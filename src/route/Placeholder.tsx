@@ -1,30 +1,72 @@
 import SideNav from '../components/SideNav';
 import { useT } from '../i18n/useT';
+import { Link } from 'react-router-dom';
 
-type PlaceholderProps = {
-  title: string;
-};
+type PlaceholderProps = { title: string };
+
+const FEATURES = [
+  { icon: 'swords', label: 'Battle Arena', color: '#a78bfa', desc: 'Real-time coding battles against other players' },
+  { icon: 'history', label: 'History', color: '#60a5fa', desc: 'Track your progress and review past submissions' },
+];
 
 function Placeholder({ title }: PlaceholderProps) {
   const t = useT();
   return (
     <div className="min-h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)]">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,var(--cg-container-a30),transparent_55%),radial-gradient(circle_at_78%_22%,var(--cg-coral-a18),transparent_58%),radial-gradient(circle_at_30%_88%,var(--cg-amber-a14),transparent_58%)]" />
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 20% 10%,var(--cg-container-a30),transparent 55%),radial-gradient(circle at 78% 22%,var(--cg-coral-a18),transparent 58%),radial-gradient(circle at 30% 88%,var(--cg-amber-a14),transparent 58%)' }} />
       </div>
       <SideNav />
       <div className="relative z-10 md:pl-[96px]">
-        <div className="mx-auto flex max-w-6xl flex-col px-6 py-20">
-          <div className="rounded-3xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a22)] p-10 shadow-[0_40px_160px_rgba(0,0,0,0.36)] backdrop-blur">
-            <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--cg-text-muted)]">
-              {t('common.comingSoon')}
+        <div className="mx-auto flex max-w-4xl flex-col items-center justify-center min-h-screen px-6 py-20 text-center">
+          {/* Animated icon */}
+          <div className="relative mb-8 animate-bounce-in">
+            <div className="absolute inset-0 rounded-3xl bg-[#ff7e5f]/20 blur-2xl animate-pulse-glow" />
+            <div className="relative w-24 h-24 rounded-3xl bg-gradient-to-br from-[#ff7e5f]/20 to-[#a78bfa]/20 border border-[color:var(--cg-border)] flex items-center justify-center">
+              <span className="material-symbols-outlined text-[48px] text-[#ff7e5f] animate-float">construction</span>
             </div>
-            <h1 className="mt-4 text-3xl font-semibold tracking-tight">
-              {title}
-            </h1>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-[color:var(--cg-text-muted)]">
-              {t('common.notImplemented')}
-            </p>
+          </div>
+
+          {/* Badge */}
+          <div className="badge-amber mb-4 animate-fade-in delay-100">
+            <span className="material-symbols-outlined text-[13px]">schedule</span>
+            {t('common.comingSoon')}
+          </div>
+
+          {/* Title */}
+          <h1 className="font-['Lexend'] text-5xl font-bold tracking-tight mb-4 animate-fade-in-up delay-150">
+            <span className="gradient-text">{title}</span>
+          </h1>
+          <p className="max-w-md text-base leading-relaxed text-[color:var(--cg-text-muted)] mb-10 animate-fade-in-up delay-200">
+            {t('common.notImplemented')}
+          </p>
+
+          {/* Feature cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-xl mb-10 animate-fade-in-up delay-300">
+            {FEATURES.map((f) => (
+              <div key={f.label} className="glass-card p-5 text-left">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="h-9 w-9 rounded-xl flex items-center justify-center border border-[color:var(--cg-border)]"
+                    style={{ background: f.color + '18' }}>
+                    <span className="material-symbols-outlined text-[20px]" style={{ color: f.color }}>{f.icon}</span>
+                  </div>
+                  <span className="text-sm font-bold">{f.label}</span>
+                </div>
+                <p className="text-xs text-[color:var(--cg-text-muted)] leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <div className="flex items-center gap-4 animate-fade-in-up delay-400">
+            <Link to="/" className="neon-btn px-6 py-3 text-sm inline-flex items-center gap-2">
+              <span className="material-symbols-outlined text-[18px]">home</span>
+              Back to Home
+            </Link>
+            <Link to="/practice" className="inline-flex items-center gap-2 rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-6 py-3 text-sm font-semibold transition hover:bg-[color:var(--cg-container-a22)]">
+              <span className="material-symbols-outlined text-[18px] text-[#4ade80]">exercise</span>
+              Try Practice
+            </Link>
           </div>
         </div>
       </div>
