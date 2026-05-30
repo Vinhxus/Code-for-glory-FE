@@ -1,10 +1,12 @@
 import SideNav from '../components/SideNav';
+import { useT } from '../i18n/useT';
 
 type PlaceholderProps = {
   title: string;
 };
 
 function Placeholder({ title }: PlaceholderProps) {
+  const t = useT();
   return (
     <div className="min-h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)]">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -15,14 +17,13 @@ function Placeholder({ title }: PlaceholderProps) {
         <div className="mx-auto flex max-w-6xl flex-col px-6 py-20">
           <div className="rounded-3xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a22)] p-10 shadow-[0_40px_160px_rgba(0,0,0,0.36)] backdrop-blur">
             <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--cg-text-muted)]">
-              COMING SOON
+              {t('common.comingSoon')}
             </div>
             <h1 className="mt-4 text-3xl font-semibold tracking-tight">
               {title}
             </h1>
             <p className="mt-3 max-w-xl text-sm leading-6 text-[color:var(--cg-text-muted)]">
-              Trang này chưa được implement. Mình sẽ nối vào flow thật khi bạn
-              chốt API và dữ liệu.
+              {t('common.notImplemented')}
             </p>
           </div>
         </div>

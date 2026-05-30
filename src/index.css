@@ -25,6 +25,30 @@
   --cg-green-hover: #6ee7a6;
 }
 
+/* Light theme overrides */
+:root[data-theme='light'] {
+  --cg-bg: #f7f8ff;
+  --cg-container: #ffffff;
+  --cg-coral: #ff6a4a;
+  --cg-amber: #ff9f1a;
+  --cg-green: #22c55e;
+  --cg-sidebar: #ffffff;
+  --cg-text: #0f172a;
+  --cg-text-muted: rgba(15, 23, 42, 0.7);
+  --cg-border: rgba(15, 23, 42, 0.12);
+
+  --cg-container-a16: rgba(255, 255, 255, 0.75);
+  --cg-container-a22: rgba(255, 255, 255, 0.85);
+  --cg-container-a30: rgba(255, 255, 255, 0.95);
+  --cg-bg-a55: rgba(247, 248, 255, 0.72);
+  --cg-bg-a72: rgba(247, 248, 255, 0.86);
+  --cg-coral-a18: rgba(255, 106, 74, 0.12);
+  --cg-amber-a14: rgba(255, 159, 26, 0.12);
+  --cg-green-a14: rgba(34, 197, 94, 0.12);
+  --cg-coral-hover: #ff7c63;
+  --cg-green-hover: #34d399;
+}
+
 html,
 body {
   height: 100%;
@@ -33,6 +57,7 @@ body {
 body {
   margin: 0;
   background-color: var(--cg-bg);
+  transition: background-color 200ms ease, color 200ms ease;
   background-image: radial-gradient(
     circle at 2px 2px,
     rgba(79, 70, 229, 0.1) 1px,

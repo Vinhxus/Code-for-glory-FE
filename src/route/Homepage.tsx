@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SideNav from '../components/SideNav';
+import QuickSettings from '../components/QuickSettings';
+import { useT } from '../i18n/useT';
 
 type Stat = {
   label: string;
@@ -12,14 +14,15 @@ type TopUser = { name: string; class: string; xp: string; rank: number };
 function Homepage() {
   const navigate = useNavigate();
   const logoSrc = '/component_2_2x.png';
+  const t = useT();
 
   const stats = useMemo<Stat[]>(
     () => [
-      { label: 'Quests Solved', value: '10', icon: '🎯' },
-      { label: 'Participants', value: '1B+', icon: '👥' },
-      { label: 'Gold Distributed', value: '1,250 Daily', icon: '🪙' },
+      { label: t('home.stats.solved'), value: '10', icon: '🎯' },
+      { label: t('home.stats.participants'), value: '1B+', icon: '👥' },
+      { label: t('home.stats.gold'), value: '1,250 Daily', icon: '🪙' },
     ],
-    []
+    [t]
   );
 
   const topUsers = useMemo<TopUser[]>(
@@ -32,7 +35,7 @@ function Homepage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0F0B3C] text-slate-100 font-['Plus_Jakarta_Sans'] selection:bg-[#FF7E5F]/30 select-none overflow-x-hidden">
+    <div className="min-h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)] font-['Plus_Jakarta_Sans'] selection:bg-[color:var(--cg-coral-a18)] select-none overflow-x-hidden">
       {/* Background Grid & Ambient Glows */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden z-0">
         <div
@@ -42,8 +45,8 @@ function Homepage() {
             backgroundSize: '40px 40px',
           }}
         />
-        <div className="absolute top-[-10%] left-[-10%] h-[600px] w-[600px] rounded-full bg-[#FF7E5F]/10 blur-[140px]" />
-        <div className="absolute top-[40%] right-[-10%] h-[500px] w-[500px] rounded-full bg-[#81DC5A]/10 blur-[120px]" />
+        <div className="absolute top-[-10%] left-[-10%] h-[600px] w-[600px] rounded-full bg-[color:var(--cg-coral-a18)] blur-[140px]" />
+        <div className="absolute top-[40%] right-[-10%] h-[500px] w-[500px] rounded-full bg-[color:var(--cg-green-a14)] blur-[120px]" />
       </div>
 
       {/* Side Navigation Bar */}
@@ -52,7 +55,7 @@ function Homepage() {
       {/* Main Container Layout */}
       <div className="relative z-10 md:pl-[96px]">
         {/* Top Navbar Header */}
-        <header className="px-8 py-6 border-b border-white/5 bg-[#0F0B3C]/60 backdrop-blur-md">
+        <header className="px-8 py-6 border-b border-[color:var(--cg-border)] bg-[color:var(--cg-bg-a72)] backdrop-blur-md">
           <div className="mx-auto flex max-w-7xl items-center justify-between">
             <Link to="/" className="flex items-center gap-3">
               <img
@@ -63,37 +66,44 @@ function Homepage() {
                   e.currentTarget.style.display = 'none';
                 }}
               />
-              <span className="font-['Lexend'] text-lg font-bold tracking-tight text-white">
+              <span className="font-['Lexend'] text-lg font-bold tracking-tight text-[color:var(--cg-text)]">
                 CodeForGlory
               </span>
             </Link>
 
-            <nav className="hidden items-center gap-8 text-sm font-medium text-slate-400 md:flex">
-              <a href="#quests" className="transition hover:text-[#FF7E5F]">
-                Quests
+            <nav className="hidden items-center gap-8 text-sm font-medium text-[color:var(--cg-text-muted)] md:flex">
+              <a
+                href="#quests"
+                className="transition hover:text-[color:var(--cg-coral)]"
+              >
+                {t('home.nav.quests')}
               </a>
               <a
                 href="#leaderboard"
-                className="transition hover:text-[#FF7E5F]"
+                className="transition hover:text-[color:var(--cg-coral)]"
               >
-                Leaderboard
+                {t('home.nav.leaderboard')}
               </a>
-              <a href="#shop" className="transition hover:text-[#FF7E5F]">
-                Shop
+              <a
+                href="#shop"
+                className="transition hover:text-[color:var(--cg-coral)]"
+              >
+                {t('home.nav.shop')}
               </a>
             </nav>
 
-            <div className="flex items-center gap-4">
-              <button className="text-slate-400 hover:text-white transition relative p-1.5">
+            <div className="flex items-center gap-3">
+              <QuickSettings />
+              <button className="text-[color:var(--cg-text-muted)] hover:text-[color:var(--cg-text)] transition relative p-1.5">
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#FF7E5F] rounded-full animate-pulse" />
                 🔔
               </button>
               <button
                 type="button"
-                className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-slate-200 backdrop-blur-md transition hover:bg-white/10"
+                className="rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-4 py-2 text-xs font-semibold text-[color:var(--cg-text)] backdrop-blur-md transition hover:bg-[color:var(--cg-container-a22)]"
                 onClick={() => navigate('/survey')}
               >
-                👤 PROFILE
+                👤 {t('common.profile')}
               </button>
             </div>
           </div>
@@ -105,18 +115,17 @@ function Homepage() {
           <section className="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
             <div className="space-y-6">
               <div className="inline-flex items-center gap-2 rounded-full border border-[#FF7E5F]/30 bg-[#FF7E5F]/10 px-4 py-1.5 text-[11px] font-semibold tracking-[0.2em] text-[#FF7E5F]">
-                ⚡ SEASON 1: THE BINARY FRONTIER
+                {t('home.hero.tag')}
               </div>
-              <h1 className="font-['Lexend'] text-4xl font-bold tracking-tight text-white leading-[1.2] md:text-5xl">
-                Master Code Through <br />
+              <h1 className="font-['Lexend'] text-4xl font-bold tracking-tight text-[color:var(--cg-text)] leading-[1.2] md:text-5xl">
+                {t('home.hero.titleA')} <br />
                 <span className="text-[#FF7E5F] drop-shadow-[0_0_25px_rgba(255,126,95,0.35)]">
-                  Epic
+                  {t('home.hero.titleB')}
                 </span>{' '}
-                Quests
+                {t('home.nav.quests')}
               </h1>
-              <p className="max-w-xl font-['Plus_Jakarta_Sans'] text-base leading-relaxed text-slate-400">
-                Short detail about topic. Forge your destiny as a developer by
-                conquering administrative terminal challenges.
+              <p className="max-w-xl font-['Plus_Jakarta_Sans'] text-base leading-relaxed text-[color:var(--cg-text-muted)]">
+                {t('home.hero.subtitle')}
               </p>
 
               <div className="flex flex-wrap items-center gap-4 pt-2">
@@ -125,30 +134,30 @@ function Homepage() {
                   className="inline-flex items-center justify-center rounded-xl bg-[#FF7E5F] px-6 py-3.5 text-xs font-bold text-[#0F0B3C] shadow-[0_12px_40px_rgba(255,126,95,0.25)] transition-all hover:scale-[1.02] active:scale-[0.98]"
                   onClick={() => navigate('/survey')}
                 >
-                  Start Your Adventure
+                  {t('home.hero.start')}
                 </button>
-                <a
-                  href="#roadmap"
-                  className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-6 py-3.5 text-xs font-semibold text-slate-300 backdrop-blur-md transition hover:border-white/20 hover:bg-white/10"
-                >
-                  View Roadmap
-                </a>
+                <Link
+                   to="/learning-path"
+                   className="inline-flex items-center justify-center rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-6 py-3.5 text-xs font-semibold text-[color:var(--cg-text)] backdrop-blur-md transition hover:bg-[color:var(--cg-container-a22)]"
+                 >
+                   {t('home.hero.roadmap')}
+                 </Link>
               </div>
             </div>
 
             {/* Simulated Terminal Mockup Code Display */}
             <div className="relative">
               <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-tr from-[#FF7E5F]/10 to-[#4F46E5]/20 blur-xl opacity-70" />
-              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/40 backdrop-blur-xl shadow-2xl">
-                <div className="flex items-center gap-2 border-b border-white/10 bg-[#181445]/50 px-5 py-3">
+              <div className="relative overflow-hidden rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] backdrop-blur-xl shadow-2xl">
+                <div className="flex items-center gap-2 border-b border-[color:var(--cg-border)] bg-[color:var(--cg-bg-a55)] px-5 py-3">
                   <div className="h-2.5 w-2.5 rounded-full bg-[#FF7E5F]" />
                   <div className="h-2.5 w-2.5 rounded-full bg-[#FFD700]" />
                   <div className="h-2.5 w-2.5 rounded-full bg-[#7ED957]" />
-                  <span className="ml-2 font-['JetBrains_Mono'] text-xs text-slate-500">
+                  <span className="ml-2 font-['JetBrains_Mono'] text-xs text-[color:var(--cg-text-muted)]">
                     start_quest.js
                   </span>
                 </div>
-                <pre className="overflow-x-auto p-6 font-['JetBrains_Mono'] text-[13px] leading-relaxed text-slate-300 bg-[#0F0B3C]/40">
+                <pre className="overflow-x-auto p-6 font-['JetBrains_Mono'] text-[13px] leading-relaxed text-[color:var(--cg-text-muted)] bg-[color:var(--cg-bg-a55)]">
                   <code>
                     <span className="text-purple-400">async function</span>{' '}
                     <span className="text-blue-400">start_quest</span>(
@@ -158,7 +167,7 @@ function Homepage() {
                     <span className="text-purple-400">await</span> API.
                     <span className="text-blue-400">init</span>(id);{'\n\n'}
                     {'  '}
-                    <span className="text-slate-500">
+                    <span className="text-[color:var(--cg-text-muted)]">
                       // Load mission assets
                     </span>
                     {'\n'}
@@ -187,18 +196,18 @@ function Homepage() {
             {stats.map((stat) => (
               <div
                 key={stat.label}
-                className="group relative overflow-hidden rounded-xl border border-white/10 bg-indigo-950/20 px-6 py-5 backdrop-blur-md transition-all duration-300 hover:border-white/20"
+                className="group relative overflow-hidden rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-6 py-5 backdrop-blur-md transition-all duration-300 hover:bg-[color:var(--cg-container-a22)]"
               >
                 <div className="flex items-center justify-between">
                   <div className="space-y-1.5">
-                    <div className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                    <div className="text-xs font-semibold tracking-wider text-[color:var(--cg-text-muted)] uppercase">
                       {stat.label}
                     </div>
-                    <div className="font-['Lexend'] text-3xl font-bold tracking-tight text-white">
+                    <div className="font-['Lexend'] text-3xl font-bold tracking-tight text-[color:var(--cg-text)]">
                       {stat.value}
                     </div>
                   </div>
-                  <div className="text-2xl bg-white/5 w-12 h-12 rounded-xl flex items-center justify-center border border-white/5 group-hover:scale-110 transition-transform">
+                  <div className="text-2xl bg-[color:var(--cg-bg-a55)] w-12 h-12 rounded-xl flex items-center justify-center border border-[color:var(--cg-border)] group-hover:scale-110 transition-transform">
                     {stat.icon}
                   </div>
                 </div>
@@ -207,48 +216,60 @@ function Homepage() {
           </section>
 
           {/* Map Progress / Main Learning Path Panel */}
-          <section
+          <Link
+            to="/learning-path"
             id="roadmap"
-            className="overflow-hidden rounded-2xl border border-white/10 bg-indigo-950/20 backdrop-blur-md p-8 relative"
+            className="group block overflow-hidden rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] backdrop-blur-md p-8 relative transition-all duration-300 hover:border-[#FF7E5F]/40 hover:shadow-[0_0_40px_rgba(255,126,95,0.10)] cursor-pointer"
           >
+            {/* Hover glow */}
+            <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-[#FF7E5F]/5 to-transparent" />
+
             <div className="relative z-10">
-              <h2 className="font-['Lexend'] text-2xl font-semibold text-white">
-                The Learning Path
-              </h2>
-              <p className="mt-1 max-w-xl text-sm text-slate-400">
-                Progress through interactive islands to master modern web
-                technologies.
-              </p>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="font-['Lexend'] text-2xl font-semibold text-[color:var(--cg-text)]">
+                    {t('home.path.title')}
+                  </h2>
+                  <p className="mt-1 max-w-xl text-sm text-[color:var(--cg-text-muted)]">
+                    {t('home.path.subtitle')}
+                  </p>
+                </div>
+                {/* CTA pill */}
+                <div className="shrink-0 flex items-center gap-2 rounded-xl border border-[#FF7E5F]/40 bg-[#FF7E5F]/10 px-4 py-2 text-xs font-bold text-[#FF7E5F] transition-all group-hover:bg-[#FF7E5F]/20">
+                  Frontend &amp; Backend
+                  <span className="transition-transform group-hover:translate-x-1">↗</span>
+                </div>
+              </div>
 
               {/* Graphical Roadmap Visual Layer */}
-              <div className="mt-16 mb-6 relative flex flex-col justify-between items-center gap-12 md:flex-row md:px-12">
+              <div className="mt-14 mb-4 relative flex flex-col justify-between items-center gap-12 md:flex-row md:px-12">
                 {/* Horizontal dotted path line connector */}
-                <div className="absolute top-1/2 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-y-1/2 hidden md:block" />
+                <div className="absolute top-1/2 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[color:var(--cg-border)] to-transparent -translate-y-1/2 hidden md:block" />
 
                 {[
-                  { step: 'A', id: 'JS', active: true, color: '#FF7E5F' },
-                  { step: 'B', id: '⚙️', active: false, color: '#4F46E5' },
-                  { step: 'C', id: '👑', active: false, color: '#4F46E5' },
+                  { step: 'A', id: 'JS', active: true },
+                  { step: 'B', id: '⚙️', active: false },
+                  { step: 'C', id: '👑', active: false },
                 ].map((node) => (
                   <div
                     key={node.step}
-                    className="relative flex flex-col items-center group z-10"
+                    className="relative flex flex-col items-center group/node z-10"
                   >
                     <div
-                      className={`w-20 h-20 rounded-[24px] flex items-center justify-center border-2 transition-all duration-300 bg-[#0F0B3C] ${
+                      className={`w-20 h-20 rounded-[24px] flex items-center justify-center border-2 transition-all duration-300 bg-[color:var(--cg-bg)] ${
                         node.active
                           ? 'border-[#FF7E5F] shadow-[0_0_30px_rgba(255,126,95,0.25)] scale-105'
-                          : 'border-white/10 group-hover:border-white/20'
+                          : 'border-[color:var(--cg-border)]'
                       }`}
                     >
                       <span
-                        className={`font-['Lexend'] text-xl font-bold ${node.active ? 'text-[#FF7E5F]' : 'text-slate-500'}`}
+                        className={`font-['Lexend'] text-xl font-bold ${node.active ? 'text-[#FF7E5F]' : 'text-[color:var(--cg-text-muted)]'}`}
                       >
                         {node.id}
                       </span>
                     </div>
                     <div className="mt-4 flex flex-col items-center">
-                      <span className="text-xs font-bold text-slate-400">
+                      <span className="text-xs font-bold text-[color:var(--cg-text-muted)]">
                         {node.step}
                       </span>
                       <div
@@ -258,26 +279,31 @@ function Homepage() {
                   </div>
                 ))}
               </div>
+
+              {/* Bottom hint */}
+              <p className="mt-2 text-center text-[11px] text-[color:var(--cg-text-muted)] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                Click để xem Frontend &amp; Backend Roadmap đầy đủ →
+              </p>
             </div>
-          </section>
+          </Link>
+
 
           {/* Battle Arena Challenge and Leaderboard Grid */}
           <section className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {/* Arena Promo Highlight Card */}
             <div
               id="quests"
-              className="relative overflow-hidden rounded-2xl border border-white/10 bg-indigo-950/20 p-8 flex flex-col justify-between backdrop-blur-md md:col-span-2"
+              className="relative overflow-hidden rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] p-8 flex flex-col justify-between backdrop-blur-md md:col-span-2"
             >
               <div className="space-y-4">
                 <div className="inline-flex items-center gap-2 text-xs font-bold tracking-widest text-[#FF7E5F]">
-                  ⚔️ LIVE COMBAT
+                  {t('home.arena.tag')}
                 </div>
-                <h2 className="font-['Lexend'] text-2xl font-semibold text-white">
-                  Battle Arena
+                <h2 className="font-['Lexend'] text-2xl font-semibold text-[color:var(--cg-text)]">
+                  {t('home.arena.title')}
                 </h2>
-                <p className="max-w-xl text-sm leading-relaxed text-slate-400">
-                  Challenge fellow coders in real-time performance duels. Prove
-                  your speed and optimization skills to climb the ranks.
+                <p className="max-w-xl text-sm leading-relaxed text-[color:var(--cg-text-muted)]">
+                  {t('home.arena.subtitle')}
                 </p>
               </div>
               <div className="pt-8">
@@ -286,7 +312,7 @@ function Homepage() {
                   className="rounded-xl bg-[#FF7E5F] px-6 py-3.5 text-xs font-bold text-[#0F0B3C] shadow-[0_12px_40px_rgba(255,126,95,0.20)] transition-all hover:scale-[1.02]"
                   onClick={() => navigate('/survey')}
                 >
-                  Join the Arena
+                  {t('home.arena.cta')}
                 </button>
               </div>
             </div>
@@ -294,11 +320,11 @@ function Homepage() {
             {/* Mini Ranking Leaderboard Component */}
             <div
               id="leaderboard"
-              className="rounded-2xl border border-white/10 bg-indigo-950/20 backdrop-blur-md flex flex-col justify-between overflow-hidden"
+              className="rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] backdrop-blur-md flex flex-col justify-between overflow-hidden"
             >
-              <div className="border-b border-white/10 px-6 py-5 bg-[#181445]/30">
-                <h3 className="font-['Lexend'] text-base font-semibold text-white">
-                  Top Users
+              <div className="border-b border-[color:var(--cg-border)] px-6 py-5 bg-[color:var(--cg-bg-a55)]">
+                <h3 className="font-['Lexend'] text-base font-semibold text-[color:var(--cg-text)]">
+                  {t('home.top.title')}
                 </h3>
               </div>
 
@@ -306,23 +332,23 @@ function Homepage() {
                 {topUsers.map((user) => (
                   <div
                     key={user.rank}
-                    className="flex items-center justify-between rounded-xl border border-white/5 bg-[#0F0B3C]/40 px-4 py-3.5"
+                    className="flex items-center justify-between rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-bg-a55)] px-4 py-3.5"
                   >
                     <div className="flex items-center gap-4">
                       <div
                         className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-bold ${
                           user.rank === 1
                             ? 'bg-[#FFD700]/10 text-[#FFD700] border border-[#FFD700]/20'
-                            : 'bg-white/5 text-slate-300'
+                            : 'bg-[color:var(--cg-container-a16)] text-[color:var(--cg-text)] border border-[color:var(--cg-border)]'
                         }`}
                       >
                         {user.rank}
                       </div>
                       <div>
-                        <div className="text-xs font-bold text-white">
+                        <div className="text-xs font-bold text-[color:var(--cg-text)]">
                           {user.name}
                         </div>
-                        <div className="text-[10px] text-slate-500 font-medium tracking-wide mt-0.5">
+                        <div className="text-[10px] text-[color:var(--cg-text-muted)] font-medium tracking-wide mt-0.5">
                           {user.class}
                         </div>
                       </div>
@@ -331,7 +357,7 @@ function Homepage() {
                       <span className="text-xs font-bold text-[#FF7E5F]">
                         {user.xp.split(' ')[0]}
                       </span>
-                      <span className="text-[10px] text-slate-500 font-semibold ml-1">
+                      <span className="text-[10px] text-[color:var(--cg-text-muted)] font-semibold ml-1">
                         XP
                       </span>
                     </div>
@@ -342,10 +368,10 @@ function Homepage() {
               <div className="p-5 pt-0">
                 <button
                   type="button"
-                  className="w-full rounded-xl border border-white/10 bg-white/5 py-3 text-xs font-semibold text-slate-300 transition hover:bg-white/10 hover:text-white"
+                  className="w-full rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] py-3 text-xs font-semibold text-[color:var(--cg-text)] transition hover:bg-[color:var(--cg-container-a22)]"
                   onClick={() => navigate('/survey')}
                 >
-                  VIEW ALL RANKINGS
+                  {t('home.top.viewAll')}
                 </button>
               </div>
             </div>
@@ -354,7 +380,7 @@ function Homepage() {
           {/* Standard Page Footer Layout Area */}
           <footer
             id="shop"
-            className="border-t border-white/10 pt-12 text-slate-400"
+            className="border-t border-[color:var(--cg-border)] pt-12 text-[color:var(--cg-text-muted)]"
           >
             <div className="grid grid-cols-1 gap-10 md:grid-cols-4">
               <div className="md:col-span-2 space-y-4">
@@ -364,37 +390,37 @@ function Homepage() {
                     alt="Logo"
                     className="h-7 w-7 object-contain"
                   />
-                  <span className="font-['Lexend'] text-base font-bold text-white">
+                  <span className="font-['Lexend'] text-base font-bold text-[color:var(--cg-text)]">
                     CodeForGlory
                   </span>
                 </div>
-                <p className="max-w-sm text-sm leading-relaxed text-slate-400">
+                <p className="max-w-sm text-sm leading-relaxed text-[color:var(--cg-text-muted)]">
                   Gamifying the future of software engineering. Orchestrate your
                   digital universe through mastery and conquest.
                 </p>
-                <div className="flex gap-4 pt-2 text-slate-500">
-                  <span className="hover:text-white cursor-pointer transition">
+                <div className="flex gap-4 pt-2 text-[color:var(--cg-text-muted)]">
+                  <span className="hover:text-[color:var(--cg-text)] cursor-pointer transition">
                     🌐
                   </span>
-                  <span className="hover:text-white cursor-pointer transition">
+                  <span className="hover:text-[color:var(--cg-text)] cursor-pointer transition">
                     💬
                   </span>
-                  <span className="hover:text-white cursor-pointer transition">
+                  <span className="hover:text-[color:var(--cg-text)] cursor-pointer transition">
                     🐦
                   </span>
                 </div>
               </div>
 
               <div>
-                <div className="text-xs font-bold tracking-widest text-white uppercase">
-                  Platform
+                <div className="text-xs font-bold tracking-widest text-[color:var(--cg-text)] uppercase">
+                  {t('home.footer.platform')}
                 </div>
                 <div className="mt-4 space-y-3 text-sm">
                   {['Courses', 'Arena', 'Pricing'].map((item) => (
                     <button
                       key={item}
                       type="button"
-                      className="block text-left text-slate-400 hover:text-white transition"
+                      className="block text-left text-[color:var(--cg-text-muted)] hover:text-[color:var(--cg-text)] transition"
                       onClick={() => navigate('/survey')}
                     >
                       {item}
@@ -404,15 +430,15 @@ function Homepage() {
               </div>
 
               <div>
-                <div className="text-xs font-bold tracking-widest text-white uppercase">
-                  Community
+                <div className="text-xs font-bold tracking-widest text-[color:var(--cg-text)] uppercase">
+                  {t('home.footer.community')}
                 </div>
                 <div className="mt-4 space-y-3 text-sm">
                   {['Discord', 'Events', 'Guilds'].map((item) => (
                     <button
                       key={item}
                       type="button"
-                      className="block text-left text-slate-400 hover:text-white transition"
+                      className="block text-left text-[color:var(--cg-text-muted)] hover:text-[color:var(--cg-text)] transition"
                       onClick={() => navigate('/survey')}
                     >
                       {item}
@@ -422,17 +448,21 @@ function Homepage() {
               </div>
             </div>
 
-            <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-white/5 py-6 text-xs text-slate-600 md:flex-row md:items-center">
+            <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-[color:var(--cg-border)] py-6 text-xs text-[color:var(--cg-text-muted)] md:flex-row md:items-center">
               <div>
                 &copy; {new Date().getFullYear()} CodeForGlory. All rights
                 reserved.
               </div>
               <div className="flex items-center gap-6">
-                {['Terms', 'Privacy', 'Support'].map((item) => (
+                {[
+                  t('home.footer.terms'),
+                  t('home.footer.privacy'),
+                  t('home.footer.support'),
+                ].map((item) => (
                   <button
                     key={item}
                     type="button"
-                    className="hover:text-slate-400 transition"
+                    className="hover:text-[color:var(--cg-text)] transition"
                     onClick={() => navigate('/survey')}
                   >
                     {item}
