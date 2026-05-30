@@ -5,9 +5,15 @@ import { useT } from '../i18n/useT';
 const cx = (...classes: Array<string | false | null | undefined>) =>
   classes.filter(Boolean).join(' ');
 
-const TABS: { key: RoadmapKey; label: string; emoji: string; sub: string }[] = [
-  { key: 'frontend', label: 'Frontend', emoji: '🧩', sub: 'UI · Web · React' },
-  { key: 'backend', label: 'Backend', emoji: '⚙️', sub: 'API · DB · Auth' },
+const TABS: { key: RoadmapKey; label: string; icon: string; sub: string; color: string; glow: string }[] = [
+  { key: 'frontend', label: 'Frontend', icon: '🧩', sub: 'UI · Web · React', color: '#ff7e5f', glow: 'rgba(255,126,95,0.3)' },
+  { key: 'backend',  label: 'Backend',  icon: '⚙️', sub: 'API · DB · Auth',  color: '#fbbf24', glow: 'rgba(251,191,36,0.3)' },
+];
+
+const STATS = [
+  { label: 'Topics',    value: '21', icon: 'library_books', color: '#ff7e5f' },
+  { label: 'Completed', value: '0',  icon: 'check_circle',  color: '#4ade80' },
+  { label: 'In Progress', value: '1', icon: 'pending',      color: '#fbbf24' },
 ];
 
 function LearningPathMap() {
@@ -15,64 +21,68 @@ function LearningPathMap() {
   const [selected, setSelected] = useState<RoadmapKey>('frontend');
 
   return (
-    <div className="w-full">
-      {/* ── Header ── */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        {/* Left: title block */}
-        <div className="flex flex-col gap-1">
-          <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--cg-text-muted)]">
+    <div className="w-full animate-fade-in">
+      {/* Header */}
+      <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+        <div className="flex flex-col gap-2">
+          <div className="badge-coral w-fit">
+            <span className="material-symbols-outlined text-[13px]">route</span>
             {t('home.path.title').toUpperCase()}
           </div>
-          <h1 className="font-['Lexend'] text-3xl font-semibold tracking-tight md:text-4xl">
-            Learning Path
+          <h1 className="font-['Lexend'] text-4xl font-bold tracking-tight">
+            Learning <span className="gradient-text">Path</span>
           </h1>
-          <p className="text-sm leading-6 text-[color:var(--cg-text-muted)]">
-            Chọn Frontend hoặc Backend để khám phá roadmap học tập.
+          <p className="text-sm leading-6 text-[color:var(--cg-text-muted)] max-w-md">
+            Chọn Frontend hoặc Backend để khám phá roadmap học tập chi tiết theo từng giai đoạn.
           </p>
         </div>
 
-        {/* Right: pill toggle */}
-        <div
-          className="flex items-center gap-1 rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] p-1 backdrop-blur"
-          role="tablist"
-          aria-label="Learning path type"
-        >
-          {TABS.map((tab) => {
-            const active = selected === tab.key;
-            return (
-              <button
-                key={tab.key}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => setSelected(tab.key)}
-                className={cx(
-                  'relative flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200',
-                  active
-                    ? 'bg-gradient-to-r from-[color:var(--cg-coral)] to-[color:var(--cg-amber)] text-white shadow-[0_4px_16px_rgba(255,120,0,0.3)]'
-                    : 'text-[color:var(--cg-text-muted)] hover:text-[color:var(--cg-text)] hover:bg-[color:var(--cg-bg-a55)]'
-                )}
-              >
-                <span className="text-base leading-none">{tab.emoji}</span>
-                <span>{tab.label}</span>
-                {active && (
-                  <span className="ml-1 hidden text-[11px] font-normal opacity-80 md:inline">
-                    {tab.sub}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+        {/* Tab toggle */}
+        <div className="flex flex-col items-end gap-4">
+          <div className="flex items-center gap-1 rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] p-1 backdrop-blur" role="tablist">
+            {TABS.map((tab) => {
+              const active = selected === tab.key;
+              return (
+                <button key={tab.key} type="button" role="tab" aria-selected={active}
+                  onClick={() => setSelected(tab.key)}
+                  className={cx(
+                    'relative flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-250',
+                    active
+                      ? 'text-[#0f0b3c] shadow-md'
+                      : 'text-[color:var(--cg-text-muted)] hover:text-[color:var(--cg-text)] hover:bg-[color:var(--cg-bg-a55)]'
+                  )}
+                  style={active ? {
+                    background: `linear-gradient(135deg, ${tab.color}, ${tab.color}cc)`,
+                    boxShadow: `0 4px 20px ${tab.glow}`,
+                  } : {}}>
+                  <span className="text-base leading-none">{tab.icon}</span>
+                  <span>{tab.label}</span>
+                  {active && (
+                    <span className="ml-1 hidden text-[11px] font-normal opacity-80 md:inline">{tab.sub}</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Quick stats */}
+          <div className="flex items-center gap-3">
+            {STATS.map((s) => (
+              <div key={s.label} className="flex items-center gap-2 rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-3 py-2">
+                <span className="material-symbols-outlined text-[16px]" style={{ color: s.color }}>{s.icon}</span>
+                <span className="text-xs font-bold" style={{ color: s.color }}>{s.value}</span>
+                <span className="text-[10px] text-[color:var(--cg-text-muted)] font-medium">{s.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* ── Divider ── */}
-      <div className="mt-6 h-px w-full bg-gradient-to-r from-transparent via-[color:var(--cg-border)] to-transparent" />
+      {/* Divider */}
+      <div className="mt-8 mb-8 h-px w-full" style={{ background: 'linear-gradient(90deg, transparent, var(--cg-border), transparent)' }} />
 
-      {/* ── Roadmap viewer ── */}
-      <div className="mt-6">
-        <RoadmapViewer key={selected} selected={selected} />
-      </div>
+      {/* Roadmap */}
+      <RoadmapViewer key={selected} selected={selected} />
     </div>
   );
 }
