@@ -1,0 +1,84 @@
+SURVEY SPEC — CodeForGlory (v1)
+
+Mục tiêu:
+- Thu thập dữ liệu để cá nhân hoá lộ trình học (quest map), độ khó, tốc độ, và loại bài tập.
+- Dùng kết quả để đề xuất track + lịch học + dạng nhiệm vụ phù hợp.
+
+Nguyên tắc UI/UX:
+- Wizard 4 bước (STEP 01/04 → 04/04), có progress bar + nút Back/Next.
+- Mỗi bước có “Mission Brief” (giải thích ngắn vì sao hỏi).
+- Validation rõ ràng: không cho Next nếu thiếu câu trả lời bắt buộc.
+- Đẹp, sci‑fi, glassmorphism, dùng palette hiện tại (cg-*).
+
+========================================
+STEP 01 — Experience (Bắt buộc)
+1) Experience Level (single-choice)
+   - Novice: print("hello world")
+   - Apprentice: function init() { ... }
+   - Journeyman: service.on("event", ...)
+   - Master: design("platform")
+
+Mục đích: đặt baseline cho độ khó và tốc độ giới thiệu kiến thức.
+
+========================================
+STEP 02 — Goals & Track (Bắt buộc)
+2) Primary Goal (single-choice)
+   - Land a job (portfolio + interview ready)
+   - Build real projects (ship product)
+   - Competitive programming (DSA heavy)
+   - Academic / fundamentals (CS basics)
+   - Just for fun (explore & curiosity)
+
+3) Interested Tracks (multi-choice, chọn 1-3)
+   - Frontend (React, UI)
+   - Backend (API, DB)
+   - Fullstack (end-to-end)
+   - Data (Python, analytics)
+   - DevOps (CI/CD, Docker)
+   - Mobile (React Native)
+
+Mục đích: chọn “nhánh quest” + nội dung ưu tiên.
+
+========================================
+STEP 03 — Preferences (Bắt buộc)
+4) Weekly time commitment (single-choice)
+   - 2–4h / week
+   - 5–7h / week
+   - 8–12h / week
+   - 13h+ / week
+
+5) Learning style (single-choice)
+   - Project-first (build → learn)
+   - Theory-first (concept → practice)
+   - Balanced (mix)
+   - Drill mode (many small exercises)
+
+6) Preferred languages/tools (multi-choice, optional)
+   - JavaScript / TypeScript
+   - Python
+   - Java
+   - C/C++
+   - SQL
+
+Mục đích: cá nhân hoá lịch + dạng nhiệm vụ + stack ưu tiên.
+
+========================================
+STEP 04 — Constraints & Calibration (Bắt buộc)
+7) Difficulty appetite (single-choice)
+   - Chill (safe & steady)
+   - Normal (recommended)
+   - Hardcore (push me)
+
+8) Biggest blocker right now (single-choice)
+   - Don’t know where to start
+   - Lack of consistency
+   - Concepts feel confusing
+   - Not enough real projects
+   - Interview anxiety
+
+9) Goal checkpoint (optional, free text)
+   - “In 30 days I want to …”
+
+Submit output (v1):
+- Save localStorage key: cg_survey_v1
+- Navigate back to Homepage (hoặc màn kế tiếp sau này)

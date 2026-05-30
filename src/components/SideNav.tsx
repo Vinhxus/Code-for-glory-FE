@@ -1,8 +1,10 @@
 import { NavLink } from 'react-router-dom';
+import { useT } from '../i18n/useT';
 
 function SideNav() {
+  const t = useT();
   return (
-    <aside className="fixed left-0 top-0 z-[60] flex h-full w-20 flex-col items-center gap-8 border-r border-white/5 bg-[color:var(--cg-sidebar)] py-6">
+    <aside className="fixed left-0 top-0 z-[60] flex h-full w-20 flex-col items-center gap-8 border-r border-[color:var(--cg-border)] bg-[color:var(--cg-sidebar)] py-6">
       <div className="mb-4">
         <img
           alt="Logo"
@@ -20,13 +22,13 @@ function SideNav() {
               'w-full py-3',
               isActive
                 ? 'sidebar-active flex flex-col items-center gap-1'
-                : 'flex flex-col items-center gap-1 text-white/40 transition-colors hover:text-white',
+                : 'flex flex-col items-center gap-1 text-[color:var(--cg-text-muted)] transition-colors hover:text-[color:var(--cg-text)]',
             ].join(' ')
           }
         >
           <span className="material-symbols-outlined text-xl">map</span>
           <span className="text-[9px] font-bold uppercase tracking-tighter">
-            Map
+            {t('nav.map')}
           </span>
         </NavLink>
 
@@ -37,13 +39,13 @@ function SideNav() {
               'w-full py-3',
               isActive
                 ? 'sidebar-active flex flex-col items-center gap-1'
-                : 'flex flex-col items-center gap-1 text-white/40 transition-colors hover:text-white',
+                : 'flex flex-col items-center gap-1 text-[color:var(--cg-text-muted)] transition-colors hover:text-[color:var(--cg-text)]',
             ].join(' ')
           }
         >
           <span className="material-symbols-outlined text-xl">swords</span>
           <span className="text-[9px] font-bold uppercase tracking-tighter">
-            Battle
+            {t('nav.battle')}
           </span>
         </NavLink>
 
@@ -54,13 +56,13 @@ function SideNav() {
               'w-full py-3',
               isActive
                 ? 'sidebar-active flex flex-col items-center gap-1'
-                : 'flex flex-col items-center gap-1 text-white/40 transition-colors hover:text-white',
+                : 'flex flex-col items-center gap-1 text-[color:var(--cg-text-muted)] transition-colors hover:text-[color:var(--cg-text)]',
             ].join(' ')
           }
         >
           <span className="material-symbols-outlined text-xl">exercise</span>
           <span className="text-[9px] font-bold uppercase tracking-tighter">
-            Practice
+            {t('nav.practice')}
           </span>
         </NavLink>
 
@@ -71,13 +73,13 @@ function SideNav() {
               'w-full py-3',
               isActive
                 ? 'sidebar-active flex flex-col items-center gap-1'
-                : 'flex flex-col items-center gap-1 text-white/40 transition-colors hover:text-white',
+                : 'flex flex-col items-center gap-1 text-[color:var(--cg-text-muted)] transition-colors hover:text-[color:var(--cg-text)]',
             ].join(' ')
           }
         >
           <span className="material-symbols-outlined text-xl">history</span>
           <span className="text-[9px] font-bold uppercase tracking-tighter">
-            History
+            {t('nav.history')}
           </span>
         </NavLink>
       </div>
