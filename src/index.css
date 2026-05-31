@@ -166,6 +166,7 @@ body {
   50%       { opacity: 0.6; transform: scale(0.85); }
 }
 
+
 /* ─── Animation Utility Classes ─── */
 .animate-fade-in-up   { animation: fadeInUp   0.55s ease both; }
 .animate-fade-in      { animation: fadeIn     0.40s ease both; }
@@ -371,6 +372,31 @@ body {
   background: linear-gradient(90deg, rgba(255,126,95,0.8) 0%, rgba(255,180,100,1) 50%, rgba(255,126,95,0.8) 100%);
   background-size: 200% 100%;
   animation: shimmer 2s linear infinite;
+}
+
+.light-beam {
+  position: relative;
+  overflow: hidden;
+}
+.light-beam::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -100%;
+  width: 30px; /* Thanh dài mỏng */
+  height: 200%;
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.5);
+  transform: rotate(25deg);
+  animation: beam-sweep 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 20;
+  filter: blur(2px);
+}
+@keyframes beam-sweep {
+  0% { left: -100%; }
+  20% { left: 200%; }
+  100% { left: 200%; }
 }
 
 /* ─── XP Progress Bar ─── */

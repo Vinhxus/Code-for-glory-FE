@@ -154,71 +154,7 @@ function SideNav() {
       {/* Bottom Divider */}
       <div className="w-full h-px mt-2 mb-3" style={{ background: 'linear-gradient(90deg, transparent, var(--cg-border), transparent)' }} />
 
-      {/* Learning Path shortcut */}
-      <div className="w-full px-2 mb-2">
-        <NavLink
-          to="/learning-path"
-          className={({ isActive }) =>
-            [
-              'group relative flex w-full items-center gap-3 rounded-xl py-3 px-3 transition-all duration-200',
-              isActive
-                ? 'text-amber-300'
-                : 'text-[color:var(--cg-text-muted)] hover:text-amber-300',
-            ].join(' ')
-          }
-          style={({ isActive }) => isActive ? {
-            background: 'linear-gradient(90deg, rgba(251,191,36,0.15) 0%, transparent 100%)',
-            boxShadow: 'inset 3px 0 0 #fbbf24',
-          } : {}}
-        >
-          {({ isActive }) => (
-            <>
-              <span
-                className="material-symbols-outlined flex-shrink-0 text-[22px] transition-all duration-200"
-                style={{
-                  color: isActive ? '#fbbf24' : undefined,
-                  filter: isActive ? 'drop-shadow(0 0 8px rgba(251,191,36,0.5))' : undefined,
-                  transform: isActive ? 'scale(1.12)' : undefined,
-                }}
-              >
-                route
-              </span>
-              <span
-                className="text-[13px] font-semibold whitespace-nowrap overflow-hidden"
-                style={{
-                  maxWidth: 120,
-                  opacity: 0,
-                  transform: 'translateX(-6px)',
-                  transition: 'opacity 0.18s ease 0.08s, transform 0.18s ease 0.08s',
-                }}
-                ref={(el) => {
-                  if (!el) return;
-                  const parent = el.closest('aside');
-                  if (!parent) return;
-                  const obs = new ResizeObserver(() => {
-                    const w = (parent as HTMLElement).offsetWidth;
-                    if (w > 100) {
-                      el.style.opacity = '1';
-                      el.style.transform = 'translateX(0)';
-                    } else {
-                      el.style.opacity = '0';
-                      el.style.transform = 'translateX(-6px)';
-                    }
-                  });
-                  obs.observe(parent);
-                }}
-              >
-                Learning Path
-              </span>
-              {isActive && (
-                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 h-1.5 w-1.5 rounded-full bg-amber-400"
-                  style={{ boxShadow: '0 0 6px rgba(251,191,36,0.6)' }}
-                />
-              )}
-            </>
-          )}
-        </NavLink>
-      </div>
+
 
       {/* User Avatar at bottom */}
       <div className="w-full px-2">

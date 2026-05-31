@@ -22,8 +22,8 @@ function Homepage() {
 
   const topUsers = useMemo(() => [
     { name: 'User Alpha', class: 'WARRIOR CLASS', xp: 123, rank: 1 },
-    { name: 'User Beta',  class: 'ARCHMAGE CLASS', xp: 98,  rank: 2 },
-    { name: 'User Gamma', class: 'ROGUE CLASS',    xp: 87,  rank: 3 },
+    { name: 'User Beta', class: 'ARCHMAGE CLASS', xp: 98, rank: 2 },
+    { name: 'User Gamma', class: 'ROGUE CLASS', xp: 87, rank: 3 },
   ], []);
 
   return (
