@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import SideNav from '../components/SideNav';
 import QuickSettings from '../components/QuickSettings';
@@ -8,9 +8,51 @@ const cx = (...classes: Array<string | false | null | undefined>) =>
 
 type DocTab = 'documentation' | 'video';
 
+const STORAGE_KEY = 'cg_survey_v2';
+
 function Practice() {
   const [tab, setTab] = useState<DocTab>('documentation');
   const chapterLabel = useMemo(() => 'CHAPTER 4.2', []);
+  
+  // State for logic
+  const [attempts, setAttempts] = useState(0);
+  const [isCooldown, setIsCooldown] = useState(false);
+  const [cooldownTime, setCooldownTime] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
+  
+  // Get config from Survey
+  const surveyData = useMemo(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch {}
+    return null;
+  }, []);
+  
+  const maxAttempts = surveyData?.penaltyAcceptance === 'strict' ? 5 : 10;
+  
+  useEffect(() => {
+    if (isCooldown && cooldownTime > 0) {
+      const timer = setInterval(() => setCooldownTime(t => t - 1), 1000);
+      return () => clearInterval(timer);
+    } else if (isCooldown && cooldownTime <= 0) {
+      setIsCooldown(false);
+    }
+  }, [isCooldown, cooldownTime]);
+
+  const handleSubmit = () => {
+    if (isLocked || isCooldown) return;
+    
+    const newAttempts = attempts + 1;
+    setAttempts(newAttempts);
+    
+    if (newAttempts >= maxAttempts) {
+      setIsLocked(true);
+    } else if (newAttempts >= 4) {
+      setIsCooldown(true);
+      setCooldownTime(30);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)] selection:bg-[color:var(--cg-coral-a18)] select-none overflow-x-hidden">
@@ -150,13 +192,21 @@ function Practice() {
                     <span className="material-symbols-outlined text-[14px] text-[#fbbf24]">code</span>
                     index.js
                   </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[14px]">lock</span>
-                    SYSTEM LOCKED
-                  </span>
+                  {isLocked && (
+                    <span className="flex items-center gap-1.5 text-red-400">
+                      <span className="material-symbols-outlined text-[14px]">lock</span>
+                      SYSTEM LOCKED
+                    </span>
+                  )}
+                  {isCooldown && (
+                    <span className="flex items-center gap-1.5 text-orange-400">
+                      <span className="material-symbols-outlined text-[14px]">timer</span>
+                      COOLDOWN: {cooldownTime}s
+                    </span>
+                  )}
                 </div>
-                <div className="rounded-full bg-red-900/60 border border-red-500/30 px-4 py-1 text-[10px] font-extrabold tracking-widest text-red-300">
-                  ⚠ ATTEMPT 9/10
+                <div className={cx("rounded-full px-4 py-1 text-[10px] font-extrabold tracking-widest border", attempts >= maxAttempts ? "bg-red-900/60 border-red-500/30 text-red-300" : attempts >= 4 ? "bg-orange-900/60 border-orange-500/30 text-orange-300" : "bg-[color:var(--cg-container-a16)] border-[color:var(--cg-border)] text-[color:var(--cg-text-muted)]")}>
+                  ⚠ ATTEMPT {attempts}/{maxAttempts}
                 </div>
               </div>
 
@@ -239,8 +289,15 @@ function Practice() {
                     <button type="button" className="rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-5 py-2 text-xs font-bold transition hover:bg-[color:var(--cg-container-a22)]">
                       Run Tests
                     </button>
-                    <button type="button" className="neon-btn px-5 py-2 text-xs">
-                      SUBMIT (9/10)
+                    <button 
+                      type="button" 
+                      onClick={handleSubmit}
+                      className={cx("px-5 py-2 text-xs font-bold rounded-xl transition", 
+                        isLocked ? "bg-red-500/20 text-red-300 cursor-not-allowed border border-red-500/30" : 
+                        isCooldown ? "bg-orange-500/20 text-orange-300 cursor-not-allowed border border-orange-500/30" : 
+                        "neon-btn")}
+                    >
+                      {isLocked ? 'LOCKED' : isCooldown ? `WAIT ${cooldownTime}s` : `SUBMIT (${attempts}/${maxAttempts})`}
                     </button>
                   </div>
                 </div>

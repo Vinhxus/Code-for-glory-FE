@@ -57,7 +57,20 @@ export type I18nKey =
   | 'assess.results.body'
   | 'assess.results.selectedLevel'
   | 'assess.results.enterPractice'
-  | 'assess.results.viewSummary';
+  | 'assess.results.viewSummary'
+  | 'roadmap.topics'
+  | 'roadmap.completed'
+  | 'roadmap.inProgress'
+  | 'roadmap.locked'
+  | 'roadmap.current'
+  | 'roadmap.frontend'
+  | 'roadmap.backend'
+  | 'roadmap.stage.beginner'
+  | 'roadmap.stage.intermediate'
+  | 'roadmap.stage.advanced'
+  | 'roadmap.tooltip.locked'
+  | 'roadmap.estCompletion'
+  | 'roadmap.welcome.empty';
 
 export const translations: Record<I18nKey, { en: string; vi: string }> = {
   'common.skip': { en: 'Skip', vi: 'Bỏ qua' },
@@ -139,4 +152,19 @@ export const translations: Record<I18nKey, { en: string; vi: string }> = {
   'assess.results.selectedLevel': { en: 'Selected level:', vi: 'Mức đã chọn:' },
   'assess.results.enterPractice': { en: 'Enter Practice Workspace', vi: 'Vào Practice Workspace' },
   'assess.results.viewSummary': { en: 'View Quest Map Summary', vi: 'Xem Quest Map Summary' },
+
+  // roadmap
+  'roadmap.topics': { en: 'Topics', vi: 'Chủ đề' },
+  'roadmap.completed': { en: 'Completed', vi: 'Đã hoàn thành' },
+  'roadmap.inProgress': { en: 'In Progress', vi: 'Đang học' },
+  'roadmap.locked': { en: 'Locked', vi: 'Đã khóa' },
+  'roadmap.current': { en: 'Current', vi: 'Hiện tại' },
+  'roadmap.frontend': { en: 'Front-end Roadmap', vi: 'Lộ trình Front-end' },
+  'roadmap.backend': { en: 'Back-end Roadmap', vi: 'Lộ trình Back-end' },
+  'roadmap.stage.beginner': { en: '🌱 Beginner Stage', vi: '🌱 Chặng Cơ bản' },
+  'roadmap.stage.intermediate': { en: '🚀 Intermediate Stage', vi: '🚀 Chặng Trung cấp' },
+  'roadmap.stage.advanced': { en: '🔥 Advanced Stage', vi: '🔥 Chặng Cao cấp' },
+  'roadmap.tooltip.locked': { en: 'Finish previous milestone to unlock', vi: 'Hoàn thành cột mốc trước để mở khóa' },
+  'roadmap.estCompletion': { en: 'Est. Completion:', vi: 'Dự kiến hoàn thành:' },
+  'roadmap.welcome.empty': { en: 'Select Frontend or Backend to explore the detailed learning roadmap.', vi: 'Chọn Frontend hoặc Backend để khám phá roadmap học tập chi tiết.' },
 };

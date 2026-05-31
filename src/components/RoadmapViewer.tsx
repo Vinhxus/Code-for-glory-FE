@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useT } from '../i18n/useT';
 
 export type RoadmapKey = 'frontend' | 'backend';
 type NodeVariant = 'recommended' | 'alternative' | 'optional';
@@ -7,30 +9,79 @@ type MainStep = { id: string; title: string; rightCols?: BranchNode[][]; leftNod
 
 /* ─── DATA (unchanged) ─── */
 const FRONTEND: MainStep[] = [
-  { id: 'internet', title: 'Internet', leftNodes: [{ id: 'il1', label: 'Prerequisite', variant: 'optional' }, { id: 'il2', label: 'Networking Basics', variant: 'optional' }], rightCols: [[{ id: 'i1', label: 'How does the Internet work?' }, { id: 'i2', label: 'What is HTTP / HTTPS?' }, { id: 'i3', label: 'What is a Domain Name?' }, { id: 'i4', label: 'What is Web Hosting?' }, { id: 'i5', label: 'DNS and how it works' }, { id: 'i6', label: 'Browsers and how they work' }]] },
-  { id: 'html', title: 'HTML', leftNodes: [{ id: 'hl1', label: 'MDN Web Docs', variant: 'recommended' }, { id: 'hl2', label: 'W3Schools', variant: 'alternative' }], rightCols: [[{ id: 'h1', label: 'Semantic HTML', variant: 'recommended' }, { id: 'h2', label: 'Forms & Validations' }, { id: 'h3', label: 'SEO Basics', variant: 'recommended' }, { id: 'h4', label: 'Accessibility', variant: 'optional' }]] },
-  { id: 'css', title: 'CSS', leftNodes: [{ id: 'cl1', label: 'CSS Tricks', variant: 'recommended' }, { id: 'cl2', label: 'Sass / SCSS', variant: 'optional' }], rightCols: [[{ id: 'c1', label: 'Box Model' }, { id: 'c2', label: 'Flexbox & Grid', variant: 'recommended' }, { id: 'c3', label: 'Responsive Design' }, { id: 'c4', label: 'Animations & Transitions', variant: 'optional' }]] },
-  { id: 'js', title: 'JavaScript', leftNodes: [{ id: 'jl1', label: 'javascript.info', variant: 'recommended' }, { id: 'jl2', label: 'TypeScript', variant: 'recommended' }, { id: 'jl3', label: 'Node.js basics', variant: 'optional' }], rightCols: [[{ id: 'j1', label: 'ES6+ Syntax', variant: 'recommended' }, { id: 'j2', label: 'DOM Manipulation' }, { id: 'j3', label: 'Fetch / REST APIs' }, { id: 'j4', label: 'Async / Await', variant: 'recommended' }, { id: 'j5', label: 'Modules & Bundling' }]] },
-  { id: 'vcs', title: 'Version Control — Git', leftNodes: [{ id: 'vl1', label: 'GitHub', variant: 'recommended' }, { id: 'vl2', label: 'GitLab', variant: 'alternative' }, { id: 'vl3', label: 'Bitbucket', variant: 'optional' }], rightCols: [[{ id: 'vr1', label: 'Branching Workflows' }, { id: 'vr2', label: 'Pull Requests & Code Review' }]] },
-  { id: 'pkg', title: 'Package Managers', leftNodes: [{ id: 'pl1', label: 'package.json', variant: 'recommended' }, { id: 'pl2', label: 'Semantic Versioning', variant: 'optional' }], rightCols: [[{ id: 'p1', label: 'npm', variant: 'recommended' }, { id: 'p2', label: 'yarn', variant: 'alternative' }], [{ id: 'p3', label: 'pnpm', variant: 'alternative' }, { id: 'p4', label: 'bun', variant: 'optional' }]] },
-  { id: 'framework', title: 'Pick a Framework', leftNodes: [{ id: 'fwl1', label: 'React Docs', variant: 'recommended' }, { id: 'fwl2', label: 'State Management', variant: 'recommended' }, { id: 'fwl3', label: 'SSR / SSG', variant: 'optional' }], rightCols: [[{ id: 'fw1', label: 'React', variant: 'recommended' }, { id: 'fw2', label: 'Vue.js', variant: 'alternative' }, { id: 'fw3', label: 'Angular', variant: 'alternative' }, { id: 'fw4', label: 'Svelte', variant: 'optional' }]] },
-  { id: 'cssfw', title: 'CSS Frameworks', leftNodes: [{ id: 'cfl1', label: 'Design Systems', variant: 'optional' }, { id: 'cfl2', label: 'shadcn/ui', variant: 'recommended' }], rightCols: [[{ id: 'cf1', label: 'Tailwind CSS', variant: 'recommended' }, { id: 'cf2', label: 'Bootstrap', variant: 'alternative' }, { id: 'cf3', label: 'Component Libraries', variant: 'optional' }]] },
-  { id: 'tooling', title: 'Build Tools & Linting', leftNodes: [{ id: 'tl1', label: 'Webpack (legacy)', variant: 'optional' }, { id: 'tl2', label: 'Rollup', variant: 'optional' }], rightCols: [[{ id: 't1', label: 'Vite', variant: 'recommended' }, { id: 't2', label: 'ESLint + Prettier', variant: 'recommended' }, { id: 't3', label: 'TypeScript', variant: 'recommended' }]] },
-  { id: 'testing', title: 'Testing', leftNodes: [{ id: 'tel1', label: 'TDD Approach', variant: 'optional' }, { id: 'tel2', label: 'Testing Library', variant: 'recommended' }], rightCols: [[{ id: 'te1', label: 'Vitest / Jest', variant: 'recommended' }, { id: 'te2', label: 'Playwright / Cypress', variant: 'alternative' }]] },
-  { id: 'deploy', title: 'Deployment', leftNodes: [{ id: 'del1', label: 'Docker', variant: 'optional' }, { id: 'del2', label: 'GitHub Actions', variant: 'recommended' }], rightCols: [[{ id: 'de1', label: 'Vercel', variant: 'recommended' }, { id: 'de2', label: 'Netlify', variant: 'alternative' }, { id: 'de3', label: 'CI / CD Basics' }]] },
+  // Beginner
+  { id: 'f1', title: 'Web & Internet Basics' },
+  { id: 'f2', title: 'Basic HTML Structure' },
+  { id: 'f3', title: 'HTML Forms & Tables' },
+  { id: 'f4', title: 'Project: Personal Profile', rightCols: [[{ id: 'fp1', label: 'HTML Project', variant: 'recommended' }]] },
+  { id: 'f5', title: 'Intro to CSS & Selectors' },
+  { id: 'f6', title: 'CSS Box Model & Colors' },
+  { id: 'f7', title: 'Project: Registration Form', rightCols: [[{ id: 'fp2', label: 'CSS Layout', variant: 'recommended' }]] },
+  { id: 'f8', title: 'CSS Flexbox' },
+  { id: 'f9', title: 'CSS Grid Basics' },
+  { id: 'f10', title: 'Project: Responsive Landing Page', rightCols: [[{ id: 'fp3', label: 'Capstone 1', variant: 'recommended' }]] },
+  
+  // Intermediate
+  { id: 'f11', title: 'JavaScript Basics & Variables' },
+  { id: 'f12', title: 'Control Flow & Functions' },
+  { id: 'f13', title: 'Project: Calculator App', rightCols: [[{ id: 'fp4', label: 'Logic', variant: 'recommended' }]] },
+  { id: 'f14', title: 'DOM Manipulation & Events' },
+  { id: 'f15', title: 'Asynchronous JS & Promises' },
+  { id: 'f16', title: 'Project: Weather App', rightCols: [[{ id: 'fp5', label: 'Fetch API', variant: 'recommended' }]] },
+  { id: 'f17', title: 'Version Control (Git)' },
+  { id: 'f18', title: 'Introduction to React' },
+  { id: 'f19', title: 'React State & Props' },
+  { id: 'f20', title: 'Project: Todo App in React', rightCols: [[{ id: 'fp6', label: 'Capstone 2', variant: 'recommended' }]] },
+
+  // Advanced
+  { id: 'f21', title: 'React Router & Navigation' },
+  { id: 'f22', title: 'Advanced State (Redux/Zustand)' },
+  { id: 'f23', title: 'Project: E-commerce Cart', rightCols: [[{ id: 'fp7', label: 'Complex UI', variant: 'recommended' }]] },
+  { id: 'f24', title: 'CSS Frameworks (Tailwind)' },
+  { id: 'f25', title: 'Next.js & SSR' },
+  { id: 'f26', title: 'Project: Fullstack Blog', rightCols: [[{ id: 'fp8', label: 'Fullstack', variant: 'recommended' }]] },
+  { id: 'f27', title: 'Automated Testing' },
+  { id: 'f28', title: 'Performance Optimization' },
+  { id: 'f29', title: 'Web Security Basics' },
+  { id: 'f30', title: 'Project: Final Deployment', rightCols: [[{ id: 'fp9', label: 'Capstone 3', variant: 'recommended' }]] },
 ];
 
 const BACKEND: MainStep[] = [
-  { id: 'internet', title: 'Internet', leftNodes: [{ id: 'il1', label: 'OSI Model', variant: 'optional' }, { id: 'il2', label: 'TCP / IP Basics', variant: 'optional' }], rightCols: [[{ id: 'i1', label: 'HTTP / HTTPS Protocol' }, { id: 'i2', label: 'DNS & Hosting' }, { id: 'i3', label: 'Client-Server Model' }]] },
-  { id: 'lang', title: 'Pick a Language', leftNodes: [{ id: 'll1', label: 'OOP Concepts', variant: 'recommended' }, { id: 'll2', label: 'Data Structures', variant: 'recommended' }, { id: 'll3', label: 'Algorithms', variant: 'optional' }], rightCols: [[{ id: 'l1', label: 'Node.js / JavaScript', variant: 'recommended' }, { id: 'l2', label: 'Python', variant: 'alternative' }, { id: 'l3', label: 'Java', variant: 'alternative' }, { id: 'l4', label: 'Go', variant: 'alternative' }, { id: 'l5', label: 'C# / .NET', variant: 'optional' }]] },
-  { id: 'vcs', title: 'Version Control — Git', leftNodes: [{ id: 'vl1', label: 'GitHub', variant: 'recommended' }, { id: 'vl2', label: 'GitLab', variant: 'alternative' }, { id: 'vl3', label: 'Bitbucket', variant: 'optional' }], rightCols: [[{ id: 'vr1', label: 'Git Flow Strategy' }, { id: 'vr2', label: 'Code Review Best Practices' }]] },
-  { id: 'db', title: 'Databases', leftNodes: [{ id: 'dbl1', label: 'SQL Basics', variant: 'recommended' }, { id: 'dbl2', label: 'ACID Properties', variant: 'recommended' }, { id: 'dbl3', label: 'ORMs (Prisma)', variant: 'optional' }], rightCols: [[{ id: 'db1', label: 'PostgreSQL / MySQL', variant: 'recommended' }, { id: 'db2', label: 'Normalization & Indexing' }, { id: 'db3', label: 'MongoDB (NoSQL)', variant: 'alternative' }, { id: 'db4', label: 'Redis (cache)', variant: 'optional' }]] },
-  { id: 'apis', title: 'Learn about APIs', leftNodes: [{ id: 'al1', label: 'Postman / Insomnia', variant: 'recommended' }, { id: 'al2', label: 'API Design Principles', variant: 'recommended' }], rightCols: [[{ id: 'a1', label: 'REST APIs', variant: 'recommended' }, { id: 'a2', label: 'JSON & OpenAPI Spec' }, { id: 'a3', label: 'GraphQL', variant: 'optional' }, { id: 'a4', label: 'gRPC', variant: 'optional' }]] },
-  { id: 'auth', title: 'Authentication', leftNodes: [{ id: 'aul1', label: 'Bcrypt / Hashing', variant: 'recommended' }, { id: 'aul2', label: 'HTTPS / TLS', variant: 'recommended' }, { id: 'aul3', label: 'CORS Policy', variant: 'optional' }], rightCols: [[{ id: 'au1', label: 'Sessions / Cookies' }, { id: 'au2', label: 'JWT', variant: 'recommended' }, { id: 'au3', label: 'OAuth 2.0', variant: 'alternative' }]] },
-  { id: 'cache', title: 'Caching', leftNodes: [{ id: 'cal1', label: 'CDN Basics', variant: 'optional' }, { id: 'cal2', label: 'Cache Invalidation', variant: 'recommended' }], rightCols: [[{ id: 'ca1', label: 'HTTP Caching' }, { id: 'ca2', label: 'Redis / Memcached', variant: 'optional' }]] },
-  { id: 'testing', title: 'Testing', leftNodes: [{ id: 'tel1', label: 'Jest / Mocha', variant: 'recommended' }, { id: 'tel2', label: 'Supertest', variant: 'optional' }], rightCols: [[{ id: 'te1', label: 'Unit Tests', variant: 'recommended' }, { id: 'te2', label: 'Integration Tests' }, { id: 'te3', label: 'API Testing Tools' }]] },
-  { id: 'devops', title: 'DevOps Basics', leftNodes: [{ id: 'dol1', label: 'Linux CLI', variant: 'recommended' }, { id: 'dol2', label: 'SSH & Servers', variant: 'recommended' }, { id: 'dol3', label: 'Kubernetes', variant: 'optional' }], rightCols: [[{ id: 'do1', label: 'Docker', variant: 'recommended' }, { id: 'do2', label: 'CI / CD Pipelines', variant: 'recommended' }, { id: 'do3', label: 'Nginx (overview)', variant: 'optional' }]] },
-  { id: 'scale', title: 'Design & Scalability', leftNodes: [{ id: 'scl1', label: 'System Design', variant: 'recommended' }, { id: 'scl2', label: 'Load Balancing', variant: 'optional' }], rightCols: [[{ id: 'sc1', label: 'Monolith vs Microservices' }, { id: 'sc2', label: 'Message Brokers', variant: 'optional' }, { id: 'sc3', label: 'Observability & Logging', variant: 'optional' }]] },
+  // Beginner
+  { id: 'b1', title: 'How the Internet Works & HTTP' },
+  { id: 'b2', title: 'Intro to Backend Languages' },
+  { id: 'b3', title: 'Basic Syntax & Functions' },
+  { id: 'b4', title: 'Project: CLI To-do List', rightCols: [[{ id: 'bp1', label: 'Basic Logic', variant: 'recommended' }]] },
+  { id: 'b5', title: 'Relational Databases & SQL' },
+  { id: 'b6', title: 'Basic CRUD in SQL' },
+  { id: 'b7', title: 'Project: Student DB', rightCols: [[{ id: 'bp2', label: 'Database', variant: 'recommended' }]] },
+  { id: 'b8', title: 'Version Control (Git)' },
+  { id: 'b9', title: 'Asynchronous Programming' },
+  { id: 'b10', title: 'Project: Basic Web Server', rightCols: [[{ id: 'bp3', label: 'Capstone 1', variant: 'recommended' }]] },
+
+  // Intermediate
+  { id: 'b11', title: 'RESTful API Principles' },
+  { id: 'b12', title: 'Building Endpoints' },
+  { id: 'b13', title: 'Project: Note-taking API', rightCols: [[{ id: 'bp4', label: 'API Design', variant: 'recommended' }]] },
+  { id: 'b14', title: 'Advanced SQL & Indexing' },
+  { id: 'b15', title: 'ORMs (Prisma/SQLAlchemy)' },
+  { id: 'b16', title: 'Project: E-commerce API', rightCols: [[{ id: 'bp5', label: 'DB Relations', variant: 'recommended' }]] },
+  { id: 'b17', title: 'Auth Basics (Sessions)' },
+  { id: 'b18', title: 'JWT & OAuth' },
+  { id: 'b19', title: 'Input Validation & Errors' },
+  { id: 'b20', title: 'Project: Secure Login System', rightCols: [[{ id: 'bp6', label: 'Capstone 2', variant: 'recommended' }]] },
+
+  // Advanced
+  { id: 'b21', title: 'Caching Strategies (Redis)' },
+  { id: 'b22', title: 'Message Brokers (RabbitMQ)' },
+  { id: 'b23', title: 'Project: Order Queue', rightCols: [[{ id: 'bp7', label: 'Async Queue', variant: 'recommended' }]] },
+  { id: 'b24', title: 'Architecture & Microservices' },
+  { id: 'b25', title: 'Containerization (Docker)' },
+  { id: 'b26', title: 'Project: Dockerized App', rightCols: [[{ id: 'bp8', label: 'DevOps', variant: 'recommended' }]] },
+  { id: 'b27', title: 'Unit & Integration Testing' },
+  { id: 'b28', title: 'CI/CD Pipelines' },
+  { id: 'b29', title: 'Cloud Deployment' },
+  { id: 'b30', title: 'Project: Final Deployment', rightCols: [[{ id: 'bp9', label: 'Capstone 3', variant: 'recommended' }]] },
 ];
 
 /* ─── STYLES ─── */
@@ -68,62 +119,92 @@ function BranchBox({ node }: { node: BranchNode }) {
       'transition-all duration-200 cursor-default select-none group/box',
       cfg.cls,
     )}>
-      {/* Colored left accent */}
       <span className={cx('absolute left-0 top-0 bottom-0 w-[2.5px] rounded-l-lg opacity-70', cfg.leftBar)} />
       <span className="pl-1">{node.label}</span>
     </div>
   );
 }
 
-function DashedLine() {
+function DashedLine({ isMilestone = false }: { isMilestone?: boolean }) {
   return (
     <div
-      className="h-px w-10 shrink-0"
+      className={cx("h-px shrink-0", isMilestone ? "w-16" : "w-10")}
       style={{ backgroundImage: 'repeating-linear-gradient(90deg, rgba(251,191,36,0.5) 0px, rgba(251,191,36,0.5) 5px, transparent 5px, transparent 10px)' }}
     />
   );
 }
 
-function VertConnector({ visible }: { visible: boolean }) {
+function VertConnector({ visible, isCompleted = false }: { visible: boolean; isCompleted?: boolean }) {
   return (
     <div
       className="mx-auto w-0.5 transition-all"
       style={{
         height: 28,
         background: visible
-          ? 'linear-gradient(to bottom, rgba(251,191,36,0.6), rgba(251,191,36,0.6))'
+          ? isCompleted ? 'linear-gradient(to bottom, #4ade80, #4ade80)' : 'linear-gradient(to bottom, rgba(251,191,36,0.6), rgba(251,191,36,0.6))'
           : 'transparent',
       }}
     />
   );
 }
 
-function MainNode({ title, index }: { title: string; index: number }) {
+type NodeStatus = 'locked' | 'current' | 'completed' | 'skipped';
+
+function MainNode({ title, index, status, deadline, onClick }: { title: string; index: number; status: NodeStatus; deadline: string; onClick: () => void }) {
+  const getStyles = () => {
+    switch (status) {
+      case 'completed':
+        return 'border-[#4ade80]/70 bg-gradient-to-br from-[#4ade80]/20 to-[#4ade80]/5 text-[#4ade80] shadow-[0_0_20px_rgba(74,222,128,0.12)] cursor-pointer hover:border-[#4ade80]';
+      case 'skipped':
+        return 'border-purple-400/50 bg-gradient-to-br from-purple-400/10 to-transparent text-purple-300 opacity-80 shadow-none cursor-pointer';
+      case 'current':
+        return 'border-[#3b82f6]/80 bg-gradient-to-br from-[#3b82f6]/20 to-[#3b82f6]/10 text-[#60a5fa] shadow-[0_0_24px_rgba(59,130,246,0.4)] animate-pulse cursor-pointer hover:border-[#3b82f6]';
+      case 'locked':
+      default:
+        return 'border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] text-[color:var(--cg-text-muted)] shadow-none opacity-60 cursor-not-allowed grayscale';
+    }
+  };
+
   return (
-    <div className={cx(
-      'w-52 rounded-xl border-2 border-amber-400/70 px-5 py-3.5 animate-node',
-      'bg-gradient-to-br from-amber-400/20 to-amber-600/10',
-      'text-center text-sm font-bold text-amber-200',
-      'shadow-[0_0_20px_rgba(251,191,36,0.12)]',
-      'transition-all duration-250 cursor-default select-none',
-      'hover:border-amber-400/95 hover:shadow-[0_0_32px_rgba(251,191,36,0.28)] hover:scale-[1.04] hover:from-amber-400/28',
+    <div onClick={onClick} className={cx(
+      'relative w-64 rounded-xl border-2 px-5 py-3.5 flex flex-col',
+      'transition-all duration-250 select-none group',
+      getStyles(),
     )}
       style={{ animationDelay: `${index * 60}ms` }}
     >
-      <span className="relative">
-        <span className="absolute -left-5 top-1/2 -translate-y-1/2 text-amber-400/60 text-xs font-mono">{String(index + 1).padStart(2, '0')}</span>
-        {title}
-      </span>
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-xs font-mono opacity-70">Milestone {String(index + 1).padStart(2, '0')}</span>
+        {status === 'completed' && <span className="material-symbols-outlined text-[14px]">check_circle</span>}
+        {status === 'skipped' && <span className="text-[10px] uppercase font-bold tracking-wider">Skipped</span>}
+        {status === 'current' && <span className="badge-purple text-[9px] py-0 px-1.5 h-4">IN PROGRESS</span>}
+        {status === 'locked' && <span className="material-symbols-outlined text-[14px]">lock</span>}
+      </div>
+      <div className="text-sm font-bold truncate">{title}</div>
+      
+      {/* Deadline display */}
+      {status !== 'skipped' && status !== 'completed' && (
+        <div className="mt-2 text-[10px] font-medium opacity-70 flex items-center gap-1 border-t border-white/10 pt-2">
+          <span className="material-symbols-outlined text-[12px]">calendar_today</span>
+          <span className="roadmap-deadline-label" /> {deadline}
+        </div>
+      )}
+      
+      {/* Hover tooltip for locked */}
+      {status === 'locked' && (
+        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 rounded-lg bg-black/90 text-white text-[10px] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 border border-white/10 roadmap-tooltip-locked">
+        </div>
+      )}
     </div>
   );
 }
 
-function StepRow({ step, isFirst, isLast, index }: { step: MainStep; isFirst: boolean; isLast: boolean; index: number }) {
+function StepRow({ step, isFirst, isLast, index, status, deadline, isMilestoneGate, onNodeClick }: { step: MainStep; isFirst: boolean; isLast: boolean; index: number; status: NodeStatus; deadline: string; isMilestoneGate: boolean; onNodeClick: () => void }) {
   const hasRight = !!step.rightCols?.length;
   const hasLeft = !!step.leftNodes?.length;
 
   return (
-    <div className="flex items-center">
+    <div className="flex items-center relative">
       {/* Left branch */}
       <div className="flex flex-1 items-center justify-end gap-2">
         {hasLeft && (
@@ -137,14 +218,14 @@ function StepRow({ step, isFirst, isLast, index }: { step: MainStep; isFirst: bo
       </div>
 
       {/* Center */}
-      <div className="flex w-52 flex-col items-center">
-        <VertConnector visible={!isFirst} />
-        <MainNode title={step.title} index={index} />
-        <VertConnector visible={!isLast} />
+      <div className="flex w-64 flex-col items-center">
+        <VertConnector visible={!isFirst} isCompleted={status === 'completed' || status === 'skipped'} />
+        <MainNode title={step.title} index={index} status={status} deadline={deadline} onClick={onNodeClick} />
+        <VertConnector visible={!isLast} isCompleted={status === 'completed' || status === 'skipped'} />
       </div>
 
       {/* Right branches */}
-      <div className="flex flex-1 flex-col items-start gap-3">
+      <div className="flex flex-1 flex-col items-start gap-3 relative">
         {hasRight && step.rightCols!.map((col, ci) => (
           <div key={ci} className="flex items-center gap-2">
             <DashedLine />
@@ -153,6 +234,14 @@ function StepRow({ step, isFirst, isLast, index }: { step: MainStep; isFirst: bo
             </div>
           </div>
         ))}
+
+        {/* Milestone Gate Badge */}
+        {isMilestoneGate && (
+           <div className="absolute left-8 top-1/2 -translate-y-1/2 flex items-center gap-2 px-3 py-1.5 bg-[#fbbf24]/10 border border-[#fbbf24]/40 rounded-lg text-[#fbbf24] shadow-[0_0_15px_rgba(251,191,36,0.2)] animate-pulse z-10">
+             <span className="material-symbols-outlined text-[16px]">swords</span>
+             <span className="text-[10px] font-bold uppercase tracking-wider">Gate Challenge</span>
+           </div>
+        )}
       </div>
     </div>
   );
@@ -183,18 +272,85 @@ function Legend() {
 }
 
 /* ─── MAIN EXPORT ─── */
-function RoadmapViewer({ selected }: { selected: RoadmapKey }) {
+function RoadmapViewer({ selected, surveyData }: { selected: RoadmapKey, surveyData: any }) {
+  const t = useT();
+  const navigate = useNavigate();
   const [hoveredStep, setHoveredStep] = useState<string | null>(null);
   const steps = selected === 'frontend' ? FRONTEND : BACKEND;
   const isFE = selected === 'frontend';
+
+  // State calculations
+  const totalHours = 120; // Example total
+  const hoursPerDay = surveyData?.hoursPerDay || 2;
+  const testScore = surveyData?.testScore || 0;
+
+  // If score > 80% (>= 4), jump to Advanced. If >= 3, jump to Intermediate.
+  // Advanced = start at index 20, Intermediate = start at index 10, Beginner = start at 0
+  const startingGlobalIndex = testScore === 5 ? 20 : testScore >= 3 ? 10 : 0;
+  
+  const currentIndex = startingGlobalIndex; // Using this to mock progress
+
+  // Generate deadlines
+  const calculateDeadline = (index: number) => {
+    const today = new Date();
+    const hoursPerNode = totalHours / 30; // 30 steps total
+    const daysToAdd = Math.ceil((index * hoursPerNode) / hoursPerDay);
+    today.setDate(today.getDate() + daysToAdd);
+    return today.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  const handleNodeClick = (index: number, status: NodeStatus) => {
+    if (status === 'locked') return;
+    if (status === 'current') navigate('/practice');
+    if (status === 'completed' || status === 'skipped') navigate('/history');
+  };
+
+  const renderStage = (title: string, colorClass: string, items: MainStep[], globalOffset: number) => {
+    const isStageLocked = currentIndex < globalOffset;
+    
+    return (
+      <div className={cx('flex flex-col items-center mb-16', isStageLocked ? 'opacity-40 grayscale' : '')}>
+        <div className={cx('px-6 py-2 rounded-full border border-white/20 text-sm font-bold shadow-lg mb-8 backdrop-blur-md', colorClass)}>
+          {title}
+        </div>
+        <div className="flex flex-col items-center min-w-[640px]">
+          {items.map((step, i) => {
+            const globalIndex = globalOffset + i;
+            const status: NodeStatus = globalIndex < currentIndex ? 'completed' : globalIndex === currentIndex ? 'current' : 'locked';
+            const deadline = calculateDeadline(globalIndex + 1);
+            // Every 10th node is the final capstone for that stage
+            const isMilestoneGate = (i + 1) % 10 === 0;
+
+            return (
+              <div key={step.id} onMouseEnter={() => setHoveredStep(step.id)}
+                className={cx('transition-opacity duration-200', hoveredStep && hoveredStep !== step.id ? 'opacity-50' : 'opacity-100')}>
+                <StepRow 
+                  step={step} 
+                  isFirst={i === 0} 
+                  isLast={i === items.length - 1} 
+                  index={globalIndex} 
+                  status={status}
+                  deadline={deadline}
+                  isMilestoneGate={isMilestoneGate}
+                  onNodeClick={() => handleNodeClick(globalIndex, status)}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="w-full animate-fade-in">
       {/* Toolbar */}
       <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
         <Legend />
-        <div className="text-[11px] text-[color:var(--cg-text-muted)] font-medium">
-          {steps.length} topics · hover nodes to highlight
+        <div className="text-[11px] text-[color:var(--cg-text-muted)] font-medium flex items-center gap-4">
+          <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-[#4ade80]" /> {t('roadmap.completed')}</div>
+          <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-[#3b82f6] animate-pulse" /> {t('roadmap.current')}</div>
+          <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-slate-500" /> {t('roadmap.locked')}</div>
         </div>
       </div>
 
@@ -212,23 +368,25 @@ function RoadmapViewer({ selected }: { selected: RoadmapKey }) {
               ? 'border-[#FF7E5F]/40 bg-[#FF7E5F]/10 text-[#FF7E5F] shadow-[0_0_24px_rgba(255,126,95,0.15)]'
               : 'border-amber-400/40 bg-amber-400/10 text-amber-300 shadow-[0_0_24px_rgba(251,191,36,0.15)]',
           )}>
-            {isFE ? '🧩 Front-end Roadmap' : '⚙️ Back-end Roadmap'}
+            {isFE ? `🧩 ${t('roadmap.frontend')}` : `⚙️ ${t('roadmap.backend')}`}
           </div>
         </div>
 
         {/* Entry arrow */}
         <div className="flex justify-center mb-0">
-          <div className="w-0.5" style={{ height: 20, background: 'linear-gradient(to bottom, transparent, rgba(251,191,36,0.6))' }} />
+          <div className="w-0.5" style={{ height: 20, background: 'linear-gradient(to bottom, transparent, #4ade80)' }} />
         </div>
 
-        {/* Steps */}
-        <div className="min-w-[640px]" onMouseLeave={() => setHoveredStep(null)}>
-          {steps.map((step, i) => (
-            <div key={step.id} onMouseEnter={() => setHoveredStep(step.id)}
-              className={cx('transition-opacity duration-200', hoveredStep && hoveredStep !== step.id ? 'opacity-50' : 'opacity-100')}>
-              <StepRow step={step} isFirst={i === 0} isLast={i === steps.length - 1} index={i} />
-            </div>
-          ))}
+        {/* Render Stages */}
+        <div className="flex flex-col w-full items-center" onMouseLeave={() => setHoveredStep(null)}>
+          {/* Note: I injected a tiny effect up top or we can just pass translations into MainNode, but I'll use CSS trick or just string replace for now. Actually, let's just pass t down if we want to, but to avoid prop drilling we can render translations in a portal or style block */}
+          <style>{`
+            .roadmap-deadline-label::before { content: "${t('roadmap.estCompletion')}"; }
+            .roadmap-tooltip-locked::before { content: "${t('roadmap.tooltip.locked')}"; }
+          `}</style>
+          {renderStage(t('roadmap.stage.beginner'), 'bg-green-500/10 text-green-400 border-green-500/30', steps.slice(0, 10), 0)}
+          {renderStage(t('roadmap.stage.intermediate'), 'bg-blue-500/10 text-blue-400 border-blue-500/30', steps.slice(10, 20), 10)}
+          {renderStage(t('roadmap.stage.advanced'), 'bg-purple-500/10 text-purple-400 border-purple-500/30', steps.slice(20, 30), 20)}
         </div>
       </div>
     </div>

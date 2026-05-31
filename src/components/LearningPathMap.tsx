@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import RoadmapViewer, { type RoadmapKey } from './RoadmapViewer';
 import { useT } from '../i18n/useT';
 
-const cx = (...classes: Array<string | false | null | undefined>) =>
-  classes.filter(Boolean).join(' ');
+const cx = (...classes: Array<string | false | null | undefined>) => classes.filter(Boolean).join(' ');
 
 const TABS: { key: RoadmapKey; label: string; icon: string; sub: string; color: string; glow: string }[] = [
   { key: 'frontend', label: 'Frontend', icon: '🧩', sub: 'UI · Web · React', color: '#ff7e5f', glow: 'rgba(255,126,95,0.3)' },
@@ -11,15 +10,45 @@ const TABS: { key: RoadmapKey; label: string; icon: string; sub: string; color: 
 ];
 
 const STATS = [
-  { label: 'Topics',    value: '21', icon: 'library_books', color: '#ff7e5f' },
-  { label: 'Completed', value: '0',  icon: 'check_circle',  color: '#4ade80' },
-  { label: 'In Progress', value: '1', icon: 'pending',      color: '#fbbf24' },
+  { labelKey: 'roadmap.topics',    value: '30', icon: 'library_books', color: '#ff7e5f' },
+  { labelKey: 'roadmap.completed', value: '0',  icon: 'check_circle',  color: '#4ade80' },
+  { labelKey: 'roadmap.inProgress', value: '1', icon: 'pending',      color: '#fbbf24' },
 ];
+
+const STORAGE_KEY = 'cg_survey_v2';
 
 function LearningPathMap() {
   const t = useT();
   const [selected, setSelected] = useState<RoadmapKey>('frontend');
+  
+  const [surveyData, setSurveyData] = useState<any>(null);
 
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        setSurveyData(parsed);
+        if (parsed.careerPath === 'backend') {
+          setSelected('backend');
+        } else if (parsed.careerPath === 'frontend') {
+          setSelected('frontend');
+        }
+      }
+    } catch {}
+  }, []);
+
+  const totalLessonHours = 120; // Default mockup for total hours
+  
+  const estimatedMonths = useMemo(() => {
+    if (!surveyData?.hoursPerDay) return 6;
+    const days = totalLessonHours / surveyData.hoursPerDay;
+    const months = Math.max(1, Math.ceil(days / 30));
+    return months;
+  }, [surveyData]);
+
+  const levelText = surveyData?.testScore === 5 ? 'Senior' : surveyData?.testScore >= 3 ? 'Mid-level' : 'Junior';
+  
   return (
     <div className="w-full animate-fade-in">
       {/* Header */}
@@ -33,7 +62,9 @@ function LearningPathMap() {
             Learning <span className="gradient-text">Path</span>
           </h1>
           <p className="text-sm leading-6 text-[color:var(--cg-text-muted)] max-w-md">
-            Chọn Frontend hoặc Backend để khám phá roadmap học tập chi tiết theo từng giai đoạn.
+            {surveyData 
+              ? (t('common.profile') === 'HỒ SƠ' ? `Chúc mừng bạn đã bắt đầu Roadmap ${selected === 'frontend' ? 'Frontend' : 'Backend'} ${levelText} trong ${estimatedMonths} tháng!` : `Congratulations on starting your ${selected === 'frontend' ? 'Frontend' : 'Backend'} ${levelText} Roadmap for ${estimatedMonths} months!`)
+              : t('roadmap.welcome.empty')}
           </p>
         </div>
 
@@ -68,10 +99,10 @@ function LearningPathMap() {
           {/* Quick stats */}
           <div className="flex items-center gap-3">
             {STATS.map((s) => (
-              <div key={s.label} className="flex items-center gap-2 rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-3 py-2">
+              <div key={s.labelKey} className="flex items-center gap-2 rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-3 py-2">
                 <span className="material-symbols-outlined text-[16px]" style={{ color: s.color }}>{s.icon}</span>
                 <span className="text-xs font-bold" style={{ color: s.color }}>{s.value}</span>
-                <span className="text-[10px] text-[color:var(--cg-text-muted)] font-medium">{s.label}</span>
+                <span className="text-[10px] text-[color:var(--cg-text-muted)] font-medium">{t(s.labelKey as any)}</span>
               </div>
             ))}
           </div>
@@ -82,7 +113,7 @@ function LearningPathMap() {
       <div className="mt-8 mb-8 h-px w-full" style={{ background: 'linear-gradient(90deg, transparent, var(--cg-border), transparent)' }} />
 
       {/* Roadmap */}
-      <RoadmapViewer key={selected} selected={selected} />
+      <RoadmapViewer key={selected} selected={selected} surveyData={surveyData} />
     </div>
   );
 }
