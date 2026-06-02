@@ -13,6 +13,8 @@ import { ProtectedRoute } from './feature/auth/protectedRoute';
 import ForgotPasswordPage from './feature/auth/forgotPasswordPage';
 import RegisterPage from './feature/auth/registerPage';
 import LoginPage from './feature/auth/loginPage';
+import Tracking from './feature/history/Tracking';
+import TabComponent from './feature/history';
 
 // App.tsx
 function App() {
@@ -36,14 +38,11 @@ function App() {
             path="/onboarding/assessment"
             element={<OnboardingAssessment />}
           />
-          <Route
-            path="/onboarding/summary"
-            element={<OnboardingSummary />}
-          />
+          <Route path="/onboarding/summary" element={<OnboardingSummary />} />
 
           <Route path="/battle" element={<Placeholder title="Battle" />} />
           <Route path="/practice" element={<Practice />} />
-          <Route path="/history" element={<Placeholder title="History" />} />
+          <Route path="/history" element={<TabComponent />} />
         </Route>
       </Routes>
     </BrowserRouter>
