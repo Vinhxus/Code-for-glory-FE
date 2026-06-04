@@ -17,31 +17,28 @@ import Tracking from './feature/history/Tracking';
 import TabComponent from './feature/history';
 import { useAuth } from './feature/auth/useAuth';
 
-// App.tsx
 function App() {
   const { isAuthenticated } = useAuth();
+  console.log('Auth state:', isAuthenticated);
+
   return (
     <BrowserRouter>
       <Routes>
         {/* Public routes */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/home" element={<Navigate to="/" replace />} />
-        <Route index element={<Navigate to="/login" replace />} />{' '}
-        {/* redirect root là login page */}
         <Route
           path="/login"
           element={
             isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />
           }
-        />{' '}
-        {/* login rồi thì không vào lại login */}
+        />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/home" element={<Navigate to="/" replace />} />
+
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<Homepage />} />
           <Route path="/survey" element={<Survey />} />
-
           <Route path="/learning-path" element={<LearningPath />} />
           <Route path="/onboarding/quiz" element={<OnboardingQuiz />} />
           <Route
@@ -49,7 +46,6 @@ function App() {
             element={<OnboardingAssessment />}
           />
           <Route path="/onboarding/summary" element={<OnboardingSummary />} />
-
           <Route path="/battle" element={<Placeholder title="Battle" />} />
           <Route path="/practice" element={<Practice />} />
           <Route path="/history" element={<TabComponent />} />

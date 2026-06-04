@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SideNav from '../components/SideNav';
 import QuickSettings from '../components/QuickSettings';
@@ -26,44 +26,83 @@ const RANK_STYLES = [
   },
 ];
 
+// Định nghĩa Type cho dữ liệu trả về (Bạn có thể tách ra file types riêng)
+interface TopUser {
+  name: string;
+  class: string;
+  xp: number;
+  rank: number;
+}
+
+interface StatsData {
+  solved: string;
+  participants: string;
+  gold: string;
+}
+
 function Homepage() {
   const navigate = useNavigate();
   const t = useT();
+
+  const [statsData, setStatsData] = useState<StatsData>({
+    solved: '0',
+    participants: '0',
+    gold: '0',
+  });
+  const [topUsers, setTopUsers] = useState<TopUser[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchHomepageData = async () => {
+      try {
+        setIsLoading(true);
+        const [statsRes, usersRes] = await Promise.all([
+          fetch('http://localhost:3000/api/home/stats'),
+          fetch('http://localhost:3000/api/home/leaderboard?limit=3'),
+        ]);
+
+        if (statsRes.ok && usersRes.ok) {
+          const statsJson = await statsRes.json();
+          const usersJson = await usersRes.json();
+
+          setStatsData(statsJson.data || statsJson);
+          setTopUsers(usersJson.data || usersJson);
+        }
+      } catch (error) {
+        console.error('Lỗi khi tải dữ liệu Homepage:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchHomepageData();
+  }, []);
 
   const stats = useMemo(
     () => [
       {
         label: t('home.stats.solved'),
-        value: '10',
+        value: statsData.solved,
         icon: 'target',
         color: '#ff7e5f',
         cls: 'stat-card-coral',
       },
       {
         label: t('home.stats.participants'),
-        value: '1B+',
+        value: statsData.participants,
         icon: 'groups',
         color: '#a78bfa',
         cls: 'stat-card-purple',
       },
       {
         label: t('home.stats.gold'),
-        value: '1,250',
+        value: statsData.gold,
         icon: 'star',
         color: '#fbbf24',
         cls: 'stat-card-amber',
       },
     ],
-    [t]
-  );
-
-  const topUsers = useMemo(
-    () => [
-      { name: 'User Alpha', class: 'WARRIOR CLASS', xp: 123, rank: 1 },
-      { name: 'User Beta', class: 'ARCHMAGE CLASS', xp: 98, rank: 2 },
-      { name: 'User Gamma', class: 'ROGUE CLASS', xp: 87, rank: 3 },
-    ],
-    []
+    [t, statsData]
   );
 
   return (

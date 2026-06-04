@@ -1,6 +1,8 @@
-import { NavLink } from 'react-router-dom';
+import { useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useT } from '../i18n/useT';
 import type { I18nKey } from '../i18n/translations';
+import { useAuth } from '../feature/auth/useAuth';
 
 type NavItem = {
   to: string;
@@ -45,6 +47,21 @@ const NAV_ITEMS: NavItem[] = [
 
 function SideNav() {
   const t = useT();
+  const navigate = useNavigate();
+  const [showMenu, setShowMenu] = useState(false);
+
+  const { logout } = useAuth();
+  const handleLogout = async () => {
+    try {
+      // Thực thi hàm logout (gọi API + xóa localStorage + clear state)
+      await logout();
+    } catch (error) {
+      console.error('Lỗi khi đăng xuất:', error);
+    } finally {
+      // đưa về trang login
+      navigate('/login');
+    }
+  };
 
   return (
     <aside
@@ -65,6 +82,7 @@ function SideNav() {
         (e.currentTarget as HTMLElement).style.width = '72px';
         (e.currentTarget as HTMLElement).style.boxShadow =
           '0 0 40px rgba(0,0,0,0.3)';
+        setShowMenu(false); // Tự động đóng menu khi chuột rời khỏi sidebar
       }}
     >
       {/* Ambient sidebar glow */}
@@ -213,9 +231,27 @@ function SideNav() {
         }}
       />
 
-      {/* User Avatar at bottom */}
-      <div className="w-full px-2">
-        <div className="flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 hover:bg-[color:var(--cg-container-a16)] cursor-pointer group">
+      {/* TẠO VÙNG CHỨA USER AVATAR & LOGOUT MENU */}
+      <div className="w-full px-2 relative">
+        {/* Menu Đăng xuất nổi lên phía trên Avatar */}
+        {showMenu && (
+          <div className="absolute bottom-full left-2 right-2 mb-2 rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-sidebar)] p-1.5 shadow-lg backdrop-blur-xl z-50">
+            <button
+              onClick={handleLogout}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-[color:var(--cg-text)] transition-colors hover:bg-[#ff7e5f]/10 hover:text-[#ff7e5f]"
+            >
+              <span className="material-symbols-outlined text-[18px]">
+                logout
+              </span>
+              <span className="whitespace-nowrap">Đăng xuất</span>
+            </button>
+          </div>
+        )}
+
+        <div
+          className="flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 hover:bg-[color:var(--cg-container-a16)] cursor-pointer group"
+          onClick={() => setShowMenu(!showMenu)}
+        >
           {/* Avatar with XP ring */}
           <div className="relative flex-shrink-0 w-8 h-8">
             <svg
@@ -249,6 +285,7 @@ function SideNav() {
               <span className="text-[9px] font-bold text-white">U</span>
             </div>
           </div>
+
           <div
             className="overflow-hidden"
             style={{
