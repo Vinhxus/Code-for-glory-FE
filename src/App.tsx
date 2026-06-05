@@ -16,6 +16,7 @@ import LoginPage from './feature/auth/loginPage';
 import Tracking from './feature/history/Tracking';
 import TabComponent from './feature/history';
 import { useAuth } from './feature/auth/useAuth';
+import BattleRoutes from './feature/battle/BattleRoutes';
 
 // App.tsx
 function App() {
@@ -50,7 +51,7 @@ function App() {
           />
           <Route path="/onboarding/summary" element={<OnboardingSummary />} />
 
-          <Route path="/battle" element={<Placeholder title="Battle" />} />
+          <Route path="/battle/*" element={<BattleRoutes />} />
           <Route path="/practice" element={<Practice />} />
           <Route path="/history" element={<TabComponent />} />
         </Route>
