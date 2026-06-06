@@ -18,7 +18,6 @@ export interface AuthResponse {
   };
 }
 
-// Raw response shape từ BE login
 interface LoginRawResponse {
   access_token: string;
   user: {
@@ -30,7 +29,7 @@ interface LoginRawResponse {
   };
 }
 
-export const BASE_URL = 'http://localhost:3000';
+export const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -48,6 +47,7 @@ export async function loginApi(data: LoginRequest): Promise<AuthResponse> {
   });
 
   const raw = await handleResponse<LoginRawResponse>(res);
+
   return {
     token: raw.access_token,
     user: {
@@ -69,11 +69,20 @@ export async function registerApi(data: RegisterRequest): Promise<void> {
 
 export async function logoutApi(): Promise<void> {
   const token = localStorage.getItem('access_token');
-  await fetch(`${BASE_URL}/auth/logout`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-  });
+
+  // Xóa token trước để dù API lỗi vẫn logout được
+  localStorage.removeItem('access_token');
+
+  try {
+    const res = await fetch(`${BASE_URL}/auth/logout`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    await handleResponse<unknown>(res);
+  } catch (err) {
+    console.warn('Logout API error (ignored):', err);
+  }
 }
