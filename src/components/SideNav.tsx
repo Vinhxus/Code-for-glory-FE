@@ -56,7 +56,7 @@ function SideNav() {
       // Thực thi hàm logout (gọi API + xóa localStorage + clear state)
       await logout();
     } catch (error) {
-      console.error('Lỗi khi đăng xuất:', error);
+      console.error('Logout error:', error);
     } finally {
       // đưa về trang login
       navigate('/login');
@@ -243,7 +243,7 @@ function SideNav() {
               <span className="material-symbols-outlined text-[18px]">
                 logout
               </span>
-              <span className="whitespace-nowrap">Đăng xuất</span>
+              <span className="whitespace-nowrap">Log out</span>
             </button>
           </div>
         )}

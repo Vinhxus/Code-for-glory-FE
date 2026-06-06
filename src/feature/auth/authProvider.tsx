@@ -1,4 +1,5 @@
 import { useState, useCallback, type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from './authContext';
 import {
   loginApi,
@@ -44,11 +45,12 @@ function getInitialAuthState(): AuthState {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
   const [state, setState] = useState<AuthState>(getInitialAuthState);
 
   const login = useCallback(async (data: LoginRequest) => {
     const res = await loginApi(data);
-    localStorage.setItem('access_token', res.token);
+    // loginApi đã set access_token, chỉ cần set user
     localStorage.setItem('user', JSON.stringify(res.user));
     setState({ user: res.user, token: res.token, isAuthenticated: true });
   }, []);
@@ -56,17 +58,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = useCallback(async (data: RegisterRequest) => {
     await registerApi(data);
     const res = await loginApi({ email: data.email, password: data.password });
-    localStorage.setItem('access_token', res.token);
     localStorage.setItem('user', JSON.stringify(res.user));
     setState({ user: res.user, token: res.token, isAuthenticated: true });
   }, []);
 
   const logout = useCallback(async () => {
-    await logoutApi();
-    localStorage.removeItem('access_token');
+    await logoutApi(); // đã xóa access_token bên trong rồi
     localStorage.removeItem('user');
     setState({ user: null, token: null, isAuthenticated: false });
-  }, []);
+    navigate('/login'); // redirect sau khi clear state
+  }, [navigate]);
 
   return (
     <AuthContext.Provider value={{ ...state, login, register, logout }}>
