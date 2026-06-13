@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import QuickSettings from '../QuickSettings';
+import { useNavigate } from 'react-router-dom';
 import './Header.css';
 
 const NAV_ITEMS = [
@@ -8,6 +9,10 @@ const NAV_ITEMS = [
 ];
 
 export default function Header() {
+  const navigate = useNavigate();
+  const handleProfileClick = () => {
+    navigate('/profile');
+  };
   const getNavLinkClass = ({ isActive }: { isActive: boolean }) =>
     `header-nav-link${isActive ? ' active' : ''}`;
   return (
@@ -31,7 +36,11 @@ export default function Header() {
             <span className="material-symbols-outlined">notifications</span>
           </button>
 
-          <button className="header-profile-btn" aria-label="Profile">
+          <button
+            className="header-profile-btn"
+            aria-label="Profile"
+            onClick={handleProfileClick}
+          >
             <span className="material-symbols-outlined">account_circle</span>
             Profile
           </button>

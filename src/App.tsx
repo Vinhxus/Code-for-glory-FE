@@ -15,6 +15,7 @@ import RegisterPage from './feature/auth/registerPage';
 import LoginPage from './feature/auth/loginPage';
 import TabComponent from './feature/history';
 import { useAuth } from './feature/auth/useAuth';
+import { profileRoutes } from './route/profileRoot';
 
 function App() {
   const { isAuthenticated } = useAuth();
@@ -33,6 +34,7 @@ function App() {
 
       {/* Protected routes */}
       <Route element={<ProtectedRoute />}>
+        {profileRoutes()}
         <Route path="/" element={<Homepage />} />
         <Route path="/survey" element={<Survey />} />
         <Route path="/learning-path" element={<LearningPath />} />
