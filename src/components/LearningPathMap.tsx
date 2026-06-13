@@ -152,12 +152,9 @@ function LearningPathMap() {
     return months;
   }, [surveyData]);
 
+  const testScore = surveyData?.testScore ?? 0;
   const levelText =
-    surveyData?.testScore === 5
-      ? 'Senior'
-      : surveyData?.testScore >= 3
-        ? 'Mid-level'
-        : 'Junior';
+    testScore === 5 ? 'Senior' : testScore >= 3 ? 'Mid-level' : 'Junior';
 
   return (
     <div className="w-full animate-fade-in">
