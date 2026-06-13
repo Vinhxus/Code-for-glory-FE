@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './EditProfile.css';
+import './editProfile.css';
 
 /* ── Types ── */
 interface Skill {
