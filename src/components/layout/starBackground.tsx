@@ -5,38 +5,37 @@ interface StarBackgroundProps {
   count?: number;
 }
 
-const DEFAULT_STAR_COUNT = 60;
-
-function createStars(count: number) {
-  return Array.from({ length: count }).map(() => {
-    const left = `${Math.random() * 100}%`;
-    const top = `${Math.random() * 100}%`;
-    const animationDelay = `${Math.random() * 3}s`;
-    const size = `${Math.random() * 2 + 1}px`;
-    return { left, top, animationDelay, size };
-  });
+// Pure random function generator that's deterministic based on seed
+function getSeededRandom(seed: number): number {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
 }
 
-// Generate a stable list at module initialization (not during render)
-const INITIAL_STARS = createStars(DEFAULT_STAR_COUNT);
-
 export default function StarBackground({
-  count = DEFAULT_STAR_COUNT,
+  count = 60,
 }: StarBackgroundProps) {
-  const stars = INITIAL_STARS.slice(0, count);
+  const stars = useMemo(() => {
+    return Array.from({ length: count }).map((_, index) => ({
+      left: getSeededRandom(index * 2.71) * 100,
+      top: getSeededRandom(index * 3.14) * 100,
+      animationDelay: getSeededRandom(index * 1.41) * 3,
+      width: getSeededRandom(index * 2.23) * 2 + 1,
+      height: getSeededRandom(index * 1.73) * 2 + 1,
+    }));
+  }, [count]);
 
   return (
     <div className="stars" aria-hidden="true">
-      {stars.map((s, i) => (
+      {stars.map((star, i) => (
         <span
           key={i}
           className="star"
           style={{
-            left: s.left,
-            top: s.top,
-            animationDelay: s.animationDelay,
-            width: s.size,
-            height: s.size,
+            left: `${star.left}%`,
+            top: `${star.top}%`,
+            animationDelay: `${star.animationDelay}s`,
+            width: `${star.width}px`,
+            height: `${star.height}px`,
           }}
         />
       ))}
