@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import Homepage from './route/Homepage';
 import Survey from './route/Survey';
 import Placeholder from './route/Placeholder';
@@ -21,29 +21,34 @@ import Mobile from './route/Mobile';
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Homepage />} />
-      <Route path="/survey" element={<Survey />} />
-      <Route path="/learning-path" element={<LearningPath />} />
-      <Route path="/onboarding/quiz" element={<OnboardingQuiz />} />
-      <Route path="/onboarding/assessment" element={<OnboardingAssessment />} />
-      <Route path="/onboarding/summary" element={<OnboardingSummary />} />
-      <Route path="/battle" element={<Placeholder title="Battle" />} />
-      <Route path="/practice" element={<Practice />} />
-      <Route path="/history" element={<Placeholder title="History" />} />
-      <Route path="/courses" element={<Courses />} />
-      <Route path="/arena" element={<Arena />} />
-      <Route path="/pricing" element={<Pricing />} />
-      <Route path="/events" element={<Events />} />
-      <Route path="/guilds" element={<Guilds />} />
-      <Route path="/terms" element={<Terms />} />
-      <Route path="/privacy" element={<Privacy />} />
-      <Route path="/support" element={<Support />} />
-      <Route path="/network" element={<Network />} />
-      <Route path="/forum" element={<Forum />} />
-      <Route path="/mobile" element={<Mobile />} />
-      <Route path="/home" element={<Navigate to="/" replace />} />
-    </Routes>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Homepage />} />
+        <Route path="/survey" element={<Survey />} />
+        <Route path="/learning-path" element={<LearningPath />} />
+        <Route path="/onboarding/quiz" element={<OnboardingQuiz />} />
+        <Route
+          path="/onboarding/assessment"
+          element={<OnboardingAssessment />}
+        />
+        <Route path="/onboarding/summary" element={<OnboardingSummary />} />
+        <Route path="/battle" element={<Placeholder title="Battle" />} />
+        <Route path="/practice" element={<Practice />} />
+        <Route path="/history" element={<Placeholder title="History" />} />
+        <Route path="/courses" element={<Courses />} />
+        <Route path="/arena" element={<Arena />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/events" element={<Events />} />
+        <Route path="/guilds" element={<Guilds />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/support" element={<Support />} />
+        <Route path="/network" element={<Network />} />
+        <Route path="/forum" element={<Forum />} />
+        <Route path="/mobile" element={<Mobile />} />
+        <Route path="/home" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

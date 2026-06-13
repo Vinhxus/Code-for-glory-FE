@@ -11,8 +11,9 @@ function getSeededRandom(seed: number): number {
   return x - Math.floor(x);
 }
 
-export default function StarBackground({ count = 60 }: StarBackgroundProps) {
-  // Generate star positions using deterministic seeded random (pure)
+export default function StarBackground({
+  count = 60,
+}: StarBackgroundProps) {
   const stars = useMemo(() => {
     return Array.from({ length: count }).map((_, index) => ({
       left: getSeededRandom(index * 2.71) * 100,
