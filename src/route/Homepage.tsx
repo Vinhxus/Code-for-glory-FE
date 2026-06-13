@@ -1,9 +1,8 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SideNav from '../components/SideNav';
 import QuickSettings from '../components/QuickSettings';
 import { useT } from '../i18n/useT';
-import Header from '../components/layout/Header';
 
 const RANK_STYLES = [
   {
@@ -26,83 +25,44 @@ const RANK_STYLES = [
   },
 ];
 
-// Định nghĩa Type cho dữ liệu trả về (Bạn có thể tách ra file types riêng)
-interface TopUser {
-  name: string;
-  class: string;
-  xp: number;
-  rank: number;
-}
-
-interface StatsData {
-  solved: string;
-  participants: string;
-  gold: string;
-}
-
 function Homepage() {
   const navigate = useNavigate();
   const t = useT();
-
-  const [statsData, setStatsData] = useState<StatsData>({
-    solved: '0',
-    participants: '0',
-    gold: '0',
-  });
-  const [topUsers, setTopUsers] = useState<TopUser[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    const fetchHomepageData = async () => {
-      try {
-        setIsLoading(true);
-        const [statsRes, usersRes] = await Promise.all([
-          fetch('http://localhost:3000/api/home/stats'),
-          fetch('http://localhost:3000/api/home/leaderboard?limit=3'),
-        ]);
-
-        if (statsRes.ok && usersRes.ok) {
-          const statsJson = await statsRes.json();
-          const usersJson = await usersRes.json();
-
-          setStatsData(statsJson.data || statsJson);
-          setTopUsers(usersJson.data || usersJson);
-        }
-      } catch (error) {
-        console.error('Lỗi khi tải dữ liệu Homepage:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchHomepageData();
-  }, []);
 
   const stats = useMemo(
     () => [
       {
         label: t('home.stats.solved'),
-        value: statsData.solved,
+        value: '10',
         icon: 'target',
         color: '#ff7e5f',
         cls: 'stat-card-coral',
       },
       {
         label: t('home.stats.participants'),
-        value: statsData.participants,
+        value: '1B+',
         icon: 'groups',
         color: '#a78bfa',
         cls: 'stat-card-purple',
       },
       {
         label: t('home.stats.gold'),
-        value: statsData.gold,
+        value: '1,250',
         icon: 'star',
         color: '#fbbf24',
         cls: 'stat-card-amber',
       },
     ],
-    [t, statsData]
+    [t]
+  );
+
+  const topUsers = useMemo(
+    () => [
+      { name: 'User Alpha', class: 'WARRIOR CLASS', xp: 123, rank: 1 },
+      { name: 'User Beta', class: 'ARCHMAGE CLASS', xp: 98, rank: 2 },
+      { name: 'User Gamma', class: 'ROGUE CLASS', xp: 87, rank: 3 },
+    ],
+    []
   );
 
   return (
@@ -131,7 +91,63 @@ function Homepage() {
 
       <div className="relative z-10 md:pl-[96px]">
         {/* Header */}
-        <Header />
+        <header className="sticky top-0 z-40 px-8 py-4 border-b border-[color:var(--cg-border)] bg-[color:var(--cg-bg-a72)] backdrop-blur-xl">
+          <div className="mx-auto flex max-w-7xl items-center justify-between">
+            <Link to="/" className="flex items-center gap-3 group">
+              <div className="relative">
+                <div className="absolute inset-0 rounded-lg bg-[#ff7e5f]/20 blur-md group-hover:bg-[#ff7e5f]/35 transition-all" />
+                <img
+                  src="/component_2_2x.png"
+                  alt="CodeForGlory"
+                  className="relative h-8 w-8 object-contain"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
+              <span className="font-['Lexend'] text-lg font-bold tracking-tight">
+                <span className="text-[#ff7e5f]">Code</span>ForGlory
+              </span>
+            </Link>
+
+            <nav className="hidden items-center gap-8 text-sm font-medium text-[color:var(--cg-text-muted)] md:flex">
+              {[
+                ['#quests', t('home.nav.quests')],
+                ['#leaderboard', t('home.nav.leaderboard')],
+                ['#shop', t('home.nav.shop')],
+              ].map(([href, label]) => (
+                <a
+                  key={href}
+                  href={href}
+                  className="relative transition hover:text-[color:var(--cg-coral)] group"
+                >
+                  {label}
+                  <span className="absolute -bottom-0.5 left-0 h-px w-0 bg-[#ff7e5f] group-hover:w-full transition-all duration-300" />
+                </a>
+              ))}
+            </nav>
+
+            <div className="flex items-center gap-3">
+              <QuickSettings />
+              <button className="relative p-2 text-[color:var(--cg-text-muted)] hover:text-[color:var(--cg-text)] transition rounded-xl hover:bg-[color:var(--cg-container-a16)]">
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#FF7E5F] rounded-full animate-status-pulse" />
+                <span className="material-symbols-outlined text-[20px]">
+                  notifications
+                </span>
+              </button>
+              <button
+                type="button"
+                className="flex items-center gap-2 rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-4 py-2 text-xs font-semibold backdrop-blur-md transition hover:bg-[color:var(--cg-container-a22)] hover:border-[#ff7e5f]/30"
+                onClick={() => navigate('/survey')}
+              >
+                <span className="material-symbols-outlined text-[16px] text-[#ff7e5f]">
+                  person
+                </span>
+                {t('common.profile')}
+              </button>
+            </div>
+          </div>
+        </header>
 
         <main className="max-w-7xl mx-auto px-8 py-12 space-y-10">
           {/* Hero */}
@@ -522,37 +538,71 @@ function Homepage() {
                   digital universe through mastery and conquest.
                 </p>
                 <div className="flex gap-3 pt-2">
-                  {['language', 'chat', 'flutter'].map((icon) => (
-                    <button
+                  {[
+                    { icon: 'language', path: '/network' },
+                    { icon: 'chat', path: '/forum' },
+                    { icon: 'flutter', path: '/mobile' },
+                  ].map(({ icon, path }) => (
+                    <Link
                       key={icon}
+                      to={path}
                       className="h-9 w-9 flex items-center justify-center rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] transition hover:border-[#ff7e5f]/40 hover:text-[#ff7e5f]"
                     >
                       <span className="material-symbols-outlined text-[18px]">
                         {icon}
                       </span>
-                    </button>
+                    </Link>
                   ))}
                 </div>
               </div>
               {[
-                [t('home.footer.platform'), ['Courses', 'Arena', 'Pricing']],
-                [t('home.footer.community'), ['Discord', 'Events', 'Guilds']],
-              ].map(([title, items]) => (
-                <div key={title as string}>
+                {
+                  title: t('home.footer.platform'),
+                  items: [
+                    { label: 'Courses', path: '/courses' },
+                    { label: 'Arena', path: '/arena' },
+                    { label: 'Pricing', path: '/pricing' },
+                  ],
+                },
+                {
+                  title: t('home.footer.community'),
+                  items: [
+                    {
+                      label: 'Discord',
+                      path: 'https://discord.com',
+                      isExternal: true,
+                    },
+                    { label: 'Events', path: '/events' },
+                    { label: 'Guilds', path: '/guilds' },
+                  ],
+                },
+              ].map((section) => (
+                <div key={section.title as string}>
                   <div className="text-xs font-bold tracking-widest text-[color:var(--cg-text)] uppercase mb-4">
-                    {title}
+                    {section.title}
                   </div>
                   <div className="space-y-3 text-sm">
-                    {(items as string[]).map((item) => (
-                      <button
-                        key={item}
-                        type="button"
-                        className="block text-left hover:text-[#ff7e5f] transition-colors"
-                        onClick={() => navigate('/survey')}
-                      >
-                        {item}
-                      </button>
-                    ))}
+                    {section.items.map((item) =>
+                      item.isExternal ? (
+                        <a
+                          key={item.label}
+                          href={item.path}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block text-left hover:text-[#ff7e5f] transition-colors"
+                        >
+                          {item.label}
+                        </a>
+                      ) : (
+                        <Link
+                          key={item.label}
+                          to={item.path}
+                          className="block text-left hover:text-[#ff7e5f] transition-colors"
+                        >
+                          {item.label}
+                        </Link>
+                      )
+                    )}
                   </div>
                 </div>
               ))}
@@ -563,18 +613,17 @@ function Homepage() {
               </div>
               <div className="flex items-center gap-6">
                 {[
-                  t('home.footer.terms'),
-                  t('home.footer.privacy'),
-                  t('home.footer.support'),
+                  { label: t('home.footer.terms'), path: '/terms' },
+                  { label: t('home.footer.privacy'), path: '/privacy' },
+                  { label: t('home.footer.support'), path: '/support' },
                 ].map((item) => (
-                  <button
-                    key={item}
-                    type="button"
+                  <Link
+                    key={item.label}
+                    to={item.path}
                     className="hover:text-[color:var(--cg-text)] transition"
-                    onClick={() => navigate('/survey')}
                   >
-                    {item}
-                  </button>
+                    {item.label}
+                  </Link>
                 ))}
               </div>
             </div>

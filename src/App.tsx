@@ -1,40 +1,28 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import Homepage from './route/Homepage';
 import Survey from './route/Survey';
 import Placeholder from './route/Placeholder';
-
 import OnboardingQuiz from './route/OnboardingQuiz';
 import OnboardingAssessment from './route/OnboardingAssessment';
 import OnboardingSummary from './route/OnboardingSummary';
 import Practice from './route/Practice';
 import LearningPath from './route/LearningPath';
-
-import { ProtectedRoute } from './feature/auth/protectedRoute';
-import ForgotPasswordPage from './feature/auth/forgotPasswordPage';
-import RegisterPage from './feature/auth/registerPage';
-import LoginPage from './feature/auth/loginPage';
-import TabComponent from './feature/history';
-import { useAuth } from './feature/auth/useAuth';
-import { profileRoutes } from './route/profileRoot';
+import Courses from './route/Courses';
+import Arena from './route/Arena';
+import Pricing from './route/Pricing';
+import Events from './route/Events';
+import Guilds from './route/Guilds';
+import Terms from './route/Terms';
+import Privacy from './route/Privacy';
+import Support from './route/Support';
+import Network from './route/Network';
+import Forum from './route/Forum';
+import Mobile from './route/Mobile';
 
 function App() {
-  const { isAuthenticated } = useAuth();
-  console.log('Auth state:', isAuthenticated);
-
   return (
-    <Routes>
-      {/* Public routes */}
-      <Route
-        path="/login"
-        element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />}
-      />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-      <Route path="/home" element={<Navigate to="/" replace />} />
-
-      {/* Protected routes */}
-      <Route element={<ProtectedRoute />}>
-        {profileRoutes()}
+    <BrowserRouter>
+      <Routes>
         <Route path="/" element={<Homepage />} />
         <Route path="/survey" element={<Survey />} />
         <Route path="/learning-path" element={<LearningPath />} />
@@ -46,9 +34,21 @@ function App() {
         <Route path="/onboarding/summary" element={<OnboardingSummary />} />
         <Route path="/battle" element={<Placeholder title="Battle" />} />
         <Route path="/practice" element={<Practice />} />
-        <Route path="/history" element={<TabComponent />} />
-      </Route>
-    </Routes>
+        <Route path="/history" element={<Placeholder title="History" />} />
+        <Route path="/courses" element={<Courses />} />
+        <Route path="/arena" element={<Arena />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/events" element={<Events />} />
+        <Route path="/guilds" element={<Guilds />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/support" element={<Support />} />
+        <Route path="/network" element={<Network />} />
+        <Route path="/forum" element={<Forum />} />
+        <Route path="/mobile" element={<Mobile />} />
+        <Route path="/home" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
