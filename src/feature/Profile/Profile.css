@@ -1,14 +1,6 @@
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
 body {
-  background: var(--bg);
-  color: var(--text-primary);
+  background: var(--cg-bg);
+  color: var(--cg-text);
   font-family: 'Segoe UI', system-ui, sans-serif;
   min-height: 100vh;
 }
@@ -20,19 +12,33 @@ body {
   padding: 24px 20px;
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: 14px;
+  position: relative;
+}
+
+.btn-back {
+  position: absolute;
+  left: -140px;
+  background: transparent;
+  color: var(--cg-text-muted);
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition:
+    color 0.2s,
+    transform 0.2s;
 }
 
 .card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: var(--cg-container);
+  border: 1px solid var(--cg-border);
+  border-radius: 12px;
   padding: 20px 24px;
 }
 
 .row {
   display: grid;
-  gap: var(--gap);
+  gap: 14px;
 }
 
 .row-top {
@@ -145,7 +151,7 @@ body {
 
 .stat-label {
   font-size: 0.65rem;
-  color: var(--text-muted);
+  color: var(--cg-text-muted);
   letter-spacing: 0.06em;
 }
 
@@ -154,7 +160,7 @@ body {
   position: absolute;
   top: 20px;
   right: 20px;
-  background: var(--gold);
+  background: var(--cg-coral);
   color: #0c0a2e;
   border: none;
   border-radius: 6px;
@@ -183,7 +189,7 @@ body {
 .rank-title {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--gold);
+  color: var(--cg-gold);
   letter-spacing: 0.1em;
   align-self: flex-start;
   width: 100%;
@@ -260,7 +266,7 @@ body {
 }
 
 .stat-block-val--gold {
-  color: var(--gold);
+  color: var(--cg-gold);
   font-size: 1.1rem;
   letter-spacing: 0.04em;
 }
@@ -304,7 +310,7 @@ body {
 }
 
 .btn-continue {
-  background: var(--green);
+  background: var(--cg-green);
   color: #0c0a2e;
   border: none;
   border-radius: 6px;
@@ -331,7 +337,7 @@ body {
 
 .course-bar-fill {
   height: 100%;
-  background: var(--green);
+  background: var(--cg-green);
   border-radius: 0 2px 2px 0;
   transition: width 0.8s ease;
 }
@@ -436,7 +442,7 @@ body {
 .achievements-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--gap);
+  gap: 14px;
 }
 
 .achievement-card {

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import SideNav from '../components/SideNav';
 import QuickSettings from '../components/QuickSettings';
 import { useT } from '../i18n/useT';
+import Header from '../components/layout/Header';
 
 const RANK_STYLES = [
   {
@@ -88,67 +89,10 @@ function Homepage() {
       </div>
 
       <SideNav />
+      <Header />
 
       <div className="relative z-10 md:pl-[96px]">
         {/* Header */}
-        <header className="sticky top-0 z-40 px-8 py-4 border-b border-[color:var(--cg-border)] bg-[color:var(--cg-bg-a72)] backdrop-blur-xl">
-          <div className="mx-auto flex max-w-7xl items-center justify-between">
-            <Link to="/" className="flex items-center gap-3 group">
-              <div className="relative">
-                <div className="absolute inset-0 rounded-lg bg-[#ff7e5f]/20 blur-md group-hover:bg-[#ff7e5f]/35 transition-all" />
-                <img
-                  src="/component_2_2x.png"
-                  alt="CodeForGlory"
-                  className="relative h-8 w-8 object-contain"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              </div>
-              <span className="font-['Lexend'] text-lg font-bold tracking-tight">
-                <span className="text-[#ff7e5f]">Code</span>ForGlory
-              </span>
-            </Link>
-
-            <nav className="hidden items-center gap-8 text-sm font-medium text-[color:var(--cg-text-muted)] md:flex">
-              {[
-                ['#quests', t('home.nav.quests')],
-                ['#leaderboard', t('home.nav.leaderboard')],
-                ['#shop', t('home.nav.shop')],
-              ].map(([href, label]) => (
-                <a
-                  key={href}
-                  href={href}
-                  className="relative transition hover:text-[color:var(--cg-coral)] group"
-                >
-                  {label}
-                  <span className="absolute -bottom-0.5 left-0 h-px w-0 bg-[#ff7e5f] group-hover:w-full transition-all duration-300" />
-                </a>
-              ))}
-            </nav>
-
-            <div className="flex items-center gap-3">
-              <QuickSettings />
-              <button className="relative p-2 text-[color:var(--cg-text-muted)] hover:text-[color:var(--cg-text)] transition rounded-xl hover:bg-[color:var(--cg-container-a16)]">
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#FF7E5F] rounded-full animate-status-pulse" />
-                <span className="material-symbols-outlined text-[20px]">
-                  notifications
-                </span>
-              </button>
-              <button
-                type="button"
-                className="flex items-center gap-2 rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-4 py-2 text-xs font-semibold backdrop-blur-md transition hover:bg-[color:var(--cg-container-a22)] hover:border-[#ff7e5f]/30"
-                onClick={() => navigate('/survey')}
-              >
-                <span className="material-symbols-outlined text-[16px] text-[#ff7e5f]">
-                  person
-                </span>
-                {t('common.profile')}
-              </button>
-            </div>
-          </div>
-        </header>
-
         <main className="max-w-7xl mx-auto px-8 py-12 space-y-10">
           {/* Hero */}
           <section className="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
