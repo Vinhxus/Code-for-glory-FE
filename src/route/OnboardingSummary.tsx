@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import QuickSettings from '../components/QuickSettings';
 
 type ExperienceLevelId = 'novice' | 'apprentice' | 'journeyman' | 'master';
 type PrimaryGoalId =
@@ -9,7 +8,13 @@ type PrimaryGoalId =
   | 'competitive'
   | 'fundamentals'
   | 'fun';
-type TrackId = 'frontend' | 'backend' | 'fullstack' | 'data' | 'devops' | 'mobile';
+type TrackId =
+  | 'frontend'
+  | 'backend'
+  | 'fullstack'
+  | 'data'
+  | 'devops'
+  | 'mobile';
 type WeeklyTimeId = '2-4' | '5-7' | '8-12' | '13+';
 type LearningStyleId = 'project-first' | 'theory-first' | 'balanced' | 'drill';
 type LanguageId = 'ts' | 'py' | 'java' | 'cpp' | 'sql';
@@ -172,8 +177,7 @@ function OnboardingSummary() {
   const quiz = useMemo(() => loadJson<QuizResult>(QUIZ_STORAGE_KEY), []);
 
   const scorePct = quiz ? Math.round((quiz.score / quiz.total) * 100) : null;
-  const primaryTrack: TrackId = (survey?.tracks?.[0] ??
-    'frontend') as TrackId;
+  const primaryTrack: TrackId = (survey?.tracks?.[0] ?? 'frontend') as TrackId;
 
   const plan = useMemo(
     () => planFor(primaryTrack, survey?.learningStyle ?? null),
@@ -215,7 +219,6 @@ function OnboardingSummary() {
           </div>
 
           <div className="flex shrink-0 items-center gap-3">
-            <QuickSettings />
             <button
               type="button"
               className="text-xs font-semibold text-[color:var(--cg-text-muted)] transition hover:text-[color:var(--cg-text)]"
@@ -260,7 +263,9 @@ function OnboardingSummary() {
                 <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--cg-text-muted)]">
                   STARTING DIFFICULTY
                 </div>
-                <div className="mt-3 text-xl font-semibold">{targetDifficulty}</div>
+                <div className="mt-3 text-xl font-semibold">
+                  {targetDifficulty}
+                </div>
                 <p className="mt-2 text-xs leading-5 text-[color:var(--cg-text-muted)]">
                   Difficulty is adaptive — it will shift as your performance
                   changes.

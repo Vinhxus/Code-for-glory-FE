@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import QuickSettings from '../components/QuickSettings';
 
 type ExperienceLevelId = 'novice' | 'apprentice' | 'journeyman' | 'master';
 type PrimaryGoalId =
@@ -9,7 +8,13 @@ type PrimaryGoalId =
   | 'competitive'
   | 'fundamentals'
   | 'fun';
-type TrackId = 'frontend' | 'backend' | 'fullstack' | 'data' | 'devops' | 'mobile';
+type TrackId =
+  | 'frontend'
+  | 'backend'
+  | 'fullstack'
+  | 'data'
+  | 'devops'
+  | 'mobile';
 type WeeklyTimeId = '2-4' | '5-7' | '8-12' | '13+';
 type LearningStyleId = 'project-first' | 'theory-first' | 'balanced' | 'drill';
 type LanguageId = 'ts' | 'py' | 'java' | 'cpp' | 'sql';
@@ -68,15 +73,20 @@ function loadSurvey(): SurveyState | null {
 }
 
 function tagColor(tag: string) {
-  if (tag === 'async') return 'text-[#FF7E5F] border-[#FF7E5F]/30 bg-[#FF7E5F]/10';
-  if (tag === 'types') return 'text-[#FFA500] border-[#FFA500]/30 bg-[#FFA500]/10';
-  if (tag === 'react') return 'text-[#4F46E5] border-[#4F46E5]/30 bg-[#4F46E5]/10';
+  if (tag === 'async')
+    return 'text-[#FF7E5F] border-[#FF7E5F]/30 bg-[#FF7E5F]/10';
+  if (tag === 'types')
+    return 'text-[#FFA500] border-[#FFA500]/30 bg-[#FFA500]/10';
+  if (tag === 'react')
+    return 'text-[#4F46E5] border-[#4F46E5]/30 bg-[#4F46E5]/10';
   return 'text-[color:var(--cg-text-muted)] border-white/10 bg-white/5';
 }
 
 function buildQuiz(tracks: TrackId[]): QuizQuestion[] {
-  const prefersFrontend = tracks.includes('frontend') || tracks.includes('fullstack');
-  const prefersBackend = tracks.includes('backend') || tracks.includes('fullstack');
+  const prefersFrontend =
+    tracks.includes('frontend') || tracks.includes('fullstack');
+  const prefersBackend =
+    tracks.includes('backend') || tracks.includes('fullstack');
 
   const base: QuizQuestion[] = [
     {
@@ -267,7 +277,6 @@ function OnboardingQuiz() {
           </div>
 
           <div className="flex shrink-0 items-center gap-3">
-            <QuickSettings />
             <button
               type="button"
               className="text-xs font-semibold text-[color:var(--cg-text-muted)] transition hover:text-[color:var(--cg-text)]"
@@ -302,8 +311,8 @@ function OnboardingQuiz() {
           </div>
         ) : (
           <div className="mx-auto w-full max-w-3xl rounded-2xl border border-[rgba(255,126,95,0.35)] bg-[rgba(255,126,95,0.12)] px-5 py-4 text-xs text-[rgba(255,255,255,0.80)] backdrop-blur">
-            No survey found. You can still take the quiz, but personalization may
-            be limited.
+            No survey found. You can still take the quiz, but personalization
+            may be limited.
           </div>
         )}
 

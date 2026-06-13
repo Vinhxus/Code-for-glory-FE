@@ -7,6 +7,17 @@ import OnboardingAssessment from './route/OnboardingAssessment';
 import OnboardingSummary from './route/OnboardingSummary';
 import Practice from './route/Practice';
 import LearningPath from './route/LearningPath';
+import Courses from './route/Courses';
+import Arena from './route/Arena';
+import Pricing from './route/Pricing';
+import Events from './route/Events';
+import Guilds from './route/Guilds';
+import Terms from './route/Terms';
+import Privacy from './route/Privacy';
+import Support from './route/Support';
+import Network from './route/Network';
+import Forum from './route/Forum';
+import Mobile from './route/Mobile';
 
 function App() {
   return (
@@ -16,11 +27,25 @@ function App() {
         <Route path="/survey" element={<Survey />} />
         <Route path="/learning-path" element={<LearningPath />} />
         <Route path="/onboarding/quiz" element={<OnboardingQuiz />} />
-        <Route path="/onboarding/assessment" element={<OnboardingAssessment />} />
+        <Route
+          path="/onboarding/assessment"
+          element={<OnboardingAssessment />}
+        />
         <Route path="/onboarding/summary" element={<OnboardingSummary />} />
         <Route path="/battle" element={<Placeholder title="Battle" />} />
         <Route path="/practice" element={<Practice />} />
         <Route path="/history" element={<Placeholder title="History" />} />
+        <Route path="/courses" element={<Courses />} />
+        <Route path="/arena" element={<Arena />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/events" element={<Events />} />
+        <Route path="/guilds" element={<Guilds />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/support" element={<Support />} />
+        <Route path="/network" element={<Network />} />
+        <Route path="/forum" element={<Forum />} />
+        <Route path="/mobile" element={<Mobile />} />
         <Route path="/home" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
