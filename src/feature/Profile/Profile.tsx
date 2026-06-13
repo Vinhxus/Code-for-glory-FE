@@ -70,6 +70,10 @@ function Profile() {
 
   return (
     <div className="page">
+      <button className="btn-back" onClick={() => navigate(-1)} title="Go back">
+        {' '}
+        ←{' '}
+      </button>
       <div className="row row-top">
         <div className="card card-profile">
           <div className="avatar-wrap">
