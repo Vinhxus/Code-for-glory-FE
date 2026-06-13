@@ -1,0 +1,20 @@
+.tab-container-root {
+  margin-top: 36px;
+  min-height: 100vh;
+  color: var(--cg-text);
+}
+
+.tab-wrapper {
+  background: var(--cg-container-a22);
+  border: 1px solid var(--cg-border);
+}
+
+.tab-button.inactive {
+  color: var(--cg-text-muted);
+}
+
+.tab-button.active {
+  background: var(--cg-amber);
+  color: #0f0b3c;
+  font-weight: 700;
+}
