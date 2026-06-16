@@ -22,7 +22,6 @@ const ERRORS: ErrorItem[] = [
   },
 ];
 
-// Bar chart data (weekly activity)
 const BAR_DATA = [1, 3, 4];
 
 function BarChart() {
