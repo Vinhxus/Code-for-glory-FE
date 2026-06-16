@@ -1,0 +1,237 @@
+.lore-container {
+  padding: 24px;
+  margin-left: 72px;
+}
+
+.lore-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.lore-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 32px;
+}
+
+.lore-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.search-wrapper {
+  position: relative;
+  width: 280px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--cg-border);
+  border-radius: 8px;
+  padding: 10px 16px 10px 16px;
+}
+
+.search-input {
+  width: 100%;
+  background: rgba(15, 11, 60, 0.4);
+  border: none;
+  color: var(--cg-text);
+  font-size: 13px;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--cg-amber);
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.15);
+}
+
+.search-icon {
+  left: 12px;
+  top: 12px;
+  color: var(--cg-text-muted);
+  font-size: 18px;
+  pointer-events: none;
+}
+
+.lore-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 12px;
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.lore-card--fade-out {
+  opacity: 0;
+  transform: scale(0.85) translateX(16px);
+  pointer-events: none;
+}
+
+.lore-banner {
+  position: relative;
+  height: 160px;
+  width: 100%;
+  overflow: hidden;
+  border-bottom: 1px solid var(--cg-border);
+}
+
+.lore-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.lore-card:not(.lore-card--fade-out):hover .lore-banner img {
+  transform: scale(1.06);
+}
+
+.btn-bookmark-remove {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(239, 68, 68, 0.15);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #ef4444;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    color 0.2s ease;
+  z-index: 10;
+}
+
+.btn-bookmark-remove:hover {
+  background: #ef4444;
+  color: #ffffff;
+  transform: scale(1.08);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.45);
+}
+
+.btn-bookmark-remove:active {
+  transform: scale(0.94);
+}
+
+.lore-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.lore-tags {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.badge-default {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--cg-text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+.lore-card-title {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--cg-text);
+  line-height: 1.4;
+}
+
+.lore-card-desc {
+  margin: 0 0 20px 0;
+  font-size: 12px;
+  color: var(--cg-text-muted);
+  line-height: 1.5;
+  line-clamp: 2;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.lore-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+}
+
+.link-recall {
+  color: var(--cg-amber);
+  text-decoration: none;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  transition: color 0.2s;
+}
+
+.link-recall:hover {
+  color: var(--cg-coral);
+}
+
+.discover-card {
+  border: 2px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+  cursor: pointer;
+  background: transparent;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
+}
+
+.discover-card:hover {
+  border-color: rgba(251, 191, 36, 0.3);
+  background: rgba(251, 191, 36, 0.02);
+}
+
+.discover-content {
+  text-align: center;
+  color: var(--cg-text-muted);
+}
+
+.discover-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+  color: var(--cg-text-muted);
+  opacity: 0.5;
+}
+
+.discover-card:hover .discover-icon,
+.discover-card:hover p {
+  color: var(--cg-amber);
+  opacity: 1;
+}
+
+.discover-content p {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
