@@ -683,7 +683,7 @@ function Practice() {
         alert(
           '🎉 Chúc mừng! Bạn đã hoàn thành bài học: ' + currentPractice.title
         );
-        navigate('/learning-path');
+        navigate('/career-path');
       } catch (error) {
         console.error('Lỗi cập nhật tiến độ:', error);
         alert('Có lỗi xảy ra khi lưu tiến độ. Vui lòng thử lại!');

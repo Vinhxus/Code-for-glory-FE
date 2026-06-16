@@ -181,7 +181,7 @@ function Homepage() {
                   {t('home.hero.start')} →
                 </button>
                 <Link
-                  to="/learning-path"
+                  to="/career-path"
                   className="inline-flex items-center gap-2 rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-6 py-3.5 text-sm font-semibold backdrop-blur-md transition hover:bg-[color:var(--cg-container-a22)] hover:border-[#a78bfa]/40"
                 >
                   <span className="material-symbols-outlined text-[16px] text-[#a78bfa]">
@@ -311,7 +311,7 @@ function Homepage() {
 
           {/* Roadmap Preview */}
           <Link
-            to="/learning-path"
+            to="/career-path"
             id="roadmap"
             className="group block overflow-hidden rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] backdrop-blur-md p-8 relative transition-all duration-300 hover:border-[#FF7E5F]/40 hover:shadow-[0_0_60px_rgba(255,126,95,0.12)] cursor-pointer animate-fade-in-up"
           >
@@ -407,7 +407,7 @@ function Homepage() {
               </div>
 
               <p className="mt-3 text-center text-[11px] text-[color:var(--cg-text-muted)] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                Click để xem Frontend & Backend Roadmap đầy đủ →
+                Click để xem Career Path (Frontend & Backend) đầy đủ →
               </p>
             </div>
           </Link>

@@ -320,7 +320,7 @@ export default function Survey() {
       setStep((s) => s + 1);
     } else {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(form));
-      navigate('/learning-path');
+      navigate('/career-path');
     }
   };
 

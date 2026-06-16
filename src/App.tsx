@@ -6,7 +6,8 @@ import OnboardingQuiz from './route/OnboardingQuiz';
 import OnboardingAssessment from './route/OnboardingAssessment';
 import OnboardingSummary from './route/OnboardingSummary';
 import Practice from './route/Practice';
-import LearningPath from './route/LearningPath';
+import CareerPath from './route/CareerPath';
+import CareerPathNode from './route/CareerPathNode';
 import Courses from './route/Courses';
 import Arena from './route/Arena';
 import Pricing from './route/Pricing';
@@ -24,7 +25,12 @@ function App() {
     <Routes>
       <Route path="/" element={<Homepage />} />
       <Route path="/survey" element={<Survey />} />
-      <Route path="/learning-path" element={<LearningPath />} />
+      <Route path="/career-path/:track/:nodeId" element={<CareerPathNode />} />
+      <Route path="/career-path" element={<CareerPath />} />
+      <Route
+        path="/learning-path"
+        element={<Navigate to="/career-path" replace />}
+      />
       <Route path="/onboarding/quiz" element={<OnboardingQuiz />} />
       <Route path="/onboarding/assessment" element={<OnboardingAssessment />} />
       <Route path="/onboarding/summary" element={<OnboardingSummary />} />
