@@ -100,7 +100,7 @@ export const translations: Record<I18nKey, { en: string; vi: string }> = {
     vi: 'Rèn luyện như một developer bằng cách chinh phục các thử thách thực chiến.',
   },
   'home.hero.start': { en: 'Start Your Adventure', vi: 'Bắt đầu hành trình' },
-  'home.hero.roadmap': { en: 'View Roadmap', vi: 'Xem lộ trình' },
+  'home.hero.roadmap': { en: 'Career Path', vi: 'Lộ trình nghề nghiệp' },
   'home.stats.solved': { en: 'Quests Solved', vi: 'Nhiệm vụ đã giải' },
   'home.stats.participants': { en: 'Participants', vi: 'Người tham gia' },
   'home.stats.gold': { en: 'Gold Distributed', vi: 'Vàng phát mỗi ngày' },
