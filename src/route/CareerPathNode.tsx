@@ -2,14 +2,32 @@ import { Link, useParams } from 'react-router-dom';
 import SideNav from '../components/SideNav';
 import { useT } from '../i18n/useT';
 import { getCareerPathNodeMeta, type CareerTrack } from './careerPathData';
+import { useSettingsStore } from '../store/settings';
 
 function CareerPathNode() {
   const t = useT();
+  const language = useSettingsStore((s) => s.language);
   const params = useParams();
   const track = (params.track as CareerTrack) || 'frontend';
   const nodeId = params.nodeId || '';
 
   const meta = getCareerPathNodeMeta(track, nodeId);
+  const text =
+    language === 'vi'
+      ? {
+          topicFallback: 'Chủ đề',
+          description:
+            'Trang này là điểm điều hướng cho node. Mình sẽ nối vào Courses / Practice thật khi bạn có danh sách lesson hoặc tài nguyên cụ thể.',
+          links: 'Liên kết',
+          noLinks: 'Chưa có link cho node này.',
+        }
+      : {
+          topicFallback: 'Topic',
+          description:
+            'This page is the landing point for a roadmap node. We can connect it to real Courses / Practice content once the lesson or resource list is available.',
+          links: 'Links',
+          noLinks: 'No links are available for this node yet.',
+        };
 
   return (
     <div className="min-h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)]">
@@ -65,16 +83,15 @@ function CareerPathNode() {
               {track.toUpperCase()}
             </div>
             <h1 className="mt-2 font-['Lexend'] text-3xl font-bold tracking-tight">
-              {meta?.title ?? 'Topic'}
+              {meta?.title ?? text.topicFallback}
             </h1>
             <p className="mt-2 text-sm text-[color:var(--cg-text-muted)]">
-              Trang này là điểm điều hướng cho node. Mình sẽ nối vào Courses /
-              Practice thật khi bạn có danh sách lesson/resource cụ thể.
+              {text.description}
             </p>
           </div>
 
           <div className="rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] backdrop-blur-md p-7">
-            <div className="text-sm font-semibold mb-4">Links</div>
+            <div className="text-sm font-semibold mb-4">{text.links}</div>
             {meta?.links?.length ? (
               <div className="space-y-3">
                 {meta.links.map((l) => (
@@ -94,7 +111,7 @@ function CareerPathNode() {
               </div>
             ) : (
               <div className="text-sm text-[color:var(--cg-text-muted)]">
-                Chưa có link cho node này.
+                {text.noLinks}
               </div>
             )}
           </div>

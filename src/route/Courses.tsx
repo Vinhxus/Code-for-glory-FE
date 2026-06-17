@@ -1,4 +1,5 @@
 import SideNav from '../components/SideNav';
+import { useSettingsStore } from '../store/settings';
 
 const COURSES = [
   {
@@ -40,6 +41,54 @@ const COURSES = [
 ];
 
 export default function Courses() {
+  const language = useSettingsStore((s) => s.language);
+  const isVi = language === 'vi';
+  const text = isVi
+    ? {
+        badge: 'Thư viện Arcane',
+        titleA: 'Làm chủ',
+        titleB: 'kỹ năng',
+        subtitle:
+          'Bắt đầu các quest học tập hoành tráng. Nhận XP, mở kỹ năng mới và chinh phục thế giới kỹ thuật phần mềm.',
+        search: 'Tìm quest...',
+        lessons: 'bài học',
+        pace: 'Tự học',
+        progress: 'Tiến độ',
+        continueQuest: 'Tiếp tục quest →',
+        startQuest: 'Bắt đầu quest',
+      }
+    : {
+        badge: 'Arcane Library',
+        titleA: 'Master the',
+        titleB: 'Arcane Arts',
+        subtitle:
+          'Embark on epic learning quests. Gain XP, unlock new abilities, and conquer the realms of software engineering.',
+        search: 'Search for quests...',
+        lessons: 'Lessons',
+        pace: 'Self-paced',
+        progress: 'Progress',
+        continueQuest: 'Continue Quest →',
+        startQuest: 'Start Quest',
+      };
+  const courses = isVi
+    ? COURSES.map((course) => ({
+        ...course,
+        title:
+          course.id === 1
+            ? 'Nền tảng Frontend'
+            : course.id === 2
+              ? 'React nâng cao'
+              : course.id === 3
+                ? 'Node.js Microservices'
+                : 'Web3 & Smart Contracts',
+        difficulty:
+          course.difficulty === 'Beginner'
+            ? 'Cơ bản'
+            : course.difficulty === 'Advanced'
+              ? 'Nâng cao'
+              : 'Chuyên sâu',
+      }))
+    : COURSES;
   return (
     <div className="min-h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)] selection:bg-[color:var(--cg-coral-a18)] select-none overflow-x-hidden">
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
@@ -62,14 +111,13 @@ export default function Courses() {
               <span className="material-symbols-outlined text-[16px] text-[#a78bfa]">
                 school
               </span>
-              Arcane Library
+              {text.badge}
             </div>
             <h1 className="font-['Lexend'] text-5xl font-bold tracking-tight md:text-6xl">
-              Master the <span className="gradient-text-cool">Arcane Arts</span>
+              {text.titleA} <span className="gradient-text-cool">{text.titleB}</span>
             </h1>
             <p className="mx-auto max-w-2xl text-base text-[color:var(--cg-text-muted)]">
-              Embark on epic learning quests. Gain XP, unlock new abilities, and
-              conquer the realms of software engineering.
+              {text.subtitle}
             </p>
           </div>
 
@@ -82,14 +130,14 @@ export default function Courses() {
             </div>
             <input
               type="text"
-              placeholder="Search for quests..."
+              placeholder={text.search}
               className="w-full rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] py-4 pl-12 pr-4 text-sm text-[color:var(--cg-text)] placeholder-[color:var(--cg-text-muted)] backdrop-blur-xl focus:border-[#a78bfa] focus:outline-none focus:ring-1 focus:ring-[#a78bfa] transition-all"
             />
           </div>
 
           {/* Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 animate-fade-in-up delay-200">
-            {COURSES.map((course) => (
+            {courses.map((course) => (
               <div
                 key={course.id}
                 className="glass-card p-6 card-hover group relative overflow-hidden"
@@ -127,19 +175,19 @@ export default function Courses() {
                     <span className="material-symbols-outlined text-[16px]">
                       menu_book
                     </span>{' '}
-                    {course.lessons} Lessons
+                    {course.lessons} {text.lessons}
                   </span>
                   <span className="flex items-center gap-1">
                     <span className="material-symbols-outlined text-[16px]">
                       schedule
                     </span>{' '}
-                    Self-paced
+                    {text.pace}
                   </span>
                 </div>
                 {course.progress > 0 ? (
                   <div className="space-y-2 relative z-10">
                     <div className="flex justify-between text-xs font-bold text-[color:var(--cg-text-muted)]">
-                      <span>Progress</span>
+                      <span>{text.progress}</span>
                       <span>{course.progress}%</span>
                     </div>
                     <div className="h-1.5 rounded-full bg-[color:var(--cg-container-a30)] overflow-hidden">
@@ -152,7 +200,7 @@ export default function Courses() {
                       />
                     </div>
                     <button className="w-full mt-4 rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] py-3 text-sm font-bold transition-all hover:bg-[color:var(--cg-container-a30)]">
-                      Continue Quest →
+                      {text.continueQuest}
                     </button>
                   </div>
                 ) : (
@@ -164,7 +212,7 @@ export default function Courses() {
                       border: `1px solid ${course.color}40`,
                     }}
                   >
-                    Start Quest
+                    {text.startQuest}
                   </button>
                 )}
               </div>

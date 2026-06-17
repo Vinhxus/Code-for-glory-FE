@@ -1,6 +1,64 @@
 import SideNav from '../components/SideNav';
+import { useSettingsStore } from '../store/settings';
 
 export default function Mobile() {
+  const language = useSettingsStore((s) => s.language);
+  const isVi = language === 'vi';
+  const text = isVi
+    ? {
+        titleA: 'Học Web Dev',
+        titleB: 'mọi lúc, mọi nơi.',
+        subtitle:
+          'Ứng dụng mobile của CodeForGlory giúp người mới luyện code khi đang di chuyển. Bạn có thể xem lại bài học, viết snippet và trao đổi với mentor ngay trên điện thoại.',
+        feature1: 'Bài học ngắn gọn',
+        feature1Desc:
+          'Phù hợp cho người mới. Học HTML, CSS và JS theo từng phần 5 phút khi đang di chuyển.',
+        feature2: 'Hỗ trợ cộng đồng tức thì',
+        feature2Desc:
+          'Nhận thông báo khi mentor trả lời trên forum để không bị kẹt quá lâu.',
+        morning: 'Chào buổi sáng',
+        coder: 'Coder!',
+        streak: 'Chuỗi ngày',
+        league: 'Hạng',
+        totalXp: 'Tổng XP',
+        nextLesson: 'Bài học tiếp theo',
+        nextLessonDesc: 'Làm chủ Higher Order Components và custom hooks.',
+        resumeLesson: 'Tiếp tục bài học',
+        dailyQuests: 'Quest hằng ngày',
+        viewAll: 'Xem tất cả',
+        quest1: 'Tạo một API Route',
+        quest1Desc: 'Hoàn thành 1 bài backend',
+        quest2: 'Style một nút phát sáng',
+        quest2Desc: 'Tailwind masterclass',
+        claim: 'NHẬN',
+      }
+    : {
+        titleA: 'Learn Web Dev',
+        titleB: 'Anywhere, Anytime.',
+        subtitle:
+          'The CodeForGlory mobile app makes it easy for beginners to practice coding on the go. Built with modern cross-platform tech, you can review lessons, write code snippets, and chat with mentors directly from your phone.',
+        feature1: 'Bite-sized Lessons',
+        feature1Desc:
+          'Perfect for beginners. Learn HTML, CSS, and JS in 5-minute interactive chunks while commuting.',
+        feature2: 'Instant Community Help',
+        feature2Desc:
+          'Get push notifications when mentors reply to your forum questions so you never stay stuck.',
+        morning: 'Good Morning',
+        coder: 'Coder!',
+        streak: 'Day Streak',
+        league: 'League',
+        totalXp: 'Total XP',
+        nextLesson: 'Next Lesson',
+        nextLessonDesc: 'Master High Order Components and custom hooks.',
+        resumeLesson: 'Resume Lesson',
+        dailyQuests: 'Daily Quests',
+        viewAll: 'View all',
+        quest1: 'Build an API Route',
+        quest1Desc: 'Complete 1 backend exercise',
+        quest2: 'Style a glowing button',
+        quest2Desc: 'Tailwind masterclass',
+        claim: 'CLAIM',
+      };
   return (
     <div className="min-h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)] selection:bg-[color:var(--cg-coral-a18)] overflow-x-hidden">
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
@@ -19,14 +77,11 @@ export default function Mobile() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-8">
               <h1 className="font-['Lexend'] text-5xl md:text-6xl font-bold tracking-tight leading-tight">
-                Learn Web Dev <br />{' '}
-                <span className="text-[#60a5fa]">Anywhere, Anytime.</span>
+                {text.titleA} <br />{' '}
+                <span className="text-[#60a5fa]">{text.titleB}</span>
               </h1>
               <p className="text-lg text-[color:var(--cg-text-muted)] leading-relaxed max-w-lg">
-                The CodeForGlory mobile app makes it easy for beginners to
-                practice coding on the go. Built with modern cross-platform
-                tech, you can review lessons, write code snippets, and chat with
-                mentors directly from your phone.
+                {text.subtitle}
               </p>
 
               <div className="space-y-4">
@@ -35,10 +90,9 @@ export default function Mobile() {
                     <span className="material-symbols-outlined">bolt</span>
                   </div>
                   <div>
-                    <h3 className="font-bold text-base">Bite-sized Lessons</h3>
+                    <h3 className="font-bold text-base">{text.feature1}</h3>
                     <p className="text-sm text-[color:var(--cg-text-muted)]">
-                      Perfect for beginners. Learn HTML, CSS, and JS in 5-minute
-                      interactive chunks while commuting.
+                      {text.feature1Desc}
                     </p>
                   </div>
                 </div>
@@ -50,11 +104,10 @@ export default function Mobile() {
                   </div>
                   <div>
                     <h3 className="font-bold text-base">
-                      Instant Community Help
+                      {text.feature2}
                     </h3>
                     <p className="text-sm text-[color:var(--cg-text-muted)]">
-                      Get push notifications when mentors reply to your forum
-                      questions so you never stay stuck.
+                      {text.feature2Desc}
                     </p>
                   </div>
                 </div>
@@ -139,10 +192,10 @@ export default function Mobile() {
                         />
                         <div>
                           <p className="text-[9px] text-gray-400 uppercase tracking-wider font-bold mb-0.5">
-                            Good Morning
+                            {text.morning}
                           </p>
                           <h2 className="font-['Lexend'] text-lg font-bold leading-none text-white">
-                            Coder!
+                            {text.coder}
                           </h2>
                         </div>
                       </div>
@@ -168,7 +221,7 @@ export default function Mobile() {
                           <span className="font-bold text-sm">12</span>
                         </div>
                         <span className="text-[9px] text-gray-500 font-medium uppercase mt-0.5">
-                          Day Streak
+                          {text.streak}
                         </span>
                       </div>
                       <div className="w-[1px] h-6 bg-[#2a2a2a]"></div>
@@ -183,7 +236,7 @@ export default function Mobile() {
                           <span className="font-bold text-sm">Gold</span>
                         </div>
                         <span className="text-[9px] text-gray-500 font-medium uppercase mt-0.5">
-                          League
+                          {text.league}
                         </span>
                       </div>
                       <div className="w-[1px] h-6 bg-[#2a2a2a]"></div>
@@ -198,7 +251,7 @@ export default function Mobile() {
                           <span className="font-bold text-sm">4.2k</span>
                         </div>
                         <span className="text-[9px] text-gray-500 font-medium uppercase mt-0.5">
-                          Total XP
+                          {text.totalXp}
                         </span>
                       </div>
                     </div>
@@ -208,7 +261,7 @@ export default function Mobile() {
                       <div className="absolute -right-8 -top-8 w-28 h-28 bg-[#60a5fa] opacity-20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
                       <div className="flex justify-between items-start mb-3 relative z-10">
                         <div className="text-[9px] font-bold uppercase tracking-widest text-[#60a5fa] bg-[#60a5fa]/10 px-2 py-1 rounded-md border border-[#60a5fa]/20">
-                          Next Lesson
+                          {text.nextLesson}
                         </div>
                         <span className="text-[11px] font-bold text-white/60">
                           75%
@@ -218,7 +271,7 @@ export default function Mobile() {
                         Advanced React Patterns
                       </h3>
                       <p className="text-[11px] text-gray-400 mb-4 relative z-10 line-clamp-1">
-                        Master High Order Components and custom hooks.
+                        {text.nextLessonDesc}
                       </p>
 
                       <div className="w-full h-1.5 bg-[#0a081a] rounded-full mb-4 overflow-hidden relative z-10 border border-[#2a2a2a]">
@@ -226,7 +279,7 @@ export default function Mobile() {
                       </div>
 
                       <button className="w-full py-2.5 bg-white text-[#120f2e] rounded-xl text-xs font-bold shadow-md hover:scale-[1.02] transition-transform flex justify-center items-center gap-2 relative z-10">
-                        Resume Lesson
+                        {text.resumeLesson}
                         <span className="material-symbols-outlined text-[16px] fill-current">
                           play_circle
                         </span>
@@ -237,10 +290,10 @@ export default function Mobile() {
                     <div className="space-y-3 pb-2">
                       <div className="flex justify-between items-end">
                         <h3 className="font-['Lexend'] font-bold text-sm text-white">
-                          Daily Quests
+                          {text.dailyQuests}
                         </h3>
                         <span className="text-[9px] text-[#60a5fa] font-bold uppercase tracking-wider cursor-pointer hover:text-white transition-colors">
-                          View all
+                          {text.viewAll}
                         </span>
                       </div>
                       <div className="space-y-2.5">
@@ -253,10 +306,10 @@ export default function Mobile() {
                             </div>
                             <div>
                               <span className="text-[12px] font-bold block mb-0.5 text-white">
-                                Build an API Route
+                                {text.quest1}
                               </span>
                               <span className="text-[9px] text-gray-500 block">
-                                Complete 1 backend exercise
+                                {text.quest1Desc}
                               </span>
                             </div>
                           </div>
@@ -279,15 +332,15 @@ export default function Mobile() {
                             </div>
                             <div>
                               <span className="text-[12px] font-bold block mb-0.5 text-white">
-                                Style a glowing button
+                                {text.quest2}
                               </span>
                               <span className="text-[9px] text-[#a78bfa]/70 block">
-                                Tailwind masterclass
+                                {text.quest2Desc}
                               </span>
                             </div>
                           </div>
                           <button className="text-[9px] font-bold text-white px-2.5 py-1 bg-[#a78bfa] rounded-md shadow-[0_0_8px_rgba(167,139,250,0.5)] hover:scale-105 transition-transform">
-                            CLAIM
+                            {text.claim}
                           </button>
                         </div>
                       </div>

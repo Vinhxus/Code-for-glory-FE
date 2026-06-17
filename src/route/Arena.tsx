@@ -1,4 +1,5 @@
 import SideNav from '../components/SideNav';
+import { useSettingsStore } from '../store/settings';
 
 const LIVE_MATCHES = [
   {
@@ -19,6 +20,31 @@ const LIVE_MATCHES = [
 ];
 
 export default function Arena() {
+  const language = useSettingsStore((s) => s.language);
+  const isVi = language === 'vi';
+  const text = isVi
+    ? {
+        title: 'Đấu Trường',
+        subtitle:
+          'Chứng minh bản lĩnh trong những trận đấu code thời gian thực. Cược XP và leo bảng xếp hạng toàn cầu.',
+        findMatch: 'Tìm trận',
+        spectate: 'Xem trực tiếp',
+        matchesRunning: 'trận đang diễn ra',
+        challenger: 'Thách đấu',
+        defender: 'Phòng thủ',
+        top: 'Đấu sĩ hàng đầu',
+      }
+    : {
+        title: 'The Colosseum',
+        subtitle:
+          'Prove your worth in real-time coding battles. Wager your XP and climb the global rankings.',
+        findMatch: 'Find Match',
+        spectate: 'Live Spectate',
+        matchesRunning: 'matches running',
+        challenger: 'Challenger',
+        defender: 'Defender',
+        top: 'Top Gladiators',
+      };
   return (
     <div className="min-h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)] selection:bg-[color:var(--cg-coral-a18)] select-none overflow-x-hidden">
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
@@ -37,14 +63,13 @@ export default function Arena() {
           {/* Hero */}
           <div className="text-center space-y-6 animate-fade-in-up">
             <h1 className="font-['Lexend'] text-6xl font-black tracking-tighter uppercase text-transparent bg-clip-text bg-gradient-to-br from-[#ff7e5f] to-[#fbbf24] animate-pulse-glow">
-              The Colosseum
+              {text.title}
             </h1>
             <p className="mx-auto max-w-xl text-lg text-[color:var(--cg-text-muted)]">
-              Prove your worth in real-time coding battles. Wager your XP and
-              climb the global rankings.
+              {text.subtitle}
             </p>
             <button className="neon-btn px-10 py-4 text-lg font-black tracking-widest uppercase mt-4">
-              Find Match
+              {text.findMatch}
             </button>
           </div>
 
@@ -55,11 +80,11 @@ export default function Arena() {
                   <span className="material-symbols-outlined text-[#ff7e5f]">
                     sensors
                   </span>{' '}
-                  Live Spectate
+                  {text.spectate}
                 </h2>
                 <div className="flex items-center gap-2 text-xs font-bold text-[#4ade80]">
                   <div className="h-2 w-2 rounded-full bg-[#4ade80] animate-status-pulse" />{' '}
-                  124 matches running
+                  {`124 ${text.matchesRunning}`}
                 </div>
               </div>
               <div className="space-y-4">
@@ -74,7 +99,7 @@ export default function Arena() {
                           {match.p1}
                         </div>
                         <div className="text-[10px] text-[color:var(--cg-text-muted)] uppercase tracking-wider">
-                          Challenger
+                          {text.challenger}
                         </div>
                       </div>
                       <div className="font-black italic text-[#ff7e5f] text-xl">
@@ -85,7 +110,7 @@ export default function Arena() {
                           {match.p2}
                         </div>
                         <div className="text-[10px] text-[color:var(--cg-text-muted)] uppercase tracking-wider">
-                          Defender
+                          {text.defender}
                         </div>
                       </div>
                     </div>
@@ -105,7 +130,7 @@ export default function Arena() {
                 <span className="material-symbols-outlined text-[#fbbf24]">
                   emoji_events
                 </span>{' '}
-                Top Gladiators
+                {text.top}
               </h2>
               <div className="glass-card p-5 space-y-4">
                 {[1, 2, 3, 4, 5].map((i) => (

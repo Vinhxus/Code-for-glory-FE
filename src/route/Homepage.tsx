@@ -311,7 +311,7 @@ function Homepage() {
 
           {/* Roadmap Preview */}
           <Link
-            to="/career-path"
+            to="/learning-path"
             id="roadmap"
             className="group block overflow-hidden rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] backdrop-blur-md p-8 relative transition-all duration-300 hover:border-[#FF7E5F]/40 hover:shadow-[0_0_60px_rgba(255,126,95,0.12)] cursor-pointer animate-fade-in-up"
           >

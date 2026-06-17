@@ -49,6 +49,18 @@ function SideNav() {
   const t = useT();
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
+  const isVi = t('nav.map') === 'Bản đồ';
+  const text = isVi
+    ? {
+        logout: 'Đăng xuất',
+        player: 'Người chơi',
+        novice: 'Tân binh',
+      }
+    : {
+        logout: 'Log out',
+        player: 'Player',
+        novice: 'Novice',
+      };
 
   const { logout } = useAuth();
   const handleLogout = async () => {
@@ -243,7 +255,7 @@ function SideNav() {
               <span className="material-symbols-outlined text-[18px]">
                 logout
               </span>
-              <span className="whitespace-nowrap">Log out</span>
+              <span className="whitespace-nowrap">{text.logout}</span>
             </button>
           </div>
         )}
@@ -312,10 +324,10 @@ function SideNav() {
             }}
           >
             <div className="text-[12px] font-bold text-[color:var(--cg-text)] whitespace-nowrap">
-              Player
+              {text.player}
             </div>
             <div className="text-[10px] text-[color:var(--cg-coral)] font-semibold whitespace-nowrap">
-              Lv.1 Novice
+              {`Lv.1 ${text.novice}`}
             </div>
           </div>
         </div>

@@ -797,6 +797,44 @@ function OnboardingAssessment() {
   const logoSrc = '/component_2_2x.png';
   const t = useT();
   const language = useSettingsStore((s) => s.language);
+  const ui =
+    language === 'vi'
+      ? {
+          skillAssessment: 'ĐÁNH GIÁ KỸ NĂNG',
+          step: 'BƯỚC',
+          skipToPractice: 'Bỏ qua tới Practice',
+          answerLevel: 'Hãy trả lời mức hiện tại. Qua được thì mở mức kế tiếp.',
+          frontendMiniCode: 'FRONTEND · MINI CODE',
+          backendMiniCode: 'BACKEND · MINI CODE',
+          results: 'KẾT QUẢ',
+          frontendScore: 'ĐIỂM FRONTEND',
+          backendScore: 'ĐIỂM BACKEND',
+          missionBrief: 'TÓM TẮT NHIỆM VỤ',
+          preview: 'XEM TRƯỚC',
+          tracks: 'Track',
+          frontendMax: 'Mức Frontend tối đa',
+          backendMax: 'Mức Backend tối đa',
+          autosave: 'Tự lưu',
+          on: 'BẬT',
+        }
+      : {
+          skillAssessment: 'SKILL ASSESSMENT',
+          step: 'STEP',
+          skipToPractice: 'Skip to Practice',
+          answerLevel: 'Answer the current level. Pass to unlock the next.',
+          frontendMiniCode: 'FRONTEND · MINI CODE',
+          backendMiniCode: 'BACKEND · MINI CODE',
+          results: 'RESULTS',
+          frontendScore: 'FRONTEND SCORE',
+          backendScore: 'BACKEND SCORE',
+          missionBrief: 'MISSION BRIEF',
+          preview: 'PREVIEW',
+          tracks: 'Tracks',
+          frontendMax: 'Frontend max',
+          backendMax: 'Backend max',
+          autosave: 'Autosave',
+          on: 'ON',
+        };
 
   const survey = useMemo(() => loadSurvey(), []);
   const tracks = survey?.tracks ?? [];
@@ -1165,9 +1203,9 @@ function OnboardingAssessment() {
 
           <div className="flex w-full max-w-sm flex-col gap-2">
             <div className="flex items-center justify-between text-[11px] font-semibold tracking-[0.28em] text-[rgba(199,201,255,0.55)]">
-              <span>SKILL ASSESSMENT</span>
+              <span>{ui.skillAssessment}</span>
               <span>
-                STEP {stepIndex + 1}/{steps.length}
+                {ui.step} {stepIndex + 1}/{steps.length}
               </span>
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-[color:var(--cg-container-a16)] ring-1 ring-[rgba(255,255,255,0.08)]">
@@ -1184,7 +1222,7 @@ function OnboardingAssessment() {
               className="text-xs font-semibold text-[color:var(--cg-text-muted)] transition hover:text-[color:var(--cg-text)]"
               onClick={() => navigate('/practice')}
             >
-              Skip to Practice
+              {ui.skipToPractice}
             </button>
           </div>
         </div>
@@ -1212,7 +1250,7 @@ function OnboardingAssessment() {
                     {t('assess.chooseMax')}
                   </h2>
                   <p className="mt-2 text-xs leading-5 text-[color:var(--cg-text-muted)]">
-                    Answer the current level. Pass to unlock the next.
+                    {ui.answerLevel}
                   </p>
                   <div className="mt-5 flex flex-wrap items-center gap-2">
                     {(['easy', 'medium', 'hard'] as const).map((d) => (
@@ -1254,7 +1292,7 @@ function OnboardingAssessment() {
                     {t('assess.chooseMax')}
                   </h2>
                   <p className="mt-2 text-xs leading-5 text-[color:var(--cg-text-muted)]">
-                    Answer the current level. Pass to unlock the next.
+                    {ui.answerLevel}
                   </p>
                   <div className="mt-5 flex flex-wrap items-center gap-2">
                     {(['easy', 'medium', 'hard'] as const).map((d) => (
@@ -1303,7 +1341,7 @@ function OnboardingAssessment() {
                   <div className="rounded-3xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a22)] p-7 shadow-[0_40px_160px_rgba(0,0,0,0.30)] backdrop-blur">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div className="text-[11px] font-semibold tracking-[0.28em] text-[rgba(199,201,255,0.55)]">
-                        FRONTEND · MINI CODE
+                        {ui.frontendMiniCode}
                       </div>
                       <div className="flex items-center gap-2">
                         {(['easy', 'medium', 'hard'] as const).map((d) => (
@@ -1402,7 +1440,7 @@ function OnboardingAssessment() {
                   <div className="rounded-3xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a22)] p-7 shadow-[0_40px_160px_rgba(0,0,0,0.30)] backdrop-blur">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div className="text-[11px] font-semibold tracking-[0.28em] text-[rgba(199,201,255,0.55)]">
-                        BACKEND · MINI CODE
+                        {ui.backendMiniCode}
                       </div>
                       <div className="flex items-center gap-2">
                         {(['easy', 'medium', 'hard'] as const).map((d) => (
@@ -1495,7 +1533,7 @@ function OnboardingAssessment() {
               <div className="space-y-6">
                 <div className="rounded-3xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a22)] p-8 shadow-[0_40px_160px_rgba(0,0,0,0.30)] backdrop-blur">
                   <div className="text-[11px] font-semibold tracking-[0.28em] text-[rgba(199,201,255,0.55)]">
-                    RESULTS
+                    {ui.results}
                   </div>
                   <h2 className="mt-3 text-2xl font-semibold tracking-tight">
                     {t('assess.results.title')}
@@ -1507,7 +1545,7 @@ function OnboardingAssessment() {
                   <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-bg-a55)] p-5">
                       <div className="text-[11px] font-semibold tracking-[0.28em] text-[rgba(199,201,255,0.55)]">
-                        FRONTEND SCORE
+                        {ui.frontendScore}
                       </div>
                       <div className="mt-3 text-2xl font-semibold">
                         {scoreFrontend
@@ -1526,7 +1564,7 @@ function OnboardingAssessment() {
 
                     <div className="rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-bg-a55)] p-5">
                       <div className="text-[11px] font-semibold tracking-[0.28em] text-[rgba(199,201,255,0.55)]">
-                        BACKEND SCORE
+                        {ui.backendScore}
                       </div>
                       <div className="mt-3 text-2xl font-semibold">
                         {scoreBackend
@@ -1574,7 +1612,7 @@ function OnboardingAssessment() {
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <div className="text-[11px] font-semibold tracking-[0.28em] text-[rgba(199,201,255,0.55)]">
-                        MISSION BRIEF
+                        {ui.missionBrief}
                       </div>
                       <h3 className="mt-2 text-lg font-semibold tracking-tight">
                         {missionBrief.title}
@@ -1598,17 +1636,17 @@ function OnboardingAssessment() {
 
             <div className="rounded-3xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] p-6 backdrop-blur">
               <div className="text-[11px] font-semibold tracking-[0.28em] text-[rgba(199,201,255,0.55)]">
-                PREVIEW
+                {ui.preview}
               </div>
               <div className="mt-4 space-y-3 text-xs text-[color:var(--cg-text-muted)]">
                 <div className="flex items-center justify-between gap-3">
-                  <span>Tracks</span>
+                  <span>{ui.tracks}</span>
                   <span className="font-semibold text-[color:var(--cg-text)]">
                     {tracks.length ? tracks.join(', ') : '—'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-3">
-                  <span>Frontend max</span>
+                  <span>{ui.frontendMax}</span>
                   <span className="font-semibold text-[color:var(--cg-text)]">
                     {maxDifficultyFrontend
                       ? formatDifficulty(maxDifficultyFrontend)
@@ -1616,7 +1654,7 @@ function OnboardingAssessment() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-3">
-                  <span>Backend max</span>
+                  <span>{ui.backendMax}</span>
                   <span className="font-semibold text-[color:var(--cg-text)]">
                     {maxDifficultyBackend
                       ? formatDifficulty(maxDifficultyBackend)
@@ -1624,9 +1662,9 @@ function OnboardingAssessment() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-3">
-                  <span>Autosave</span>
+                  <span>{ui.autosave}</span>
                   <span className="font-semibold text-[color:var(--cg-text)]">
-                    ON
+                    {ui.on}
                   </span>
                 </div>
               </div>

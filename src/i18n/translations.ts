@@ -38,6 +38,8 @@ export type I18nKey =
   | 'home.footer.terms'
   | 'home.footer.privacy'
   | 'home.footer.support'
+  | 'common.backToMap'
+  | 'summary.primaryTrack'
   // assessment
   | 'assess.title'
   | 'assess.subtitle'
@@ -70,7 +72,19 @@ export type I18nKey =
   | 'roadmap.stage.advanced'
   | 'roadmap.tooltip.locked'
   | 'roadmap.estCompletion'
-  | 'roadmap.welcome.empty';
+  | 'roadmap.welcome.empty'
+  | 'survey.profileReady.title'
+  | 'survey.profileReady.body.part1'
+  | 'survey.profileReady.startJourney'
+  | 'footer.tagline'
+  | 'footer.platform'
+  | 'footer.community'
+  | 'footer.courses'
+  | 'footer.arena'
+  | 'footer.pricing'
+  | 'footer.discord'
+  | 'footer.events'
+  | 'footer.guilds';
 
 export const translations: Record<I18nKey, { en: string; vi: string }> = {
   'common.skip': { en: 'Skip', vi: 'Bỏ qua' },
@@ -92,7 +106,10 @@ export const translations: Record<I18nKey, { en: string; vi: string }> = {
   'home.nav.quests': { en: 'Quests', vi: 'Nhiệm vụ' },
   'home.nav.leaderboard': { en: 'Leaderboard', vi: 'Bảng xếp hạng' },
   'home.nav.shop': { en: 'Shop', vi: 'Cửa hàng' },
-  'home.hero.tag': { en: '⚡ SEASON 1: THE BINARY FRONTIER', vi: '⚡ MÙA 1: BIÊN GIỚI NHỊ PHÂN' },
+  'home.hero.tag': {
+    en: '⚡ SEASON 1: THE BINARY FRONTIER',
+    vi: '⚡ MÙA 1: BIÊN GIỚI NHỊ PHÂN',
+  },
   'home.hero.titleA': { en: 'Master Code Through', vi: 'Làm chủ code qua' },
   'home.hero.titleB': { en: 'Epic', vi: 'Những' },
   'home.hero.subtitle': {
@@ -123,35 +140,76 @@ export const translations: Record<I18nKey, { en: string; vi: string }> = {
   'home.footer.terms': { en: 'Terms', vi: 'Điều khoản' },
   'home.footer.privacy': { en: 'Privacy', vi: 'Bảo mật' },
   'home.footer.support': { en: 'Support', vi: 'Hỗ trợ' },
+  'common.backToMap': { en: 'Back to Map', vi: 'Quay lại Bản đồ' },
+  'summary.primaryTrack': { en: 'PRIMARY TRACK', vi: 'CHẶNG CHÍNH' },
 
-  'assess.title': { en: 'Skill Assessment (Frontend/Backend)', vi: 'Khảo sát kỹ năng (Frontend/Backend)' },
+  'assess.title': {
+    en: 'Skill Assessment (Frontend/Backend)',
+    vi: 'Khảo sát kỹ năng (Frontend/Backend)',
+  },
   'assess.subtitle': {
     en: 'Multiple-choice + mini coding tasks at Easy / Medium / Hard to estimate your level.',
     vi: 'Trắc nghiệm + mini bài code theo Easy / Medium / Hard để ước lượng trình độ.',
   },
-  'assess.frontend.max': { en: 'FRONTEND · CHOOSE YOUR MAX DIFFICULTY', vi: 'FRONTEND · CHỌN ĐỘ KHÓ CAO NHẤT' },
-  'assess.backend.max': { en: 'BACKEND · CHOOSE YOUR MAX DIFFICULTY', vi: 'BACKEND · CHỌN ĐỘ KHÓ CAO NHẤT' },
-  'assess.chooseMax': { en: 'How far do you want to go?', vi: 'Bạn muốn làm tới mức nào?' },
-  'assess.chooseBeforeAnswer': { en: 'Choose a difficulty before answering.', vi: 'Chọn độ khó trước khi trả lời.' },
-  'assess.code.noTracksTitle': { en: "You didn't pick Frontend/Backend in the previous survey.", vi: 'Bạn chưa chọn Frontend/Backend ở survey trước.' },
-  'assess.code.noTracksBody': { en: 'You can still press Next to enter Practice.', vi: 'Bạn vẫn có thể bấm Next để vào Practice.' },
+  'assess.frontend.max': {
+    en: 'FRONTEND · CHOOSE YOUR MAX DIFFICULTY',
+    vi: 'FRONTEND · CHỌN ĐỘ KHÓ CAO NHẤT',
+  },
+  'assess.backend.max': {
+    en: 'BACKEND · CHOOSE YOUR MAX DIFFICULTY',
+    vi: 'BACKEND · CHỌN ĐỘ KHÓ CAO NHẤT',
+  },
+  'assess.chooseMax': {
+    en: 'How far do you want to go?',
+    vi: 'Bạn muốn làm tới mức nào?',
+  },
+  'assess.chooseBeforeAnswer': {
+    en: 'Choose a difficulty before answering.',
+    vi: 'Chọn độ khó trước khi trả lời.',
+  },
+  'assess.code.noTracksTitle': {
+    en: "You didn't pick Frontend/Backend in the previous survey.",
+    vi: 'Bạn chưa chọn Frontend/Backend ở survey trước.',
+  },
+  'assess.code.noTracksBody': {
+    en: 'You can still press Next to enter Practice.',
+    vi: 'Bạn vẫn có thể bấm Next để vào Practice.',
+  },
   'assess.correct': { en: '✓ Correct', vi: '✓ Đúng' },
   'assess.notQuite': { en: '✕ Not quite', vi: '✕ Chưa đúng' },
-  'assess.confidence': { en: 'Confidence (1 low → 5 high)', vi: 'Độ tự tin (1 thấp → 5 cao)' },
-  'assess.code.placeholder': { en: '// Write your code here…', vi: '// Viết code ở đây…' },
-  'assess.pseudo.placeholder': { en: '// Write pseudo-code here…', vi: '// Viết pseudo-code ở đây…' },
+  'assess.confidence': {
+    en: 'Confidence (1 low → 5 high)',
+    vi: 'Độ tự tin (1 thấp → 5 cao)',
+  },
+  'assess.code.placeholder': {
+    en: '// Write your code here…',
+    vi: '// Viết code ở đây…',
+  },
+  'assess.pseudo.placeholder': {
+    en: '// Write pseudo-code here…',
+    vi: '// Viết pseudo-code ở đây…',
+  },
   'assess.tip.notAutograded': {
     en: 'Tip: this is not auto-graded. The goal is to save it so you (or a mentor) can review your thinking.',
     vi: 'Tip: bài này không chấm tự động. Mục tiêu là lưu lại để bạn (hoặc mentor) review cách bạn tư duy.',
   },
-  'assess.results.title': { en: 'Skill assessment completed', vi: 'Hoàn thành khảo sát kỹ năng' },
+  'assess.results.title': {
+    en: 'Skill assessment completed',
+    vi: 'Hoàn thành khảo sát kỹ năng',
+  },
   'assess.results.body': {
     en: 'Results are saved to localStorage for personalization and Practice.',
     vi: 'Kết quả được lưu vào localStorage để cá nhân hoá và dùng cho Practice.',
   },
   'assess.results.selectedLevel': { en: 'Selected level:', vi: 'Mức đã chọn:' },
-  'assess.results.enterPractice': { en: 'Enter Practice Workspace', vi: 'Vào Practice Workspace' },
-  'assess.results.viewSummary': { en: 'View Quest Map Summary', vi: 'Xem Quest Map Summary' },
+  'assess.results.enterPractice': {
+    en: 'Enter Practice Workspace',
+    vi: 'Vào Practice Workspace',
+  },
+  'assess.results.viewSummary': {
+    en: 'View Quest Map Summary',
+    vi: 'Xem Quest Map Summary',
+  },
 
   // roadmap
   'roadmap.topics': { en: 'Topics', vi: 'Chủ đề' },
@@ -162,9 +220,47 @@ export const translations: Record<I18nKey, { en: string; vi: string }> = {
   'roadmap.frontend': { en: 'Front-end Roadmap', vi: 'Lộ trình Front-end' },
   'roadmap.backend': { en: 'Back-end Roadmap', vi: 'Lộ trình Back-end' },
   'roadmap.stage.beginner': { en: '🌱 Beginner Stage', vi: '🌱 Chặng Cơ bản' },
-  'roadmap.stage.intermediate': { en: '🚀 Intermediate Stage', vi: '🚀 Chặng Trung cấp' },
+  'roadmap.stage.intermediate': {
+    en: '🚀 Intermediate Stage',
+    vi: '🚀 Chặng Trung cấp',
+  },
   'roadmap.stage.advanced': { en: '🔥 Advanced Stage', vi: '🔥 Chặng Cao cấp' },
-  'roadmap.tooltip.locked': { en: 'Finish previous milestone to unlock', vi: 'Hoàn thành cột mốc trước để mở khóa' },
-  'roadmap.estCompletion': { en: 'Est. Completion:', vi: 'Dự kiến hoàn thành:' },
-  'roadmap.welcome.empty': { en: 'Select Frontend or Backend to explore the detailed learning roadmap.', vi: 'Chọn Frontend hoặc Backend để khám phá roadmap học tập chi tiết.' },
+  'roadmap.tooltip.locked': {
+    en: 'Finish previous milestone to unlock',
+    vi: 'Hoàn thành cột mốc trước để mở khóa',
+  },
+  'roadmap.estCompletion': {
+    en: 'Est. Completion:',
+    vi: 'Dự kiến hoàn thành:',
+  },
+  'roadmap.welcome.empty': {
+    en: 'Select Frontend or Backend to explore the detailed learning roadmap.',
+    vi: 'Chọn Frontend hoặc Backend để khám phá roadmap học tập chi tiết.',
+  },
+  // survey / profile ready
+  'survey.profileReady.title': {
+    en: 'Your Profile is Ready',
+    vi: 'Hồ sơ của bạn đã sẵn sàng',
+  },
+  'survey.profileReady.body.part1': {
+    en: 'We detect you are a',
+    vi: 'Chúng tôi nhận thấy bạn là một',
+  },
+  'survey.profileReady.startJourney': {
+    en: 'Start your journey',
+    vi: 'Bắt đầu hành trình',
+  },
+  // footer
+  'footer.tagline': {
+    en: 'Gamifying the future of software engineering.',
+    vi: 'Gamify tương lai của kỹ thuật phần mềm.',
+  },
+  'footer.platform': { en: 'Platform', vi: 'Nền tảng' },
+  'footer.community': { en: 'Community', vi: 'Cộng đồng' },
+  'footer.courses': { en: 'Courses', vi: 'Khoá học' },
+  'footer.arena': { en: 'Arena', vi: 'Đấu trường' },
+  'footer.pricing': { en: 'Pricing', vi: 'Giá' },
+  'footer.discord': { en: 'Discord', vi: 'Discord' },
+  'footer.events': { en: 'Events', vi: 'Sự kiện' },
+  'footer.guilds': { en: 'Guilds', vi: 'Guilds' },
 };

@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Homepage from './route/Homepage';
+import LearningPath from './route/LearningPath';
 import Survey from './route/Survey';
 import Placeholder from './route/Placeholder';
 import OnboardingQuiz from './route/OnboardingQuiz';
@@ -27,10 +28,7 @@ function App() {
       <Route path="/survey" element={<Survey />} />
       <Route path="/career-path/:track/:nodeId" element={<CareerPathNode />} />
       <Route path="/career-path" element={<CareerPath />} />
-      <Route
-        path="/learning-path"
-        element={<Navigate to="/career-path" replace />}
-      />
+      <Route path="/learning-path" element={<LearningPath />} />
       <Route path="/onboarding/quiz" element={<OnboardingQuiz />} />
       <Route path="/onboarding/assessment" element={<OnboardingAssessment />} />
       <Route path="/onboarding/summary" element={<OnboardingSummary />} />
