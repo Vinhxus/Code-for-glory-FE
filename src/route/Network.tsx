@@ -1,6 +1,40 @@
 import SideNav from '../components/SideNav';
+import { useSettingsStore } from '../store/settings';
 
 export default function Network() {
+  const language = useSettingsStore((s) => s.language);
+  const isVi = language === 'vi';
+  const text = isVi
+    ? {
+        titleA: 'Mạng lưới',
+        titleB: 'người học',
+        subtitle:
+          'Bạn không học một mình. Hãy tham gia hệ sinh thái toàn cầu nơi người mới và người có kinh nghiệm cùng luyện tập, review code và phát triển.',
+        countries: '120+ quốc gia',
+        countriesDesc:
+          'Kết nối với người học trên khắp thế giới, chia sẻ góc nhìn và văn hoá code đa dạng.',
+        students: '500K+ học viên',
+        studentsDesc:
+          'Một cộng đồng lớn, năng động với rất nhiều người mới đang bắt đầu hành trình coding như bạn.',
+        answers: 'Hàng triệu câu trả lời',
+        answersDesc:
+          'Không bị kẹt quá lâu. Diễn đàn và mạng lưới Q&A luôn sẵn sàng với lời giải chi tiết cho lỗi web dev.',
+      }
+    : {
+        titleA: 'Global',
+        titleB: 'Learner Network',
+        subtitle:
+          'You are not learning alone. Join a worldwide ecosystem of beginners and experts helping each other master web development. Our global network connects you with peers to practice, review code, and grow together.',
+        countries: '120+ Countries',
+        countriesDesc:
+          'Connect with learners from all over the world, sharing diverse perspectives and coding cultures.',
+        students: '500K+ Students',
+        studentsDesc:
+          'A massive, active community of beginners starting their coding journey just like you.',
+        answers: 'Millions of Answers',
+        answersDesc:
+          'Never get stuck for long. Our active forum and Q&A network provides detailed solutions for every web dev bug.',
+      };
   return (
     <div className="min-h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)] selection:bg-[color:var(--cg-coral-a18)] overflow-x-hidden">
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
@@ -17,14 +51,10 @@ export default function Network() {
         <main className="max-w-7xl mx-auto px-8 py-16 animate-fade-in-up space-y-16">
           <div className="text-center space-y-6 max-w-3xl mx-auto">
             <h1 className="font-['Lexend'] text-5xl font-bold tracking-tight">
-              Global{' '}
-              <span className="gradient-text-green">Learner Network</span>
+              {text.titleA} <span className="gradient-text-green">{text.titleB}</span>
             </h1>
             <p className="text-lg text-[color:var(--cg-text-muted)] leading-relaxed">
-              You are not learning alone. Join a worldwide ecosystem of
-              beginners and experts helping each other master web development.
-              Our global network connects you with peers to practice, review
-              code, and grow together.
+              {text.subtitle}
             </p>
           </div>
 
@@ -35,10 +65,9 @@ export default function Network() {
                   public
                 </span>
               </div>
-              <h3 className="text-2xl font-bold">120+ Countries</h3>
+              <h3 className="text-2xl font-bold">{text.countries}</h3>
               <p className="text-sm text-[color:var(--cg-text-muted)]">
-                Connect with learners from all over the world, sharing diverse
-                perspectives and coding cultures.
+                {text.countriesDesc}
               </p>
             </div>
             <div className="glass-card p-8 text-center space-y-4 relative overflow-hidden transform md:-translate-y-4 shadow-2xl border-[#ff7e5f]/30">
@@ -49,11 +78,10 @@ export default function Network() {
                 </span>
               </div>
               <h3 className="text-2xl font-bold text-[#ff7e5f]">
-                500K+ Students
+                {text.students}
               </h3>
               <p className="text-sm text-[color:var(--cg-text-muted)]">
-                A massive, active community of beginners starting their coding
-                journey just like you.
+                {text.studentsDesc}
               </p>
             </div>
             <div className="glass-card p-8 text-center space-y-4">
@@ -62,10 +90,9 @@ export default function Network() {
                   forum
                 </span>
               </div>
-              <h3 className="text-2xl font-bold">Millions of Answers</h3>
+              <h3 className="text-2xl font-bold">{text.answers}</h3>
               <p className="text-sm text-[color:var(--cg-text-muted)]">
-                Never get stuck for long. Our active forum and Q&A network
-                provides detailed solutions for every web dev bug.
+                {text.answersDesc}
               </p>
             </div>
           </div>

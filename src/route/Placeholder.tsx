@@ -1,16 +1,55 @@
 import SideNav from '../components/SideNav';
 import { useT } from '../i18n/useT';
 import { Link } from 'react-router-dom';
+import { useSettingsStore } from '../store/settings';
 
 type PlaceholderProps = { title: string };
 
-const FEATURES = [
-  { icon: 'swords', label: 'Battle Arena', color: '#a78bfa', desc: 'Real-time coding battles against other players' },
-  { icon: 'history', label: 'History', color: '#60a5fa', desc: 'Track your progress and review past submissions' },
-];
-
 function Placeholder({ title }: PlaceholderProps) {
   const t = useT();
+  const language = useSettingsStore((s) => s.language);
+  const localizedTitle =
+    language === 'vi'
+      ? title === 'Battle'
+        ? 'Đấu'
+        : title === 'History'
+          ? 'Lịch sử'
+          : title
+      : title;
+  const features =
+    language === 'vi'
+      ? [
+          {
+            icon: 'swords',
+            label: 'Đấu trường',
+            color: '#a78bfa',
+            desc: 'Những trận đấu code thời gian thực với người chơi khác',
+          },
+          {
+            icon: 'history',
+            label: 'Lịch sử',
+            color: '#60a5fa',
+            desc: 'Theo dõi tiến độ và xem lại các bài nộp trước đó',
+          },
+        ]
+      : [
+          {
+            icon: 'swords',
+            label: 'Battle Arena',
+            color: '#a78bfa',
+            desc: 'Real-time coding battles against other players',
+          },
+          {
+            icon: 'history',
+            label: 'History',
+            color: '#60a5fa',
+            desc: 'Track your progress and review past submissions',
+          },
+        ];
+  const cta =
+    language === 'vi'
+      ? { backHome: 'Về trang chủ', tryPractice: 'Thử Practice' }
+      : { backHome: 'Back to Home', tryPractice: 'Try Practice' };
   return (
     <div className="min-h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)]">
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
@@ -35,7 +74,7 @@ function Placeholder({ title }: PlaceholderProps) {
 
           {/* Title */}
           <h1 className="font-['Lexend'] text-5xl font-bold tracking-tight mb-4 animate-fade-in-up delay-150">
-            <span className="gradient-text">{title}</span>
+            <span className="gradient-text">{localizedTitle}</span>
           </h1>
           <p className="max-w-md text-base leading-relaxed text-[color:var(--cg-text-muted)] mb-10 animate-fade-in-up delay-200">
             {t('common.notImplemented')}
@@ -43,7 +82,7 @@ function Placeholder({ title }: PlaceholderProps) {
 
           {/* Feature cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-xl mb-10 animate-fade-in-up delay-300">
-            {FEATURES.map((f) => (
+            {features.map((f) => (
               <div key={f.label} className="glass-card p-5 text-left">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="h-9 w-9 rounded-xl flex items-center justify-center border border-[color:var(--cg-border)]"
@@ -61,11 +100,11 @@ function Placeholder({ title }: PlaceholderProps) {
           <div className="flex items-center gap-4 animate-fade-in-up delay-400">
             <Link to="/" className="neon-btn px-6 py-3 text-sm inline-flex items-center gap-2">
               <span className="material-symbols-outlined text-[18px]">home</span>
-              Back to Home
+              {cta.backHome}
             </Link>
             <Link to="/practice" className="inline-flex items-center gap-2 rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-6 py-3 text-sm font-semibold transition hover:bg-[color:var(--cg-container-a22)]">
               <span className="material-symbols-outlined text-[18px] text-[#4ade80]">exercise</span>
-              Try Practice
+              {cta.tryPractice}
             </Link>
           </div>
         </div>

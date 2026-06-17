@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useSettingsStore } from '../store/settings';
 
 type ExperienceLevelId = 'novice' | 'apprentice' | 'journeyman' | 'master';
 type PrimaryGoalId =
@@ -198,6 +199,7 @@ function buildQuiz(tracks: TrackId[]): QuizQuestion[] {
 function OnboardingQuiz() {
   const navigate = useNavigate();
   const logoSrc = '/component_2_2x.png';
+  const appLanguage = useSettingsStore((s) => s.language);
 
   const survey = useMemo(() => loadSurvey(), []);
   const questions = useMemo(() => buildQuiz(survey?.tracks ?? []), [survey]);
@@ -209,6 +211,10 @@ function OnboardingQuiz() {
   const selected = current ? answers[current.id] : undefined;
   const progressPct =
     questions.length === 0 ? 0 : ((index + 1) / questions.length) * 100;
+  const ui =
+    appLanguage === 'vi'
+      ? { calibration: 'QUIZ HIỆU CHỈNH', skip: 'Bỏ qua' }
+      : { calibration: 'CALIBRATION QUIZ', skip: 'Skip' };
 
   const canNext = current ? typeof selected === 'number' : false;
 
@@ -263,7 +269,7 @@ function OnboardingQuiz() {
 
           <div className="flex w-full max-w-sm flex-col gap-2">
             <div className="flex items-center justify-between text-[11px] font-semibold tracking-[0.28em] text-[rgba(199,201,255,0.55)]">
-              <span>CALIBRATION QUIZ</span>
+              <span>{ui.calibration}</span>
               <span>
                 Q{index + 1}/{questions.length}
               </span>
@@ -282,7 +288,7 @@ function OnboardingQuiz() {
               className="text-xs font-semibold text-[color:var(--cg-text-muted)] transition hover:text-[color:var(--cg-text)]"
               onClick={() => navigate('/')}
             >
-              Skip
+              {ui.skip}
             </button>
           </div>
         </div>

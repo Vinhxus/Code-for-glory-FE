@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom';
+import { useT } from '../i18n/useT';
 import LearningPathMap from '../components/LearningPathMap';
 import SideNav from '../components/SideNav';
 
 function LearningPath() {
+  const t = useT();
+
   return (
     <div className="min-h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)]">
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
@@ -52,7 +55,7 @@ function LearningPath() {
                 <span className="material-symbols-outlined text-[16px] text-[#ff7e5f]">
                   arrow_back
                 </span>
-                Back to Map
+                {t('common.backToMap')}
               </Link>
             </div>
           </div>

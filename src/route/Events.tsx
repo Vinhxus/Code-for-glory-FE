@@ -1,4 +1,5 @@
 import SideNav from '../components/SideNav';
+import { useSettingsStore } from '../store/settings';
 
 const EVENTS = [
   {
@@ -31,6 +32,48 @@ const EVENTS = [
 ];
 
 export default function Events() {
+  const language = useSettingsStore((s) => s.language);
+  const isVi = language === 'vi';
+  const text = isVi
+    ? {
+        titleA: 'Sự',
+        titleB: 'kiện',
+        subtitle:
+          'Tham gia hackathon toàn cầu, thử thách hằng tuần và các masterclass độc quyền cùng cộng đồng.',
+        reward: 'Phần thưởng',
+        details: 'Xem chi tiết',
+      }
+    : {
+        titleA: 'Epic',
+        titleB: 'Events',
+        subtitle:
+          'Join the community in massive global hackathons, weekly challenges, and exclusive masterclasses.',
+        reward: 'Reward',
+        details: 'View Details',
+      };
+  const events = isVi
+    ? EVENTS.map((event) => ({
+        ...event,
+        title:
+          event.id === 1
+            ? 'Global Hackathon 2026'
+            : event.id === 2
+              ? 'Masterclass System Design'
+              : 'Thử thách thuật toán hằng tuần',
+        type:
+          event.type === 'Competition'
+            ? 'Thi đấu'
+            : event.type === 'Webinar'
+              ? 'Webinar'
+              : 'Thử thách',
+        status:
+          event.status === 'Registration Open'
+            ? 'Đang mở đăng ký'
+            : event.status === 'Upcoming'
+              ? 'Sắp diễn ra'
+              : 'Đang diễn ra',
+      }))
+    : EVENTS;
   return (
     <div className="min-h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)] selection:bg-[color:var(--cg-coral-a18)] select-none overflow-x-hidden">
       <SideNav />
@@ -38,16 +81,15 @@ export default function Events() {
         <main className="max-w-5xl mx-auto px-8 py-16 space-y-12 animate-fade-in-up">
           <div className="text-center space-y-4 mb-12">
             <h1 className="font-['Lexend'] text-5xl font-bold tracking-tight">
-              Epic <span className="gradient-text">Events</span>
+              {text.titleA} <span className="gradient-text">{text.titleB}</span>
             </h1>
             <p className="text-[color:var(--cg-text-muted)] max-w-xl mx-auto">
-              Join the community in massive global hackathons, weekly
-              challenges, and exclusive masterclasses.
+              {text.subtitle}
             </p>
           </div>
 
           <div className="space-y-6">
-            {EVENTS.map((ev, i) => (
+            {events.map((ev, i) => (
               <div
                 key={ev.id}
                 className="glass-card flex flex-col md:flex-row items-start md:items-center justify-between p-8 card-hover"
@@ -80,7 +122,7 @@ export default function Events() {
                     <span className="material-symbols-outlined text-[18px]">
                       workspace_premium
                     </span>{' '}
-                    Reward: {ev.reward}
+                    {text.reward}: {ev.reward}
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-3 w-full md:w-auto">
@@ -89,7 +131,7 @@ export default function Events() {
                     {ev.status}
                   </div>
                   <button className="w-full md:w-auto rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-8 py-3 font-bold hover:bg-[color:var(--cg-container-a30)] transition-colors text-sm">
-                    View Details
+                    {text.details}
                   </button>
                 </div>
               </div>

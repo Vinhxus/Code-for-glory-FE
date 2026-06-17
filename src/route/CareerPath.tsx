@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import SideNav from '../components/SideNav';
 import { useT } from '../i18n/useT';
+import { useSettingsStore } from '../store/settings';
 
 type TrackKey = 'frontend' | 'backend';
 type NodeKind = 'main' | 'sub' | 'badge' | 'panel';
@@ -2353,6 +2354,7 @@ function buildBackendSpec(): RoadmapSpec {
 
 function CareerPath() {
   const t = useT();
+  const language = useSettingsStore((s) => s.language);
   const [track, setTrack] = useState<TrackKey>('frontend');
 
   const tabs = useMemo(
@@ -2443,10 +2445,16 @@ function CareerPath() {
                 <span className="material-symbols-outlined text-[13px]">
                   route
                 </span>
-                CAREER PATH
+                {language === 'vi' ? 'LỘ TRÌNH NGHỀ NGHIỆP' : 'CAREER PATH'}
               </div>
               <h1 className="font-['Lexend'] text-4xl font-bold tracking-tight">
-                Career <span className="gradient-text">Path</span>
+                {language === 'vi' ? (
+                  'Lộ trình nghề nghiệp'
+                ) : (
+                  <>
+                    Career <span className="gradient-text">Path</span>
+                  </>
+                )}
               </h1>
               <p className="text-sm leading-6 text-[color:var(--cg-text-muted)] max-w-xl">
                 Lộ trình học này giúp bạn biết nên học gì tiếp theo, bám sát kỹ

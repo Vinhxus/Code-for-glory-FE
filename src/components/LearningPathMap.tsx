@@ -10,6 +10,7 @@ import {
   type LearningPathNodeDto,
   type ProgressDto,
 } from '../services/learningPathApi';
+import { useSettingsStore } from '../store/settings';
 
 const cx = (...classes: Array<string | false | null | undefined>) =>
   classes.filter(Boolean).join(' ');
@@ -70,6 +71,8 @@ const STORAGE_KEY = 'cg_survey_v2';
 
 function LearningPathMap() {
   const t = useT();
+  const language = useSettingsStore((s) => s.language);
+  const isVi = language === 'vi';
   const [selected, setSelected] = useState<RoadmapKey>('frontend');
   const [surveyData, setSurveyData] = useState<{
     careerPath?: string;
@@ -154,7 +157,30 @@ function LearningPathMap() {
 
   const testScore = surveyData?.testScore ?? 0;
   const levelText =
-    testScore === 5 ? 'Senior' : testScore >= 3 ? 'Mid-level' : 'Junior';
+    testScore === 5
+      ? isVi
+        ? 'Senior'
+        : 'Senior'
+      : testScore >= 3
+        ? isVi
+          ? 'Trung cấp'
+          : 'Mid-level'
+        : isVi
+          ? 'Junior'
+          : 'Junior';
+  const selectedLabel = isVi
+    ? selected === 'frontend'
+      ? 'Frontend'
+      : 'Backend'
+    : selected === 'frontend'
+      ? 'Frontend'
+      : 'Backend';
+  const headerTitle = isVi ? 'Lộ trình học' : 'Learning Path';
+  const introText = surveyData
+    ? isVi
+      ? `Chúc mừng bạn đã bắt đầu roadmap ${selectedLabel} ${levelText} trong ${estimatedMonths} tháng!`
+      : `Congratulations on starting your ${selectedLabel} ${levelText} roadmap for ${estimatedMonths} months!`
+    : t('roadmap.welcome.empty');
 
   return (
     <div className="w-full animate-fade-in">
@@ -166,14 +192,10 @@ function LearningPathMap() {
             {t('home.path.title').toUpperCase()}
           </div>
           <h1 className="font-['Lexend'] text-4xl font-bold tracking-tight">
-            Learning <span className="gradient-text">Path</span>
+            {headerTitle}
           </h1>
           <p className="text-sm leading-6 text-[color:var(--cg-text-muted)] max-w-md">
-            {surveyData
-              ? t('common.profile') === 'HỒ SƠ'
-                ? `Chúc mừng bạn đã bắt đầu Roadmap ${selected === 'frontend' ? 'Frontend' : 'Backend'} ${levelText} trong ${estimatedMonths} tháng!`
-                : `Congratulations on starting your ${selected === 'frontend' ? 'Frontend' : 'Backend'} ${levelText} Roadmap for ${estimatedMonths} months!`
-              : t('roadmap.welcome.empty')}
+            {introText}
           </p>
         </div>
 
@@ -208,10 +230,20 @@ function LearningPathMap() {
                   }
                 >
                   <span className="text-base leading-none">{tab.icon}</span>
-                  <span>{tab.label}</span>
+                      <span>
+                        {isVi
+                          ? tab.key === 'frontend'
+                            ? 'Frontend'
+                            : 'Backend'
+                          : tab.label}
+                      </span>
                   {active && (
                     <span className="ml-1 hidden text-[11px] font-normal opacity-80 md:inline">
-                      {tab.sub}
+                          {isVi
+                            ? tab.key === 'frontend'
+                              ? 'UI · Web · React'
+                              : 'API · CSDL · Auth'
+                            : tab.sub}
                     </span>
                   )}
                 </button>

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useT } from '../i18n/useT';
 
 type ExperienceLevelId = 'novice' | 'apprentice' | 'journeyman' | 'master';
 type PrimaryGoalId =
@@ -172,6 +173,8 @@ function planFor(track: TrackId, style: LearningStyleId | null) {
 function OnboardingSummary() {
   const navigate = useNavigate();
   const logoSrc = '/component_2_2x.png';
+  const t = useT();
+  const isVi = t('common.back') === 'Quay lại';
 
   const survey = useMemo(() => loadJson<SurveyState>(SURVEY_STORAGE_KEY), []);
   const quiz = useMemo(() => loadJson<QuizResult>(QUIZ_STORAGE_KEY), []);
@@ -188,6 +191,29 @@ function OnboardingSummary() {
     () => difficultyLabel(survey?.difficulty ?? null, scorePct),
     [survey?.difficulty, scorePct]
   );
+  const labels = isVi
+    ? {
+        signals: 'TÍN HIỆU CỦA BẠN',
+        understood: 'Những gì tụi mình hiểu về bạn',
+        experience: 'Trình độ hiện tại',
+        goal: 'Mục tiêu chính',
+        weeklyTime: 'Thời gian mỗi tuần',
+        checkpoint: 'Mốc mục tiêu',
+        checkpointSet: 'Đã đặt',
+        tipPrefix: 'Mẹo: nếu muốn chạy lại onboarding, hãy xoá các key',
+        tipSuffix: 'trong',
+      }
+    : {
+        signals: 'YOUR SIGNALS',
+        understood: 'What we understood about you',
+        experience: 'Experience level',
+        goal: 'Primary goal',
+        weeklyTime: 'Weekly time',
+        checkpoint: 'Checkpoint',
+        checkpointSet: 'Set',
+        tipPrefix: 'Tip: if you want to re-run onboarding, clear',
+        tipSuffix: 'keys',
+      };
 
   return (
     <div className="min-h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)]">
@@ -235,20 +261,19 @@ function OnboardingSummary() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_10%,rgba(255,126,95,0.18),transparent_60%),radial-gradient(circle_at_75%_65%,rgba(74,222,128,0.12),transparent_55%)]" />
           <div className="relative">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#FF7E5F]/30 bg-[#FF7E5F]/10 px-4 py-1.5 text-[11px] font-semibold tracking-[0.2em] text-[#FF7E5F]">
-              ⚡ PERSONALIZED ONBOARDING COMPLETE
+              ⚡ {t('assess.results.title')}
             </div>
             <h1 className="mt-5 text-3xl font-semibold tracking-tight md:text-4xl">
-              Your Quest Map is Ready
+              {t('home.path.title')}
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-[color:var(--cg-text-muted)]">
-              We’ll start you on a focused route, then refine as you complete
-              real practice quests.
+              {t('assess.results.body')}
             </p>
 
             <div className="mt-7 grid grid-cols-1 gap-5 md:grid-cols-3">
               <div className="rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-bg-a55)] p-5 ring-1 ring-[rgba(255,255,255,0.06)]">
                 <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--cg-text-muted)]">
-                  PRIMARY TRACK
+                  {t('summary.primaryTrack')}
                 </div>
                 <div className="mt-3 text-xl font-semibold">
                   {niceTrack(primaryTrack)}
@@ -261,7 +286,7 @@ function OnboardingSummary() {
 
               <div className="rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-bg-a55)] p-5 ring-1 ring-[rgba(255,255,255,0.06)]">
                 <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--cg-text-muted)]">
-                  STARTING DIFFICULTY
+                  {t('assess.results.selectedLevel')}
                 </div>
                 <div className="mt-3 text-xl font-semibold">
                   {targetDifficulty}
@@ -274,7 +299,7 @@ function OnboardingSummary() {
 
               <div className="rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-bg-a55)] p-5 ring-1 ring-[rgba(255,255,255,0.06)]">
                 <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--cg-text-muted)]">
-                  CALIBRATION SCORE
+                  {t('assess.results.title')}
                 </div>
                 <div className="mt-3 text-xl font-semibold">
                   {scorePct != null ? `${scorePct}%` : '—'}
@@ -299,7 +324,7 @@ function OnboardingSummary() {
                 className="inline-flex items-center gap-2 rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-5 py-3 text-xs font-semibold text-[color:var(--cg-text)] backdrop-blur-md transition hover:bg-[color:var(--cg-container-a22)]"
                 onClick={() => navigate('/')}
               >
-                Back to Map
+                {t('common.backToMap')}
               </button>
             </div>
           </div>
@@ -351,36 +376,36 @@ function OnboardingSummary() {
 
           <div className="rounded-3xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a22)] p-8 shadow-[0_40px_160px_rgba(0,0,0,0.30)] backdrop-blur">
             <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--cg-text-muted)]">
-              YOUR SIGNALS
+              {labels.signals}
             </div>
             <h2 className="mt-3 text-xl font-semibold tracking-tight">
-              What we understood about you
+              {labels.understood}
             </h2>
 
             <div className="mt-6 space-y-4 text-xs text-[color:var(--cg-text-muted)]">
               <div className="flex items-center justify-between gap-4 rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-bg-a55)] px-5 py-4">
-                <span>Experience level</span>
+                <span>{labels.experience}</span>
                 <span className="font-semibold text-[color:var(--cg-text)]">
                   {survey?.experienceLevel ?? '—'}
                 </span>
               </div>
               <div className="flex items-center justify-between gap-4 rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-bg-a55)] px-5 py-4">
-                <span>Primary goal</span>
+                <span>{labels.goal}</span>
                 <span className="font-semibold text-[color:var(--cg-text)]">
                   {survey?.primaryGoal ?? '—'}
                 </span>
               </div>
               <div className="flex items-center justify-between gap-4 rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-bg-a55)] px-5 py-4">
-                <span>Weekly time</span>
+                <span>{labels.weeklyTime}</span>
                 <span className="font-semibold text-[color:var(--cg-text)]">
                   {survey?.weeklyTime ?? '—'}
                 </span>
               </div>
               <div className="rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-bg-a55)] px-5 py-4">
                 <div className="flex items-center justify-between gap-4">
-                  <span>Checkpoint</span>
+                  <span>{labels.checkpoint}</span>
                   <span className="font-semibold text-[color:var(--cg-text)]">
-                    {survey?.checkpoint?.trim() ? 'Set' : '—'}
+                    {survey?.checkpoint?.trim() ? labels.checkpointSet : '—'}
                   </span>
                 </div>
                 {survey?.checkpoint?.trim() ? (
@@ -392,8 +417,8 @@ function OnboardingSummary() {
             </div>
 
             <div className="mt-6 rounded-2xl border border-[#FFA500]/25 bg-[#FFA500]/10 p-5 text-xs text-[color:var(--cg-text)]">
-              Tip: if you want to re-run onboarding, clear{' '}
-              <span className="font-mono">localStorage</span> keys{' '}
+              {labels.tipPrefix} <span className="font-mono">localStorage</span>{' '}
+              {labels.tipSuffix}{' '}
               <span className="font-mono">cg_survey_v1</span> and{' '}
               <span className="font-mono">cg_quiz_v1</span>.
             </div>

@@ -1,7 +1,21 @@
 import { Link } from 'react-router-dom';
 import './Footer.css';
+import { useT } from '../../i18n/useT';
 
 export default function Footer() {
+  const t = useT();
+  const labels =
+    t('footer.platform') === 'Nền tảng'
+      ? {
+          share: 'Chia sẻ',
+          feedback: 'Phản hồi',
+          language: 'Ngôn ngữ',
+        }
+      : {
+          share: 'Share',
+          feedback: 'Feedback',
+          language: 'Language',
+        };
   return (
     <footer className="footer">
       <div className="footer-inner">
@@ -9,54 +23,56 @@ export default function Footer() {
           <Link to="/" className="footer-logo">
             CodeForGlory
           </Link>
-          <p className="footer-tagline">
-            Gamifying the future of software engineering.
-          </p>
+          <p className="footer-tagline">{t('footer.tagline')}</p>
         </div>
 
         <div className="footer-links">
           <div className="footer-link-group">
-            <p className="footer-link-group-title">Platform</p>
+            <p className="footer-link-group-title">{t('footer.platform')}</p>
             <Link to="/courses" className="footer-link">
-              Courses
+              {t('footer.courses')}
             </Link>
             <Link to="/battle" className="footer-link">
-              Arena
+              {t('footer.arena')}
             </Link>
             <Link to="/pricing" className="footer-link">
-              Pricing
+              {t('footer.pricing')}
             </Link>
           </div>
 
           <div className="footer-link-group">
-            <p className="footer-link-group-title">Community</p>
+            <p className="footer-link-group-title">{t('footer.community')}</p>
             <a
               href="https://discord.gg/"
               target="_blank"
               rel="noreferrer"
               className="footer-link"
             >
-              Discord
+              {t('footer.discord')}
             </a>
             <Link to="/events" className="footer-link">
-              Events
+              {t('footer.events')}
             </Link>
             <Link to="/guilds" className="footer-link">
-              Guilds
+              {t('footer.guilds')}
             </Link>
           </div>
         </div>
 
         {/* ── Social Icons ── */}
         <div className="footer-socials">
-          <a href="#share" className="footer-social-btn" aria-label="Share">
+          <a
+            href="#share"
+            className="footer-social-btn"
+            aria-label={labels.share}
+          >
             <span className="material-symbols-outlined">share</span>
           </a>
 
           <a
             href="#feedback"
             className="footer-social-btn"
-            aria-label="Feedback"
+            aria-label={labels.feedback}
           >
             <span className="material-symbols-outlined">chat_bubble</span>
           </a>
@@ -64,7 +80,7 @@ export default function Footer() {
           <a
             href="#language"
             className="footer-social-btn"
-            aria-label="Language"
+            aria-label={labels.language}
           >
             <span className="material-symbols-outlined">language</span>
           </a>

@@ -1,4 +1,5 @@
 import SideNav from '../components/SideNav';
+import { useSettingsStore } from '../store/settings';
 
 const GUILDS = [
   {
@@ -28,6 +29,38 @@ const GUILDS = [
 ];
 
 export default function Guilds() {
+  const language = useSettingsStore((s) => s.language);
+  const isVi = language === 'vi';
+  const text = isVi
+    ? {
+        titleA: 'Bang hội',
+        titleB: 'faction',
+        subtitle:
+          'Kết nối với những developer khác. Hoàn thành quest bang hội, chia sẻ kiến thức và cùng leo bảng xếp hạng.',
+        create: 'Tạo Guild',
+        members: 'thành viên',
+        join: 'Tham gia Guild',
+      }
+    : {
+        titleA: 'Guild',
+        titleB: 'Factions',
+        subtitle:
+          'Unite with fellow developers. Complete guild quests, share knowledge, and dominate the global leaderboards together.',
+        create: 'Create Guild',
+        members: 'Members',
+        join: 'Join Guild',
+      };
+  const guilds = isVi
+    ? GUILDS.map((guild) => ({
+        ...guild,
+        type:
+          guild.type === 'Backend'
+            ? 'Backend'
+            : guild.type === 'Frontend'
+              ? 'Frontend'
+              : 'Khoa học dữ liệu',
+      }))
+    : GUILDS;
   return (
     <div className="min-h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)] selection:bg-[color:var(--cg-coral-a18)] select-none overflow-x-hidden">
       <SideNav />
@@ -36,21 +69,19 @@ export default function Guilds() {
           <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-[color:var(--cg-border)] pb-8">
             <div className="space-y-4">
               <h1 className="font-['Lexend'] text-5xl font-bold tracking-tight">
-                Guild <span className="gradient-text-amber">Factions</span>
+                {text.titleA} <span className="gradient-text-amber">{text.titleB}</span>
               </h1>
               <p className="text-[color:var(--cg-text-muted)] max-w-xl">
-                Unite with fellow developers. Complete guild quests, share
-                knowledge, and dominate the global leaderboards together.
+                {text.subtitle}
               </p>
             </div>
             <button className="neon-btn-amber px-6 py-3 font-bold flex items-center gap-2">
-              <span className="material-symbols-outlined">add</span> Create
-              Guild
+              <span className="material-symbols-outlined">add</span> {text.create}
             </button>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {GUILDS.map((guild) => (
+            {guilds.map((guild) => (
               <div
                 key={guild.id}
                 className="glass-card relative overflow-hidden card-hover group cursor-pointer"
@@ -94,14 +125,14 @@ export default function Guilds() {
                       <span className="material-symbols-outlined text-[18px]">
                         group
                       </span>{' '}
-                      {guild.members} Members
+                      {guild.members} {text.members}
                     </span>
                   </div>
                   <button
                     className="w-full rounded-xl py-3 font-bold transition-colors hover:opacity-80"
                     style={{ background: guild.color, color: '#0f0b3c' }}
                   >
-                    Join Guild
+                    {text.join}
                   </button>
                 </div>
               </div>

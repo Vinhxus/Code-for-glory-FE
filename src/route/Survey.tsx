@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useT } from '../i18n/useT';
 import { Link, useNavigate } from 'react-router-dom';
 
 type CareerPathId = 'frontend' | 'backend' | 'fullstack';
@@ -200,6 +201,7 @@ function loadInitialState(): SurveyState {
 
 export default function Survey() {
   const navigate = useNavigate();
+  const t = useT();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<SurveyState>(() => loadInitialState());
 
@@ -320,7 +322,7 @@ export default function Survey() {
       setStep((s) => s + 1);
     } else {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(form));
-      navigate('/career-path');
+      navigate('/learning-path');
     }
   };
 
@@ -609,16 +611,18 @@ export default function Survey() {
                   </span>
                 </div>
                 <h1 className="text-2xl font-bold mb-4">
-                  Your Profile is Ready
+                  {t('survey.profileReady.title')}
                 </h1>
                 <p className="text-sm leading-relaxed text-[color:var(--cg-text-muted)] mb-6">
-                  Chúng tôi nhận thấy bạn là một{' '}
+                  {t('survey.profileReady.body.part1')}{' '}
                   <strong className="text-white">
                     Potential{' '}
                     {form.selfAssessment === 'junior' ? 'Junior' : 'Beginner'}{' '}
                     {form.careerPath?.toUpperCase()}
                   </strong>{' '}
-                  ({userLevel} level), sẵn sàng học{' '}
+                  ({userLevel} level),{' '}
+                  {/* keep Vietnamese phrasing for the rest to preserve original sentence flow */}
+                  sẵn sàng học{' '}
                   <strong className="text-[#ff7e5f]">
                     {form.hoursPerDay}h
                   </strong>{' '}
@@ -636,7 +640,7 @@ export default function Survey() {
                     onClick={handleNext}
                     className="neon-btn px-8 py-3 text-sm font-bold flex items-center gap-2"
                   >
-                    Bắt đầu hành trình{' '}
+                    {t('survey.profileReady.startJourney')}{' '}
                     <span className="material-symbols-outlined text-[18px]">
                       rocket_launch
                     </span>
