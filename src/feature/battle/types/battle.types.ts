@@ -1,10 +1,10 @@
 export type BattleField = 'FE' | 'BE';
 export type BattleMode = 'speed' | 'performance';
 export type BattleStatus =
-  | 'waiting'
-  | 'in_progress'
-  | 'completed'
-  | 'abandoned';
+  | 'WAITING'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | 'ABANDONED';
 
 export interface BattlePlayer {
   userId: string;
