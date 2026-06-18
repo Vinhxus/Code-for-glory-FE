@@ -20,6 +20,7 @@ import Support from './route/Support';
 import Network from './route/Network';
 import Forum from './route/Forum';
 import Mobile from './route/Mobile';
+import Shop from './route/Shop';
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function App() {
       <Route path="/network" element={<Network />} />
       <Route path="/forum" element={<Forum />} />
       <Route path="/mobile" element={<Mobile />} />
+      <Route path="/shop" element={<Shop />} />
       <Route path="/home" element={<Navigate to="/" replace />} />
     </Routes>
   );

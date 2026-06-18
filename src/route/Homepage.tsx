@@ -112,19 +112,30 @@ function Homepage() {
 
             <nav className="hidden items-center gap-8 text-sm font-medium text-[color:var(--cg-text-muted)] md:flex">
               {[
-                ['#quests', t('home.nav.quests')],
-                ['#leaderboard', t('home.nav.leaderboard')],
-                ['#shop', t('home.nav.shop')],
-              ].map(([href, label]) => (
-                <a
-                  key={href}
-                  href={href}
-                  className="relative transition hover:text-[color:var(--cg-coral)] group"
-                >
-                  {label}
-                  <span className="absolute -bottom-0.5 left-0 h-px w-0 bg-[#ff7e5f] group-hover:w-full transition-all duration-300" />
-                </a>
-              ))}
+                { kind: 'anchor' as const, key: 'quests', href: '#quests', label: t('home.nav.quests') },
+                { kind: 'anchor' as const, key: 'leaderboard', href: '#leaderboard', label: t('home.nav.leaderboard') },
+                { kind: 'route' as const, key: 'shop', to: '/shop', label: t('home.nav.shop') },
+              ].map((item) =>
+                item.kind === 'route' ? (
+                  <Link
+                    key={item.key}
+                    to={item.to}
+                    className="relative transition hover:text-[color:var(--cg-coral)] group"
+                  >
+                    {item.label}
+                    <span className="absolute -bottom-0.5 left-0 h-px w-0 bg-[#ff7e5f] group-hover:w-full transition-all duration-300" />
+                  </Link>
+                ) : (
+                  <a
+                    key={item.key}
+                    href={item.href}
+                    className="relative transition hover:text-[color:var(--cg-coral)] group"
+                  >
+                    {item.label}
+                    <span className="absolute -bottom-0.5 left-0 h-px w-0 bg-[#ff7e5f] group-hover:w-full transition-all duration-300" />
+                  </a>
+                )
+              )}
             </nav>
 
             <div className="flex items-center gap-3">
