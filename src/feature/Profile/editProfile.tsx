@@ -170,6 +170,7 @@ function SkillEditRow({
 
 /* ── Main component ── */
 export default function EditProfile() {
+  console.log('EditProfile rendered');
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -248,7 +249,6 @@ export default function EditProfile() {
         </div>
       </div>
 
-      {/* ─── Avatar ─── */}
       <div className="edit-card">
         <p className="edit-section-title">Avatar</p>
         <div className="edit-avatar-section">

@@ -1,36 +1,12 @@
-:root {
-  --bg: #0c0a2e;
-  --bg-card: #13113a;
-  --bg-card-2: #1a1850;
-  --border: rgba(90, 80, 200, 0.35);
-  --border-glow: rgba(100, 90, 255, 0.6);
-
-  --text-primary: #e8e6ff;
-  --text-secondary: #7b78b8;
-  --text-muted: #4e4b80;
-
-  --gold: #f5a623;
-  --green: #00e676;
-  --purple: #6c5ce7;
-  --blue-accent: #4fc3f7;
-  --coral: #ff6b81;
-
-  --radius: 12px;
-  --gap: 14px;
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
 body {
-  background: var(--bg);
-  color: var(--text-primary);
-  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--cg-bg);
+  color: var(--cg-text);
+  font-family:
+    Lexend,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    sans-serif;
   min-height: 100vh;
 }
 
@@ -40,20 +16,19 @@ body {
   padding: 28px 20px;
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: 14px;
 }
 
 .edit-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: var(--cg-container);
+  border: 1px solid var(--cg-border);
+  border-radius: 16px;
   padding: 24px 28px;
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-/* ─── Top bar ─── */
 .edit-topbar {
   display: flex;
   align-items: center;
@@ -67,10 +42,10 @@ body {
 }
 
 .btn-back {
-  background: rgba(90, 80, 200, 0.15);
-  border: 1px solid var(--border);
+  background: rgba(255, 126, 95, 0.1);
+  border: 1px solid var(--cg-border);
   border-radius: 8px;
-  color: var(--text-secondary);
+  color: var(--cg-text-muted);
   cursor: pointer;
   font-size: 1rem;
   width: 36px;
@@ -84,14 +59,14 @@ body {
 }
 
 .btn-back:hover {
-  background: rgba(90, 80, 200, 0.3);
-  color: var(--text-primary);
+  background: rgba(255, 126, 95, 0.2);
+  color: var(--cg-text);
 }
 
 .edit-topbar-title {
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--cg-text);
   letter-spacing: 0.04em;
 }
 
@@ -102,9 +77,9 @@ body {
 
 .btn-cancel {
   background: transparent;
-  border: 1px solid var(--border);
+  border: 1px solid var(--cg-border);
   border-radius: 8px;
-  color: var(--text-secondary);
+  color: var(--cg-text-muted);
   cursor: pointer;
   font-size: 0.75rem;
   font-weight: 600;
@@ -116,12 +91,12 @@ body {
 }
 
 .btn-cancel:hover {
-  border-color: var(--coral);
-  color: var(--coral);
+  border-color: var(--cg-coral);
+  color: var(--cg-coral);
 }
 
 .btn-save {
-  background: var(--green);
+  background: var(--cg-green);
   border: none;
   border-radius: 8px;
   color: #0c0a2e;
@@ -139,6 +114,7 @@ body {
   opacity: 0.85;
   transform: translateY(-1px);
 }
+
 .btn-save:active {
   transform: translateY(0);
 }
@@ -161,21 +137,9 @@ body {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 3px solid var(--purple);
+  border: 3px solid var(--cg-coral);
   animation: glow-ring 2s ease-in-out infinite;
   pointer-events: none;
-}
-
-@keyframes glow-ring {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.5;
-    transform: scale(1.06);
-  }
 }
 
 .edit-avatar-img {
@@ -183,7 +147,7 @@ body {
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  background: var(--bg-card-2);
+  background: var(--cg-container-a16);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -194,7 +158,7 @@ body {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(15, 11, 60, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -215,13 +179,13 @@ body {
 .edit-avatar-label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--cg-text);
   margin-bottom: 4px;
 }
 
 .edit-avatar-hint {
   font-size: 0.7rem;
-  color: var(--text-muted);
+  color: var(--cg-text-muted);
   margin-bottom: 12px;
 }
 
@@ -231,10 +195,10 @@ body {
 }
 
 .btn-upload {
-  background: rgba(108, 92, 231, 0.2);
-  border: 1px solid rgba(108, 92, 231, 0.5);
+  background: rgba(255, 126, 95, 0.15);
+  border: 1px solid rgba(255, 126, 95, 0.35);
   border-radius: 6px;
-  color: var(--blue-accent);
+  color: var(--cg-coral);
   cursor: pointer;
   font-size: 0.72rem;
   font-weight: 600;
@@ -243,14 +207,14 @@ body {
 }
 
 .btn-upload:hover {
-  background: rgba(108, 92, 231, 0.35);
+  background: rgba(255, 126, 95, 0.25);
 }
 
 .btn-remove-avatar {
   background: transparent;
-  border: 1px solid var(--border);
+  border: 1px solid var(--cg-border);
   border-radius: 6px;
-  color: var(--text-muted);
+  color: var(--cg-text-muted);
   cursor: pointer;
   font-size: 0.72rem;
   font-weight: 600;
@@ -261,18 +225,18 @@ body {
 }
 
 .btn-remove-avatar:hover {
-  border-color: var(--coral);
-  color: var(--coral);
+  border-color: var(--cg-coral);
+  color: var(--cg-coral);
 }
 
 /* ─── Section header ─── */
 .edit-section-title {
   font-size: 0.7rem;
   font-weight: 700;
-  color: var(--text-muted);
+  color: var(--cg-text-muted);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--cg-border);
   padding-bottom: 10px;
   margin-bottom: 4px;
 }
@@ -297,7 +261,7 @@ body {
 .field-label {
   font-size: 0.68rem;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--cg-text-muted);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -305,10 +269,10 @@ body {
 .field-input,
 .field-textarea,
 .field-select {
-  background: var(--bg-card-2);
-  border: 1px solid var(--border);
+  background: var(--cg-container-a16);
+  border: 1px solid var(--cg-border);
   border-radius: 8px;
-  color: var(--text-primary);
+  color: var(--cg-text);
   font-family: inherit;
   font-size: 0.88rem;
   padding: 10px 14px;
@@ -322,13 +286,13 @@ body {
 .field-input:focus,
 .field-textarea:focus,
 .field-select:focus {
-  border-color: var(--purple);
-  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+  border-color: var(--cg-coral);
+  box-shadow: 0 0 0 3px rgba(255, 126, 95, 0.15);
 }
 
 .field-input::placeholder,
 .field-textarea::placeholder {
-  color: var(--text-muted);
+  color: rgba(199, 201, 255, 0.4);
 }
 
 .field-textarea {
@@ -340,34 +304,36 @@ body {
 .field-select {
   cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234e4b80' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23ff7e5f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
   padding-right: 32px;
 }
 
 .field-select option {
-  background: var(--bg-card-2);
+  background: var(--cg-sidebar);
+  color: var(--cg-text);
 }
 
 .field-hint {
   font-size: 0.65rem;
-  color: var(--text-muted);
+  color: var(--cg-text-muted);
   margin-top: 2px;
 }
 
 /* ─── Character counter ─── */
 .field-counter {
   font-size: 0.65rem;
-  color: var(--text-muted);
+  color: var(--cg-text-muted);
   text-align: right;
 }
 
 .field-counter--warn {
-  color: var(--gold);
+  color: var(--cg-amber);
 }
+
 .field-counter--over {
-  color: var(--coral);
+  color: var(--cg-coral);
 }
 
 /* ─── Skills edit ─── */
@@ -382,9 +348,9 @@ body {
   flex-direction: column;
   gap: 8px;
   padding: 16px;
-  background: var(--bg-card-2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  background: var(--cg-container-a16);
+  border: 1px solid var(--cg-border);
+  border-radius: 12px;
 }
 
 .skill-edit-header {
@@ -398,7 +364,7 @@ body {
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.1em;
-  color: var(--coral);
+  color: var(--cg-coral);
   text-transform: uppercase;
 }
 
@@ -406,8 +372,8 @@ body {
   flex: 1;
   background: transparent;
   border: none;
-  border-bottom: 1px solid var(--border);
-  color: var(--text-primary);
+  border-bottom: 1px solid var(--cg-border);
+  color: var(--cg-text);
   font-family: inherit;
   font-size: 0.9rem;
   font-weight: 600;
@@ -417,51 +383,32 @@ body {
 }
 
 .skill-edit-name:focus {
-  border-bottom-color: var(--purple);
+  border-bottom-color: var(--cg-coral);
 }
 
 .skill-edit-percent {
   font-size: 0.9rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--cg-text);
   min-width: 42px;
   text-align: right;
 }
 
-/* range slider */
-.skill-range {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 6px;
-  background: rgba(90, 80, 200, 0.2);
-  border-radius: 3px;
-  outline: none;
-  cursor: pointer;
-}
-
-.skill-range::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--purple);
-  border: 2px solid var(--text-primary);
-  cursor: pointer;
-  transition: transform 0.15s;
-}
-
-.skill-range::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
+/* ─── Range Slider Container & Hitbox Repair ─── */
+.skill-range-container {
+  position: relative;
+  height: 24px; /* Khung chạm ảo cao 24px */
+  display: flex;
+  align-items: center;
 }
 
 .skill-range-track {
   position: relative;
   height: 6px;
-  background: rgba(90, 80, 200, 0.2);
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 3px;
   overflow: hidden;
+  width: 100%; /* Co dãn hết chiều rộng */
 }
 
 .skill-range-fill {
@@ -469,12 +416,25 @@ body {
   left: 0;
   top: 0;
   height: 100%;
-  background: linear-gradient(90deg, var(--coral), var(--gold));
+  background: linear-gradient(90deg, var(--cg-coral), var(--cg-amber));
   border-radius: 3px;
   pointer-events: none;
-  transition: width 0.1s;
 }
 
+.skill-range {
+  -webkit-appearance: none;
+  appearance: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0; /* Input thật ẩn đi bao phủ toàn bộ vùng 24px */
+  cursor: pointer;
+  z-index: 2;
+  margin: 0;
+}
+
+/* ─── Tags ─── */
 .skill-edit-tags {
   display: flex;
   gap: 6px;
@@ -483,10 +443,10 @@ body {
 }
 
 .skill-tag-edit {
-  background: rgba(108, 92, 231, 0.15);
-  border: 1px solid rgba(108, 92, 231, 0.4);
+  background: rgba(255, 126, 95, 0.12);
+  border: 1px solid rgba(255, 126, 95, 0.3);
   border-radius: 4px;
-  color: var(--blue-accent);
+  color: var(--cg-coral);
   font-size: 0.6rem;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -499,7 +459,7 @@ body {
 .skill-tag-remove {
   background: none;
   border: none;
-  color: var(--text-muted);
+  color: var(--cg-text-muted);
   cursor: pointer;
   font-size: 0.7rem;
   padding: 0;
@@ -508,14 +468,14 @@ body {
 }
 
 .skill-tag-remove:hover {
-  color: var(--coral);
+  color: var(--cg-coral);
 }
 
 .skill-tag-add-input {
   background: transparent;
-  border: 1px dashed var(--border);
+  border: 1px dashed var(--cg-border);
   border-radius: 4px;
-  color: var(--text-secondary);
+  color: var(--cg-text-muted);
   font-family: inherit;
   font-size: 0.6rem;
   font-weight: 600;
@@ -527,10 +487,11 @@ body {
 }
 
 .skill-tag-add-input:focus {
-  border-color: var(--purple);
+  border-color: var(--cg-coral);
 }
+
 .skill-tag-add-input::placeholder {
-  color: var(--text-muted);
+  color: rgba(199, 201, 255, 0.3);
 }
 
 /* ─── Privacy toggles ─── */
@@ -546,7 +507,7 @@ body {
   justify-content: space-between;
   gap: 16px;
   padding: 16px 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--cg-border);
 }
 
 .privacy-row:last-child {
@@ -562,12 +523,12 @@ body {
 .privacy-label {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--cg-text);
 }
 
 .privacy-desc {
   font-size: 0.7rem;
-  color: var(--text-muted);
+  color: var(--cg-text-muted);
 }
 
 /* Toggle switch */
@@ -577,8 +538,8 @@ body {
   width: 44px;
   height: 24px;
   border-radius: 12px;
-  background: rgba(90, 80, 200, 0.2);
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--cg-border);
   cursor: pointer;
   transition:
     background 0.25s,
@@ -587,8 +548,8 @@ body {
 }
 
 .toggle--on {
-  background: var(--purple);
-  border-color: var(--purple);
+  background: var(--cg-coral);
+  border-color: var(--cg-coral);
 }
 
 .toggle-thumb {
@@ -598,7 +559,7 @@ body {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: var(--text-muted);
+  background: var(--cg-text-muted);
   transition:
     transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
     background 0.25s;
@@ -607,7 +568,7 @@ body {
 
 .toggle--on .toggle-thumb {
   transform: translateX(20px);
-  background: #fff;
+  background: #ffffff;
 }
 
 /* ─── Danger zone ─── */
@@ -616,8 +577,8 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background: rgba(255, 107, 129, 0.05);
-  border: 1px solid rgba(255, 107, 129, 0.2);
+  background: rgba(255, 126, 95, 0.05);
+  border: 1px solid rgba(255, 126, 95, 0.2);
   border-radius: 10px;
 }
 
@@ -630,19 +591,19 @@ body {
 .danger-title {
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--coral);
+  color: var(--cg-coral);
 }
 
 .danger-desc {
   font-size: 0.7rem;
-  color: var(--text-muted);
+  color: var(--cg-text-muted);
 }
 
 .btn-danger {
   background: transparent;
-  border: 1px solid var(--coral);
+  border: 1px solid var(--cg-coral);
   border-radius: 6px;
-  color: var(--coral);
+  color: var(--cg-coral);
   cursor: pointer;
   font-size: 0.72rem;
   font-weight: 700;
@@ -651,23 +612,22 @@ body {
 }
 
 .btn-danger:hover {
-  background: rgba(255, 107, 129, 0.12);
+  background: rgba(255, 126, 95, 0.15);
 }
 
-/* ─── Toast notification ─── */
 .edit-toast {
   position: fixed;
   bottom: 28px;
   left: 50%;
   transform: translateX(-50%) translateY(80px);
-  background: var(--green);
+  background: var(--cg-green);
   color: #0c0a2e;
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   padding: 10px 24px;
   border-radius: 50px;
-  box-shadow: 0 4px 20px rgba(0, 230, 118, 0.35);
+  box-shadow: 0 4px 20px rgba(74, 222, 128, 0.35);
   pointer-events: none;
   transition:
     transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),

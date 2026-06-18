@@ -21,10 +21,13 @@ import Network from './route/Network';
 import Forum from './route/Forum';
 import Mobile from './route/Mobile';
 import Shop from './route/Shop';
+import { profileRoutes } from './route/profileRoot';
+import TabComponent from './feature/history';
 
 function App() {
   return (
     <Routes>
+      {profileRoutes()}
       <Route path="/" element={<Homepage />} />
       <Route path="/survey" element={<Survey />} />
       <Route path="/career-path/:track/:nodeId" element={<CareerPathNode />} />
@@ -35,7 +38,7 @@ function App() {
       <Route path="/onboarding/summary" element={<OnboardingSummary />} />
       <Route path="/battle" element={<Placeholder title="Battle" />} />
       <Route path="/practice" element={<Practice />} />
-      <Route path="/history" element={<Placeholder title="History" />} />
+      <Route path="/history" element={<TabComponent />} />
       <Route path="/courses" element={<Courses />} />
       <Route path="/arena" element={<Arena />} />
       <Route path="/pricing" element={<Pricing />} />
