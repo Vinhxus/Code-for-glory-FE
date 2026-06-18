@@ -47,6 +47,8 @@ export async function loginApi(data: LoginRequest): Promise<AuthResponse> {
   });
 
   const raw = await handleResponse<LoginRawResponse>(res);
+  // Lưu token để các API khác (Shop, v.v.) có thể dùng Authorization header
+  localStorage.setItem('access_token', raw.access_token);
 
   return {
     token: raw.access_token,

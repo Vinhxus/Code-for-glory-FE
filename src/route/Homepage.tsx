@@ -92,7 +92,6 @@ function Homepage() {
       <Header />
 
       <div className="relative z-10 md:pl-[96px]">
-        {/* Header */}
         <main className="max-w-7xl mx-auto px-8 py-12 space-y-10">
           {/* Hero */}
           <section className="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
