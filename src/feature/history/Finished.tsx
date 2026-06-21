@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, type FC } from 'react';
 import './Finished.css';
+import HButton from '../../components/history/HButton';
 export interface Lesson {
   id: number;
   title: string;
@@ -177,11 +178,11 @@ const LessonCard: FC<LessonCardProps> = ({ lesson, index }) => {
         <span className="lesson-score-unit">/100</span>
       </div>
 
-      <button
+      <HButton
         className={`btn-review ${isLatest ? 'btn-review--latest' : 'btn-review--default'}`}
       >
         Review
-      </button>
+      </HButton>
     </div>
   );
 };

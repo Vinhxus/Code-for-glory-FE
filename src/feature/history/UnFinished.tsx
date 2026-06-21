@@ -1,5 +1,6 @@
 import { useState, useEffect, type FC } from 'react';
 import './UnFinished.css';
+import HButton from '../../components/history/HButton';
 
 export interface Quest {
   id: number;
@@ -115,7 +116,7 @@ const QuestCard: FC<QuestCardProps> = ({ quest }) => (
       </div>
 
       <div className="quest-card__actions">
-        <button className="btn-continue">CONTINUE QUEST</button>
+        <HButton className="btn-continue">CONTINUE QUEST</HButton>
       </div>
     </div>
   </div>

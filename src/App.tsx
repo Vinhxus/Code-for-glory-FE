@@ -23,6 +23,7 @@ import Mobile from './route/Mobile';
 import Shop from './route/Shop';
 import { profileRoutes } from './route/profileRoot';
 import TabComponent from './feature/history';
+import { Streak } from './route/Streak';
 
 function App() {
   return (
@@ -39,6 +40,10 @@ function App() {
       <Route path="/battle" element={<Placeholder title="Battle" />} />
       <Route path="/practice" element={<Practice />} />
       <Route path="/history" element={<TabComponent />} />
+
+      {/* 2. Thêm route này để hứng đường dẫn từ SideNav */}
+      <Route path="/streak" element={<Streak />} />
+
       <Route path="/courses" element={<Courses />} />
       <Route path="/arena" element={<Arena />} />
       <Route path="/pricing" element={<Pricing />} />
