@@ -1,4 +1,5 @@
 import './Tracking.css';
+import HButton from '../../components/history/HButton';
 
 interface ErrorItem {
   id: number;
@@ -58,7 +59,7 @@ function ErrorRow({ item }: { item: ErrorItem }) {
         </div>
       </div>
 
-      <button className="view-fix-btn">VIEW FIX</button>
+      <HButton>VIEW FIX</HButton>
     </div>
   );
 }

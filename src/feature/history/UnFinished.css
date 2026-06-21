@@ -156,7 +156,7 @@
   justify-content: flex-end;
 }
 
-.btn-continue {
+/* .btn-continue {
   padding: 6px 14px;
   border-radius: 8px;
   border: 1px solid var(--cg-coral);
@@ -169,12 +169,12 @@
   transition:
     background 0.2s,
     color 0.2s;
-}
+} */
 
-.btn-continue:hover {
+/* .btn-continue:hover {
   background: var(--cg-coral);
   color: #fff;
-}
+} */
 
 .drafts-section__header {
   display: flex;
