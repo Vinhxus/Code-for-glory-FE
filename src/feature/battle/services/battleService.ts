@@ -5,6 +5,9 @@ import type {
   BattleMode,
   SubmitAnswerPayload,
   SubmitAnswerResponse,
+  BattleSubmission,
+  CodeAnalysis,
+  CreateAnalysisPayload,
 } from '../types/battle.types';
 
 export const createBattle = async (
@@ -39,5 +42,23 @@ export const abandonBattle = async (battleId: string) => {
 };
 export const getBattleById = async (battleId: string): Promise<Battle> => {
   const response = await axiosInstance.get(`/battles/${battleId}`);
+  return response.data;
+};
+export const getSubmissions = async (
+  battleId: string
+): Promise<BattleSubmission[]> => {
+  const response = await axiosInstance.get(`/battles/${battleId}/submissions`);
+  return response.data;
+};
+
+export const createAnalysis = async (
+  payload: CreateAnalysisPayload
+): Promise<CodeAnalysis> => {
+  const response = await axiosInstance.post('/code-analysis', payload);
+  return response.data;
+};
+
+export const getAnalysis = async (battleId: string): Promise<CodeAnalysis> => {
+  const response = await axiosInstance.get(`/code-analysis/${battleId}`);
   return response.data;
 };

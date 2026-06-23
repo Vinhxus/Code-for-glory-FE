@@ -15,7 +15,7 @@ const MODE: {
   stats: { label: string; value: string }[];
 }[] = [
   {
-    value: 'speed',
+    value: 'SPEED',
     icon: '⚡',
     title: 'Speed Mode',
     description:
@@ -27,7 +27,7 @@ const MODE: {
     ],
   },
   {
-    value: 'performance',
+    value: 'PERFORMANCE',
     icon: '🚀',
     title: 'Performance Mode',
     description:

@@ -3,6 +3,7 @@ import FieldSelectPage from './pages/FieldSelectPage';
 import ModeSelectPage from './pages/ModeSelectPage';
 import BattleArenaPage from './pages/BattleArenaPage';
 import BattleResultPage from './pages/BattleResultPage';
+import AnalyzeCodePage from './pages/AnalyzeCodePage';
 
 const BattleRoutes = () => {
   return (
@@ -11,6 +12,7 @@ const BattleRoutes = () => {
       <Route path="mode" element={<ModeSelectPage />} />
       <Route path="arena/:battleId" element={<BattleArenaPage />} />
       <Route path="result/:battleId" element={<BattleResultPage />} />
+      <Route path="analyze/:battleId" element={<AnalyzeCodePage />} />
     </Routes>
   );
 };

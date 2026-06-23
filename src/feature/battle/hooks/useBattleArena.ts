@@ -1,17 +1,25 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getBattleById } from '../services/battleService';
-import type { Battle } from '../types/battle.types';
+import { getBattleById, submitAnswer } from '../services/battleService';
+import {
+  getBattleSocket,
+  disconnectBattleSocket,
+} from '../services/battleSocket';
+import type { Battle, OpponentCorrectPayload } from '../types/battle.types';
 import { BATTLE_ROUTES } from '../constants/battle.constants';
-import { submitAnswer } from '../services/battleService';
+import { useAuth } from '../../auth/useAuth';
+
+const CORRECT_FEEDBACK_DELAY_MS = 1200;
 
 export const useBattleArena = (battleId: string | undefined) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [battle, setBattle] = useState<Battle | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(0);
-  const timeRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const advanceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMountedRef = useRef(true);
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [code, setCode] = useState('// Write your answer here\n');
@@ -21,9 +29,17 @@ export const useBattleArena = (battleId: string | undefined) => {
     message: string;
     points: number;
   } | null>(null);
-  const [language, setLanguage] = useState('javascript');
-  const [editorTheme, setEditorTheme] = useState('vs-dark');
 
+  // Theo dõi mounted state để chặn setState sau khi unmount
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      if (advanceTimeoutRef.current) clearTimeout(advanceTimeoutRef.current);
+    };
+  }, []);
+
+  // Fetch battle ban đầu
   useEffect(() => {
     if (!battleId) {
       navigate(BATTLE_ROUTES.FIELD);
@@ -36,12 +52,8 @@ export const useBattleArena = (battleId: string | undefined) => {
         const data = await getBattleById(battleId);
         setBattle(data);
 
-        if (data.status === 'IN_PROGRESS' && data.expectedEndTime) {
-          const remaining = Math.floor(
-            (new Date(data.expectedEndTime).getTime() - Date.now()) / 1000
-          );
-          setTimeLeft(Math.max(0, remaining));
-        } else if (data.status === 'IN_PROGRESS') {
+        // Chỉ set tạm timeLimit, timer-tick từ server sẽ cập nhật chính xác ngay sau đó
+        if (data.status === 'IN_PROGRESS') {
           setTimeLeft(data.timeLimit);
         }
       } catch {
@@ -52,24 +64,62 @@ export const useBattleArena = (battleId: string | undefined) => {
     };
     fetchBattle();
   }, [battleId, navigate]);
-  //Timer countdown
-  useEffect(() => {
-    if (!battle || battle.status != 'IN_PROGRESS' || timeLeft <= 0) return;
 
-    timeRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timeRef.current!);
-          navigate(`${BATTLE_ROUTES.RESULT}/${battle._id}`);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => {
-      if (timeRef.current) clearInterval(timeRef.current);
+  // Socket: join room battle + lắng nghe realtime events
+  useEffect(() => {
+    if (!battleId) return;
+
+    const socket = getBattleSocket();
+    socket.connect();
+    socket.emit('join-battle', { battleId });
+
+    const handleBattleStarted = (updatedBattle: Battle) => {
+      setBattle(updatedBattle);
+      setTimeLeft(updatedBattle.timeLimit);
     };
-  }, [battle, navigate]);
+
+    const handleOpponentCorrect = (payload: OpponentCorrectPayload) => {
+      setBattle((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          players: prev.players.map((p) =>
+            p.userId === payload.userId
+              ? { ...p, currentScore: payload.currentScore }
+              : p
+          ),
+        };
+      });
+    };
+
+    const handleTimerTick = (payload: { timeRemaining: number }) => {
+      setTimeLeft(payload.timeRemaining);
+    };
+
+    // Nguồn navigate DUY NHẤT khi trận đấu kết thúc (dù do hết giờ hay
+    // do 1 trong 2 người đúng hết câu) — delay bằng feedback delay để
+    // cả 2 người chơi đều kịp thấy trạng thái cuối trước khi bị chuyển trang.
+    const handleBattleEnded = () => {
+      setTimeout(() => {
+        if (isMountedRef.current) {
+          navigate(`${BATTLE_ROUTES.RESULT}/${battleId}`);
+        }
+      }, CORRECT_FEEDBACK_DELAY_MS);
+    };
+
+    socket.on('battle-started', handleBattleStarted);
+    socket.on('opponent-correct', handleOpponentCorrect);
+    socket.on('timer-tick', handleTimerTick);
+    socket.on('battle-ended', handleBattleEnded);
+
+    return () => {
+      socket.off('battle-started', handleBattleStarted);
+      socket.off('opponent-correct', handleOpponentCorrect);
+      socket.off('timer-tick', handleTimerTick);
+      socket.off('battle-ended', handleBattleEnded);
+      disconnectBattleSocket();
+    };
+  }, [battleId, navigate]);
 
   const formatTime = (seconds: number) => {
     const min = Math.floor(seconds / 60)
@@ -79,25 +129,31 @@ export const useBattleArena = (battleId: string | undefined) => {
     return `${min}:${sec}`;
   };
 
-  const mockUserId = localStorage.getItem('mockUserId') ?? '';
-  const me = battle?.players.find((p) => p.userId === mockUserId) ?? null;
-  const opponent = battle?.players.find((p) => p.userId !== mockUserId) ?? null;
+  const myUserId = user?.id ?? '';
+  const me = battle?.players.find((p) => p.userId === myUserId) ?? null;
+  const opponent = battle?.players.find((p) => p.userId !== myUserId) ?? null;
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (language: string) => {
     if (!battle || !battleId || isSubmitting) return;
 
     const currentQuestion = battle.questions[currentQuestionIndex];
-
     if (!currentQuestion) return;
 
     setIsSubmitting(true);
     setSubmitResult(null);
+    localStorage.setItem(
+      `battleLang:${battleId}:${currentQuestion.questionId}`,
+      language
+    );
 
     try {
       const result = await submitAnswer(battleId, {
         questionId: currentQuestion.questionId,
         answer: code,
       });
+
+      if (!isMountedRef.current) return;
+
       setSubmitResult({
         isCorrect: result.isCorrect,
         message: result.message,
@@ -106,24 +162,34 @@ export const useBattleArena = (battleId: string | undefined) => {
 
       if (result.isCorrect) {
         const nextIndex = currentQuestionIndex + 1;
-        if (nextIndex >= battle.questions.length) {
-          navigate(`${BATTLE_ROUTES.RESULT}/${battle._id}`);
-        } else {
-          setCurrentQuestionIndex(nextIndex);
-          setCode('// Write your answer here\n');
-          setSubmitResult(null);
-        }
+        advanceTimeoutRef.current = setTimeout(() => {
+          if (!isMountedRef.current) return;
+
+          // Nếu còn câu tiếp theo → chuyển câu cục bộ.
+          // Nếu đây là câu cuối → KHÔNG tự navigate nữa, chờ
+          // socket 'battle-ended' xử lý (xem effect Socket phía trên).
+          if (nextIndex < battle.questions.length) {
+            setCurrentQuestionIndex(nextIndex);
+            setCode('// Write your answer here\n');
+            setSubmitResult(null);
+          }
+        }, CORRECT_FEEDBACK_DELAY_MS);
       }
     } catch {
-      setSubmitResult({
-        isCorrect: false,
-        message: 'Submit failed. Please try again.',
-        points: 0,
-      });
+      if (isMountedRef.current) {
+        setSubmitResult({
+          isCorrect: false,
+          message: 'Submit failed. Please try again.',
+          points: 0,
+        });
+      }
     } finally {
-      setIsSubmitting(false);
+      if (isMountedRef.current) setIsSubmitting(false);
     }
   };
+
+  const dismissFeedback = () => setSubmitResult(null);
+
   const isWaiting = battle?.status === 'WAITING';
 
   return {
@@ -140,6 +206,7 @@ export const useBattleArena = (battleId: string | undefined) => {
     isSubmitting,
     submitResult,
     handleSubmit,
+    dismissFeedback,
     isWaiting,
   };
 };

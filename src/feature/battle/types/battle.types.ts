@@ -1,5 +1,5 @@
 export type BattleField = 'FE' | 'BE';
-export type BattleMode = 'speed' | 'performance';
+export type BattleMode = 'SPEED' | 'PERFORMANCE';
 export type BattleStatus =
   | 'WAITING'
   | 'IN_PROGRESS'
@@ -51,4 +51,51 @@ export interface SubmitAnswerResponse {
   currentScore: number;
   currentQuestionIndex: number;
   message: string;
+}
+
+export type ResultType = 'victory' | 'defeat' | 'draw';
+
+export interface BattleSubmission {
+  _id: string;
+  battleId: string;
+  userId: string;
+  questionId: string;
+  answer: string;
+  isCorrect: boolean;
+  points: number;
+  timeSpent: number;
+  submittedAt: string;
+}
+
+export interface CodeAnalysisResource {
+  title: string;
+  url: string;
+}
+
+export interface CodeAnalysis {
+  _id: string;
+  battleId: string;
+  userId: string;
+  code: string;
+  language: string;
+  summary: string;
+  strengths: string[];
+  improvements: string[];
+  refactoringSuggestion: string;
+  resources: CodeAnalysisResource[];
+  status: 'pending' | 'completed' | 'failed';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateAnalysisPayload {
+  battleId: string;
+  code: string;
+  language: string;
+}
+export interface OpponentCorrectPayload {
+  userId: string;
+  questionId: string;
+  questionOrder: number;
+  currentScore: number;
 }

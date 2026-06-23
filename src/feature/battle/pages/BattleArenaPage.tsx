@@ -4,6 +4,7 @@ import Editor from '@monaco-editor/react';
 import SideNav from '../../../components/SideNav';
 import Header from '../../../components/layout/Header';
 import { useBattleArena } from '../hooks/useBattleArena';
+import SubmitFailedModal from '../components/SubmitFailedModal';
 
 const LANGUAGES = [
   { label: 'JavaScript', value: 'javascript' },
@@ -31,6 +32,7 @@ const BattleArenaPage = () => {
     isSubmitting,
     submitResult,
     handleSubmit,
+    dismissFeedback,
     isWaiting,
   } = useBattleArena(battleId);
 
@@ -199,30 +201,17 @@ const BattleArenaPage = () => {
                 </div>
 
                 {/* Feedback bar */}
-                {submitResult && (
-                  <div
-                    className={`rounded-xl border px-4 py-3 text-sm ${
-                      submitResult.isCorrect
-                        ? 'border-green-500/30 bg-green-500/10 text-green-400'
-                        : 'border-red-500/30 bg-red-500/10 text-red-400'
-                    }`}
-                  >
-                    <span className="font-semibold">
-                      {submitResult.isCorrect ? '✓ Correct' : '✗ Wrong'}
-                    </span>
+                {submitResult && submitResult.isCorrect && (
+                  <div className="rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-400">
+                    <span className="font-semibold">✓ Correct</span>
                     {' — '}
                     {submitResult.message}
-                    {!submitResult.isCorrect && submitResult.points !== 0 && (
-                      <span className="ml-2 text-xs opacity-70">
-                        ({submitResult.points} pts)
-                      </span>
-                    )}
                   </div>
                 )}
 
                 {/* Submit button */}
                 <button
-                  onClick={handleSubmit}
+                  onClick={() => handleSubmit(language)}
                   disabled={isSubmitting}
                   className="neon-btn w-full py-3 font-['Lexend'] font-semibold disabled:cursor-not-allowed disabled:opacity-50"
                 >
@@ -233,6 +222,13 @@ const BattleArenaPage = () => {
           </main>
         )}
       </div>
+      {submitResult && !submitResult.isCorrect && (
+        <SubmitFailedModal
+          message={submitResult.message}
+          points={submitResult.points}
+          onRetry={dismissFeedback}
+        />
+      )}
     </div>
   );
 };
