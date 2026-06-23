@@ -64,9 +64,10 @@ export default function RegisterPage() {
     setIsLoading(true);
     try {
       await registerApi({
-        name: form.username,
+        username: form.username,
         email: form.email,
         password: form.password,
+        confirmPassword: form.confirmPassword,
       });
 
       setForm({ username: '', email: '', password: '', confirmPassword: '' });

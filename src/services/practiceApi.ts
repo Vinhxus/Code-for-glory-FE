@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+import { request } from './apiClient';
 
 export type SubmissionStatus =
   | 'Accepted'
@@ -46,22 +46,6 @@ export type PracticeEvaluationPayload = {
   locale: 'vi' | 'en';
   nodeId?: string;
 };
-
-async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options?.headers || {}),
-    },
-    ...options,
-  });
-
-  if (!response.ok) {
-    throw new Error(`API request failed with status ${response.status}`);
-  }
-
-  return response.json() as Promise<T>;
-}
 
 export async function runPracticeCode(payload: PracticeEvaluationPayload) {
   return request<JudgeRunResult>('/exercises/run', {

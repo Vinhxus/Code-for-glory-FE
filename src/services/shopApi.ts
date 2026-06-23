@@ -1,30 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-function authHeader(): Record<string, string> {
-  const token = localStorage.getItem('access_token');
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
-
-async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...authHeader(),
-  };
-  if (options?.headers) {
-    Object.assign(headers, options.headers as Record<string, string>);
-  }
-
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    headers,
-    ...options,
-  });
-
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    throw new Error(payload?.message ?? `API request failed (${response.status})`);
-  }
-  return payload as T;
-}
+import { request } from './apiClient';
 
 export type ShopItem = {
   _id: string;
@@ -87,11 +61,16 @@ export async function getShopMe() {
   return request<ShopMe>(`/shop/me`);
 }
 
-export async function checkoutCart(items: Array<{ itemId: string; quantity: number }>) {
-  return request<{ coins: number; purchaseId: string; totalCoins: number }>(`/shop/checkout`, {
-    method: 'POST',
-    body: JSON.stringify({ items }),
-  });
+export async function checkoutCart(
+  items: Array<{ itemId: string; quantity: number }>
+) {
+  return request<{ coins: number; purchaseId: string; totalCoins: number }>(
+    `/shop/checkout`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ items }),
+    }
+  );
 }
 
 export async function claimDailyReward() {
