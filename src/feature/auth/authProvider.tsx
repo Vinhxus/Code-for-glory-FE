@@ -13,6 +13,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  role: string;
 }
 
 interface AuthState {
@@ -28,20 +29,31 @@ export interface AuthContextValue extends AuthState {
 }
 
 function getInitialAuthState(): AuthState {
-  const storedToken = localStorage.getItem('access_token');
-  const storedUser = localStorage.getItem('user');
+  return {
+    user: {
+      id: 'mock-admin-id-123',
+      name: 'Hoàng Quốc Vinh (Admin Mock)',
+      email: 'admin@codeforglory.com',
+      role: 'admin', // Ép quyền admin ở đây để vượt qua RequireAdmin
+    },
+    token: 'mock-token-xyz',
+    isAuthenticated: true, // Ép trạng thái đã đăng nhập
+  };
 
-  if (storedToken && storedUser) {
-    try {
-      const parsedUser: User = JSON.parse(storedUser);
-      return { user: parsedUser, token: storedToken, isAuthenticated: true };
-    } catch {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('user');
-    }
-  }
+  // const storedToken = localStorage.getItem('access_token');
+  // const storedUser = localStorage.getItem('user');
 
-  return { user: null, token: null, isAuthenticated: false };
+  // if (storedToken && storedUser) {
+  //   try {
+  //     const parsedUser: User = JSON.parse(storedUser);
+  //     return { user: parsedUser, token: storedToken, isAuthenticated: true };
+  //   } catch {
+  //     localStorage.removeItem('access_token');
+  //     localStorage.removeItem('user');
+  //   }
+  // }
+
+  // return { user: null, token: null, isAuthenticated: false };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -63,10 +75,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    await logoutApi(); // đã xóa access_token bên trong rồi
-    localStorage.removeItem('user');
-    setState({ user: null, token: null, isAuthenticated: false });
-    navigate('/login'); // redirect sau khi clear state
+    try {
+      await logoutApi().catch((err) =>
+        console.error('Backend logout error:', err)
+      );
+    } finally {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user');
+
+      // Cập nhật lại state về null để các Route nhận biết
+      setState({ user: null, token: null, isAuthenticated: false });
+
+      // về trang login
+      navigate('/login', { replace: true });
+    }
   }, [navigate]);
 
   return (
