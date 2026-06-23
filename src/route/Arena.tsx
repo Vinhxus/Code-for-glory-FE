@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import SideNav from '../components/SideNav';
 import { useSettingsStore } from '../store/settings';
+import { getLeaderboard, type LeaderboardRow } from '../services/battlesApi';
 
 const LIVE_MATCHES = [
   {
@@ -22,6 +24,22 @@ const LIVE_MATCHES = [
 export default function Arena() {
   const language = useSettingsStore((s) => s.language);
   const isVi = language === 'vi';
+
+  // Bảng xếp hạng thật (mặc định lĩnh vực frontend — chưa có bộ chọn field).
+  const [leaders, setLeaders] = useState<LeaderboardRow[]>([]);
+  useEffect(() => {
+    let active = true;
+    getLeaderboard('frontend', 5)
+      .then((rows) => {
+        if (active) setLeaders(rows);
+      })
+      .catch(() => {
+        if (active) setLeaders([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
   const text = isVi
     ? {
         title: 'Đấu Trường',
@@ -133,22 +151,30 @@ export default function Arena() {
                 {text.top}
               </h2>
               <div className="glass-card p-5 space-y-4">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between border-b border-[color:var(--cg-border)] pb-3 last:border-0 last:pb-0"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs bg-[color:var(--cg-container-a30)]">
-                        #{i}
-                      </div>
-                      <div className="font-bold text-sm">Player_{i}</div>
-                    </div>
-                    <div className="text-xs font-bold text-[#fbbf24]">
-                      {10 - i}M XP
-                    </div>
+                {leaders.length === 0 ? (
+                  <div className="text-xs text-[color:var(--cg-text-muted)] py-2">
+                    {isVi
+                      ? 'Chưa có dữ liệu xếp hạng.'
+                      : 'No ranking data yet.'}
                   </div>
-                ))}
+                ) : (
+                  leaders.map((row) => (
+                    <div
+                      key={row.userId}
+                      className="flex items-center justify-between border-b border-[color:var(--cg-border)] pb-3 last:border-0 last:pb-0"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs bg-[color:var(--cg-container-a30)]">
+                          #{row.rank}
+                        </div>
+                        <div className="font-bold text-sm">{row.username}</div>
+                      </div>
+                      <div className="text-xs font-bold text-[#fbbf24]">
+                        {row.ratingPoints} pts
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
