@@ -72,23 +72,12 @@ export default function RegisterPage() {
       });
 
       setForm({ username: '', email: '', password: '', confirmPassword: '' });
-      setSuccessMsg('Tạo tài khoản thành công! Đang chuyển hướng...');
+      setSuccessMsg('Success! Navigate to login...');
 
       setTimeout(() => navigate('/'), 1200);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to register';
-      const lower = message.toLowerCase();
-
-      // Nếu lỗi mảng hoặc chuỗi từ NestJS validator (ví dụ: confirm password must match)
-      if (lower.includes('confirm')) {
-        setErrors({ confirmPassword: 'Mật khẩu xác nhận không trùng khớp!' });
-      } else if (lower.includes('email')) {
-        setErrors({ email: 'Email đã tồn tại trên hệ thống!' });
-      } else if (lower.includes('username') || lower.includes('name')) {
-        setErrors({ username: 'Tên người dùng đã tồn tại hoặc không hợp lệ!' });
-      } else {
-        setErrors({ general: message });
-      }
+      setErrors({ general: message });
     } finally {
       setIsLoading(false);
     }

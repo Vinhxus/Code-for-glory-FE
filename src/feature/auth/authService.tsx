@@ -4,10 +4,10 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
-  username: string; // Đổi từ name -> username
+  username: string;
   email: string;
   password: string;
-  confirmPassword: string; // Thêm trường này vào interface nếu chưa có
+  confirmPassword: string;
 }
 export interface AuthResponse {
   token: string;
@@ -19,7 +19,6 @@ export interface AuthResponse {
   };
 }
 
-// Cấu trúc map chính xác theo dữ liệu từ NestJS Backend
 interface LoginRawResponse {
   message: string;
   accessToken: string; // NestJS trả về accessToken thay vì access_token
@@ -72,7 +71,12 @@ export async function registerApi(data: RegisterRequest): Promise<void> {
   const res = await fetch(`${BASE_URL}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
+    body: JSON.stringify({
+      username: data.username.trim(),
+      email: data.email.toLowerCase().trim(),
+      password: data.password,
+      confirmPassword: data.confirmPassword,
+    }),
   });
   await handleResponse<unknown>(res);
 }
