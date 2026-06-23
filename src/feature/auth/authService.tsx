@@ -4,11 +4,11 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
-  name: string;
+  username: string; // Đổi từ name -> username
   email: string;
   password: string;
+  confirmPassword: string; // Thêm trường này vào interface nếu chưa có
 }
-
 export interface AuthResponse {
   token: string;
   user: {
