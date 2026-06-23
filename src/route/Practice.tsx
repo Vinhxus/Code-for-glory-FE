@@ -2899,25 +2899,32 @@ function Practice() {
       setCooldownTime(0);
       setIsLocked(false);
 
-      if (nodeId) {
-        await updateNodeProgress(nodeId, {
-          status: 'completed',
-          quizScore: 10,
-        });
-      }
-
+      // Show success toast immediately — accepted regardless of progress sync
       showToast(
         isVi
           ? `🎉 Submit thành công cho bài ${currentPractice.title}.`
           : `🎉 Submission accepted for ${currentPractice.title}.`,
         'success'
       );
+
+      // Sync learning-path progress separately — don't let failures block the UX
+      if (nodeId) {
+        try {
+          await updateNodeProgress(nodeId, {
+            status: 'completed',
+            quizScore: 10,
+          });
+        } catch (progressError) {
+          // Non-critical: practice submission already recorded; just log quietly
+          console.warn('Could not sync learning-path progress:', progressError);
+        }
+      }
     } catch (error) {
-      console.error('Lỗi cập nhật tiến độ:', error);
+      console.error('Lỗi submit:', error);
       showToast(
         isVi
-          ? 'Có lỗi xảy ra khi lưu tiến độ. Vui lòng thử lại!'
-          : 'Something went wrong while saving progress. Please try again.',
+          ? 'Có lỗi xảy ra khi nộp bài. Vui lòng thử lại!'
+          : 'Something went wrong while submitting. Please try again.',
         'error'
       );
     } finally {
