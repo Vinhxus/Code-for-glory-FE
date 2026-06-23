@@ -48,16 +48,16 @@ const NODES: MapNode[] = [
   {
     id: 'addnode',
     label: 'Add Node',
-    x: 760,
-    y: 180,
+    x: 690,
+    y: 100,
     state: 'locked',
     icon: 'add',
   },
   {
     id: 'backend',
     label: 'Node Backend',
-    x: 605,
-    y: 315,
+    x: 670,
+    y: 330,
     state: 'locked',
     icon: 'lock',
   },
@@ -149,10 +149,10 @@ function Connector({ from, to, dashed }: MapEdge) {
   if (!nodeA || !nodeB) return null;
 
   // +32 = bán kính node (h-16 w-16 = 64px) để lấy đúng tâm
-  const x1 = nodeA.x + 32;
-  const y1 = nodeA.y + 32;
-  const x2 = nodeB.x + 32;
-  const y2 = nodeB.y + 32;
+  const x1 = nodeA.x;
+  const y1 = nodeA.y;
+  const x2 = nodeB.x;
+  const y2 = nodeB.y;
 
   const active = nodeA.state !== 'locked' && nodeB.state !== 'locked';
 
