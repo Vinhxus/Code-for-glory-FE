@@ -29,31 +29,20 @@ export interface AuthContextValue extends AuthState {
 }
 
 function getInitialAuthState(): AuthState {
-  return {
-    user: {
-      id: 'mock-admin-id-123',
-      name: 'Hoàng Quốc Vinh (Admin Mock)',
-      email: 'admin@codeforglory.com',
-      role: 'admin', // Ép quyền admin ở đây để vượt qua RequireAdmin
-    },
-    token: 'mock-token-xyz',
-    isAuthenticated: true, // Ép trạng thái đã đăng nhập
-  };
+  const storedToken = localStorage.getItem('access_token');
+  const storedUser = localStorage.getItem('user');
 
-  // const storedToken = localStorage.getItem('access_token');
-  // const storedUser = localStorage.getItem('user');
+  if (storedToken && storedUser) {
+    try {
+      const parsedUser: User = JSON.parse(storedUser);
+      return { user: parsedUser, token: storedToken, isAuthenticated: true };
+    } catch {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user');
+    }
+  }
 
-  // if (storedToken && storedUser) {
-  //   try {
-  //     const parsedUser: User = JSON.parse(storedUser);
-  //     return { user: parsedUser, token: storedToken, isAuthenticated: true };
-  //   } catch {
-  //     localStorage.removeItem('access_token');
-  //     localStorage.removeItem('user');
-  //   }
-  // }
-
-  // return { user: null, token: null, isAuthenticated: false };
+  return { user: null, token: null, isAuthenticated: false };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
