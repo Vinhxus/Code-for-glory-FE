@@ -39,20 +39,14 @@ export default function RegisterPage() {
   const validate = (): boolean => {
     const newErrors: FieldError = {};
 
-    // 1. Validate Username (Từ 3-32 ký tự, không chứa ký tự lạ)
-    const usernameRegex = /^[a-zA-Z0-9_]+$/;
-    if (form.username.length < 3 || form.username.length > 32) {
-      newErrors.username = 'Username must be between 3 and 32 characters';
-    } else if (!usernameRegex.test(form.username)) {
-      newErrors.username =
-        'Username can only contain letters, numbers and underscore';
+    if (form.username.length < 3) {
+      newErrors.username = 'Username must be at least 3 characters';
     }
 
-    // 2. Validate Password length (Tối thiểu 8 ký tự)
     if (form.password.length < 8) {
+      // Khớp với @MinLength(8) của Backend
       newErrors.password = 'Password must be at least 8 characters';
     } else {
-      // 3. Validate chữ và số trong Password
       const hasLetter = /[a-zA-Z]/.test(form.password);
       const hasNumber = /[0-9]/.test(form.password);
       if (!hasLetter || !hasNumber) {
@@ -61,10 +55,8 @@ export default function RegisterPage() {
       }
     }
 
-    // 4. Validate Confirm Password trùng khớp
     if (form.password !== form.confirmPassword) {
-      newErrors.confirmPassword =
-        'Confirm password must be similar to password';
+      newErrors.confirmPassword = 'Confirm password must match';
     }
 
     setErrors(newErrors);

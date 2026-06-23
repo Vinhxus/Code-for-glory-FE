@@ -53,16 +53,20 @@ export async function loginApi(data: LoginRequest): Promise<AuthResponse> {
 
   const raw = await handleResponse<LoginRawResponse>(res);
 
-  // Lưu đúng trường accessToken từ NestJS
+  // Nếu login thất bại hoặc không có token, không làm tiếp
+  if (!raw || !raw.accessToken) {
+    throw new Error('Đăng nhập thất bại: Không nhận được token từ hệ thống.');
+  }
+
   localStorage.setItem('access_token', raw.accessToken);
 
   return {
     token: raw.accessToken,
     user: {
-      id: raw.user._id,
-      email: raw.user.email,
-      name: raw.user.name,
-      role: raw.user.role,
+      id: raw.user?._id ?? '', // Dùng ?. và giá trị mặc định để an toàn
+      email: raw.user?.email ?? '',
+      name: raw.user?.name ?? '',
+      role: raw.user?.role ?? 'user',
     },
   };
 }
