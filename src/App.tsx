@@ -35,6 +35,8 @@ import { ProtectedRoute } from './feature/auth/protectedRoute'; // Đảm bảo 
 import RequireAdmin from './feature/auth/RequireAdmin';
 import QuestNodeEditor from './feature/admin/QuestNodeEditor';
 import NodeDetail from './feature/admin/NodeDetail';
+import BattleAdmin from './feature/admin/BattleAdmin';
+import CreateBattleProblem from './feature/admin/createBattleProblem';
 
 function App() {
   return (
@@ -84,13 +86,26 @@ function App() {
       </Route>
 
       {/* Admin*/}
-      <Route path="/admin/quest-node">
-        <Route index element={<QuestNodeEditor />} />
-        <Route path=":nodeId" element={<NodeDetail />} />
-      </Route>
+      <Route
+        element={
+          <RequireAdmin>
+            {/* Thẻ cha trống đóng vai trò như một Layout/Guard chung */}
+            <ProtectedRoute />
+          </RequireAdmin>
+        }
+      >
+        {/* Trang bản đồ lộ trình Admin tổng quan: /admin/quest-node */}
+        <Route path="/admin/quest-node">
+          <Route index element={<QuestNodeEditor />} />
+          <Route path=":nodeId" element={<NodeDetail />} />
+        </Route>
 
-      {/* Điều hướng tất cả các link không tồn tại về trang chủ */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+        {/* Trang Quản lý kịch bản Battle Admin: /admin/battle */}
+        <Route path="/admin/battle" element={<BattleAdmin />} />
+
+        {/* Đăng ký Route tạo bài tập mới tại đây */}
+        <Route path="/admin/battle/create" element={<CreateBattleProblem />} />
+      </Route>
     </Routes>
   );
 }

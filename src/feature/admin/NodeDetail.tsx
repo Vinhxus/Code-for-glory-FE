@@ -105,12 +105,15 @@ function SectionCard({
   );
 }
 
+// 🛠️ CẬP NHẬT: Thêm onChangeTitle vào định nghĩa Props của LessonRow
 function LessonRow({
   lesson,
   onDelete,
+  onChangeTitle,
 }: {
   lesson: Lesson;
   onDelete: (id: string) => void;
+  onChangeTitle: (newTitle: string) => void; // Khai báo prop mới ở đây
 }) {
   return (
     <div
@@ -132,8 +135,15 @@ function LessonRow({
       </span>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold">{lesson.title}</p>
-        <p className="text-xs" style={{ color: 'var(--cg-text-muted)' }}>
+        {/* 🛠️ THAY ĐỔI CỐT LÕI: Biến thẻ <p> thành thẻ <input> để cho phép gõ chữ sửa tên bài học */}
+        <input
+          type="text"
+          value={lesson.title}
+          onChange={(e) => onChangeTitle(e.target.value)}
+          className="w-full bg-transparent border-none text-sm font-semibold outline-none focus:text-[color:var(--cg-coral)]"
+          style={{ color: 'var(--cg-text)' }}
+        />
+        <p className="text-xs mt-0.5" style={{ color: 'var(--cg-text-muted)' }}>
           {LESSON_TYPE_LABEL[lesson.type]} • {lesson.meta}
         </p>
       </div>
@@ -151,7 +161,7 @@ function LessonRow({
       <button
         onClick={() => onDelete(lesson.id)}
         aria-label={`Xóa ${lesson.title}`}
-        className="shrink-0 p-1"
+        className="shrink-0 p-1 cursor-pointer hover:text-red-400 transition-colors"
         style={{ color: 'var(--cg-text-muted)' }}
       >
         <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
@@ -193,6 +203,17 @@ export default function NodeDetail() {
     if (val && !tags.includes(val)) setTags((cur) => [...cur, val]);
     setNewTag('');
     setAddingTag(false);
+  };
+
+  const handleUpdateLessonByIndex = (
+    index: number,
+    updatedFields: Partial<Lesson>
+  ) => {
+    setLessons((curLessons) =>
+      curLessons.map((lesson, i) =>
+        i === index ? { ...lesson, ...updatedFields } : lesson
+      )
+    );
   };
 
   return (
@@ -331,13 +352,20 @@ export default function NodeDetail() {
               }
             >
               <div className="flex flex-col gap-2.5">
-                {lessons.map((lesson) => (
-                  <LessonRow
-                    key={lesson.id}
-                    lesson={lesson}
-                    onDelete={removeLesson}
-                  />
-                ))}
+                <div className="flex flex-col gap-2.5">
+                  {lessons.map((lesson, index) => (
+                    <LessonRow
+                      key={lesson.id}
+                      lesson={lesson}
+                      onDelete={removeLesson}
+                      // 🛠️ THAY ĐỔI: Nếu component LessonRow của bạn có ô input sửa tên, hãy truyền prop này vào
+                      onChangeTitle={(newTitle) =>
+                        handleUpdateLessonByIndex(index, { title: newTitle })
+                      }
+                    />
+                  ))}
+                  {/* ... đoạn check độ dài mảng rỗng */}
+                </div>
                 {lessons.length === 0 && (
                   <p
                     className="py-4 text-center text-sm"
