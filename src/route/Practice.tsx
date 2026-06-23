@@ -3419,7 +3419,7 @@ function Practice() {
   }
 
   return (
-    <div className="h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)] selection:bg-[color:var(--cg-coral-a18)] select-none overflow-hidden flex flex-col">
+    <div className="h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)] selection:bg-[color:var(--cg-coral-a18)] overflow-hidden flex flex-col">
       {/* Toast notifications */}
       {toast && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[999] animate-bounce-in max-w-md w-full px-4">
