@@ -1,28 +1,18 @@
 import { type ReactNode } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from './useAuth';
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from './useAuth'; // Thay đổi đường dẫn cho đúng nếu cần
 
 interface RequireAdminProps {
-  children: ReactNode;
-  /** Trang để redirect khi đăng nhập rồi nhưng không phải admin. */
-  redirectTo?: string;
+  children?: ReactNode; // Đổi thành dấu '?' để children trở thành OPTIONAL (không bắt buộc)
 }
 
-export default function RequireAdmin({
-  children,
-  redirectTo = '/',
-}: RequireAdminProps) {
+export default function RequireAdmin({ children }: RequireAdminProps) {
   const { user, isAuthenticated } = useAuth();
-  const location = useLocation();
 
-  // Chưa đăng nhập -> về /login, nhớ trang muốn vào để quay lại sau khi login
-  if (!isAuthenticated || !user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  // 1. Nếu chưa đăng nhập hoặc không phải admin, về trang chủ hoặc trang login
+  if (!isAuthenticated || user?.role !== 'admin') {
+    return <Navigate to="/" replace />;
   }
 
-  if (user.role !== 'admin') {
-    return <Navigate to={redirectTo} replace />;
-  }
-
-  return <>{children}</>;
+  return children ? <>{children}</> : <Outlet />;
 }

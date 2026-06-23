@@ -31,7 +31,7 @@ import RegisterPage from './feature/auth/registerPage';
 import ForgotPasswordPage from './feature/auth/forgotPasswordPage';
 
 // Route Guards (Bảo mật)
-import { ProtectedRoute } from './feature/auth/protectedRoute'; // Đảm bảo đúng path tới file protectedRoute của bạn
+import { ProtectedRoute } from './feature/auth/protectedRoute';
 import RequireAdmin from './feature/auth/RequireAdmin';
 import QuestNodeEditor from './feature/admin/QuestNodeEditor';
 import NodeDetail from './feature/admin/NodeDetail';
@@ -41,14 +41,14 @@ import CreateBattleProblem from './feature/admin/createBattleProblem';
 function App() {
   return (
     <Routes>
-      {/* Public */}
+      {/* ================= PUBLIC ROUTES ================= */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
 
-      {/*ROUTES BẮT BUỘC ĐĂNG NHẬP (PROTECTED)*/}
+      {/* ================= PROTECTED ROUTES (USER) ================= */}
       {/* Nếu chưa đăng nhập, ProtectedRoute tự động đưa user về trang /login */}
       <Route element={<ProtectedRoute />}>
         {profileRoutes()}
@@ -83,29 +83,31 @@ function App() {
         <Route path="/mobile" element={<Mobile />} />
         <Route path="/shop" element={<Shop />} />
         <Route path="/home" element={<Navigate to="/" replace />} />
-      </Route>
 
-      {/* Admin*/}
-      <Route
-        element={
-          <RequireAdmin>
-            {/* Thẻ cha trống đóng vai trò như một Layout/Guard chung */}
-            <ProtectedRoute />
-          </RequireAdmin>
-        }
-      >
-        {/* Trang bản đồ lộ trình Admin tổng quan: /admin/quest-node */}
-        <Route path="/admin/quest-node">
-          <Route index element={<QuestNodeEditor />} />
-          <Route path=":nodeId" element={<NodeDetail />} />
+        {/* ================= PROTECTED ROUTES (ADMIN ONLY) ================= */}
+        {/* Lồng thẳng quyền Admin vào bên trong ProtectedRoute để vừa check đăng nhập, vừa check quyền Admin chuẩn xác */}
+        <Route element={<RequireAdmin />}>
+          {/* Trang bản đồ lộ trình Admin tổng quan: /admin/quest-node */}
+          <Route path="/admin/quest-node">
+            <Route index element={<QuestNodeEditor />} />
+            <Route path=":nodeId" element={<NodeDetail />} />
+          </Route>
+
+          {/* Trang Quản lý kịch bản Battle Admin: /admin/battle */}
+          <Route path="/admin/battle" element={<BattleAdmin />} />
+
+          {/* Đăng ký Route tạo bài tập mới tại đây */}
+          <Route
+            path="/admin/battle/create"
+            element={<CreateBattleProblem />}
+          />
         </Route>
-
-        {/* Trang Quản lý kịch bản Battle Admin: /admin/battle */}
-        <Route path="/admin/battle" element={<BattleAdmin />} />
-
-        {/* Đăng ký Route tạo bài tập mới tại đây */}
-        <Route path="/admin/battle/create" element={<CreateBattleProblem />} />
       </Route>
+
+      {/* ================= CATCH ALL (404 SAFETY NET) ================= */}
+      {/* Nếu người dùng gõ URL bậy bạ không khớp, tự động đẩy về trang chủ. 
+          Nếu chưa đăng nhập, luồng ProtectedRoute ở trên sẽ tự xử lý đẩy ra /login */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
