@@ -1,4 +1,4 @@
-import React, { useMemo, useState, type FC } from 'react';
+import React, { useMemo, useState, type FC, useEffect } from 'react';
 import './Saved.css';
 
 interface LoreItem {
@@ -71,35 +71,40 @@ const LoreCard: FC<LoreCardProps> = ({ data, onRemoveBookmark }) => {
   );
 };
 
-const INITIAL_LORE_DATA: LoreItem[] = [
-  {
-    id: '1',
-    title: 'The Sigils of State',
-    description:
-      'Mastering complex state management using custom hooks and the Context API within the...',
-    bannerUrl: 'https://picsum.photos/id/1005/400/250',
-    tags: ['React', 'Advanced Architecture'],
-    isBookmarked: true,
-  },
-  {
-    id: '2',
-    title: 'Asynchronous Alchemy',
-    description:
-      'Optimizing event-loop performance for high-throughput digital environments using advanced...',
-    bannerUrl: 'https://picsum.photos/id/1018/400/250',
-    tags: ['Node.js', 'Performance'],
-    isBookmarked: true,
-  },
-];
-
 export const Saved: React.FC = () => {
-  const [loreList, setLoreList] = useState<LoreItem[]>(INITIAL_LORE_DATA);
+  const [loreList, setLoreList] = useState<LoreItem[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const handleRemoveBookmark = (id: string) => {
-    setLoreList((prevList) => prevList.filter((item) => item.id !== id));
+  // Fetch dữ liệu bài đã lưu khi vào tab (Hook luôn ở trên đầu)
+  useEffect(() => {
+    fetch('/api/history/saved')
+      .then((res) => res.json())
+      .then((data: LoreItem[]) => {
+        setLoreList(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  // Logic xóa bookmark
+  const handleRemoveBookmark = async (id: string) => {
+    try {
+      const res = await fetch(`/api/history/saved/${id}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        setLoreList((prevList) => prevList.filter((item) => item.id !== id));
+      }
+    } catch (err) {
+      console.error('Error deleting bookmark:', err);
+    }
   };
 
+  // Khai báo useMemo
   const filteredLore = useMemo(() => {
     return loreList.filter(
       (item) =>
@@ -109,6 +114,14 @@ export const Saved: React.FC = () => {
         )
     );
   }, [loreList, searchQuery]);
+
+  if (loading) {
+    return (
+      <div className="lore-container" style={{ color: 'var(--cg-text-muted)' }}>
+        Scrolls loading...
+      </div>
+    );
+  }
 
   return (
     <div className="lore-container animate-fade-in-up">
