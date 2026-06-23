@@ -19,10 +19,15 @@ export interface AuthResponse {
   };
 }
 
+// Cấu trúc map chính xác theo dữ liệu từ NestJS Backend
 interface LoginRawResponse {
-  access_token: string;
+  message: string;
+  accessToken: string; // NestJS trả về accessToken thay vì access_token
+  refreshToken: string;
+  accessExpiresIn: number;
   user: {
     _id: string;
+    email: string;
     name: string;
     role: string;
     is_first_login: boolean;
@@ -48,14 +53,15 @@ export async function loginApi(data: LoginRequest): Promise<AuthResponse> {
   });
 
   const raw = await handleResponse<LoginRawResponse>(res);
-  // Lưu token để các API khác (Shop, v.v.) có thể dùng Authorization header
-  localStorage.setItem('access_token', raw.access_token);
+
+  // Lưu đúng trường accessToken từ NestJS
+  localStorage.setItem('access_token', raw.accessToken);
 
   return {
-    token: raw.access_token,
+    token: raw.accessToken,
     user: {
       id: raw.user._id,
-      email: data.email,
+      email: raw.user.email,
       name: raw.user.name,
       role: raw.user.role,
     },
@@ -73,8 +79,6 @@ export async function registerApi(data: RegisterRequest): Promise<void> {
 
 export async function logoutApi(): Promise<void> {
   const token = localStorage.getItem('access_token');
-
-  // Xóa token trước để dù API lỗi vẫn logout được
   localStorage.removeItem('access_token');
 
   try {

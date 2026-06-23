@@ -18,6 +18,7 @@ export default function RegisterPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const { register } = useAuth(); // Lấy hàm register từ useAuth
   const [form, setForm] = useState({
     username: '',
     email: '',
@@ -63,23 +64,26 @@ export default function RegisterPage() {
 
     setIsLoading(true);
     try {
-      await registerApi({
+      // Gọi qua context để thực hiện đăng ký + đăng nhập tự động
+      await register({
         name: form.username,
         email: form.email,
         password: form.password,
       });
 
       setForm({ username: '', email: '', password: '', confirmPassword: '' });
-      setSuccessMsg('Create account successful, please sign in');
-      setTimeout(() => navigate('/login'), 1000);
+      setSuccessMsg('Tạo tài khoản thành công! Đang chuyển hướng...');
+
+      // Chuyển thẳng về trang chủ sau khi đăng nhập thành công
+      setTimeout(() => navigate('/'), 1200);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to register';
       const lower = message.toLowerCase();
 
       if (lower.includes('email')) {
-        setErrors({ email: 'Email has already existed!' });
+        setErrors({ email: 'Email đã tồn tại trên hệ thống!' });
       } else if (lower.includes('username') || lower.includes('name')) {
-        setErrors({ username: 'Username has already existed!' });
+        setErrors({ username: 'Tên người dùng đã tồn tại!' });
       } else {
         console.error('Register error from BE:', message);
         setErrors({ general: message });
