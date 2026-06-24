@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import {
-  ForumUser,
   getUserProfile,
   sendFriendRequest,
   followUser,
   unfollowUser,
 } from '../services/forumApi';
+import type { ForumUser } from '../services/forumApi';
 import { useSettingsStore } from '../store/settings';
 
 interface UserProfileModalProps {

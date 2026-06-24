@@ -3,12 +3,8 @@ import SideNav from '../components/SideNav';
 import { useSettingsStore } from '../store/settings';
 import UserProfileModal from '../components/UserProfileModal';
 import FriendsSidebar from '../components/FriendsSidebar';
-import {
-  getPosts,
-  createPost,
-  reactToPost,
-  ForumPost,
-} from '../services/forumApi';
+import { getPosts, createPost, reactToPost } from '../services/forumApi';
+import type { ForumPost } from '../services/forumApi';
 
 type Channel = {
   id: string;
@@ -24,6 +20,7 @@ type Channel = {
 type ChatMessage = {
   id: string;
   author: string;
+  authorId?: string;
   role?: 'mentor' | 'builder' | 'member' | 'you';
   time: string;
   body: string;

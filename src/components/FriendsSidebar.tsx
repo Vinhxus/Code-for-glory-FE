@@ -4,9 +4,8 @@ import {
   acceptFriendRequest,
   rejectFriendRequest,
   getFriends,
-  ForumUser,
-  FriendRequest,
 } from '../services/forumApi';
+import type { ForumUser, FriendRequest } from '../services/forumApi';
 import { useSettingsStore } from '../store/settings';
 
 export default function FriendsSidebar() {
