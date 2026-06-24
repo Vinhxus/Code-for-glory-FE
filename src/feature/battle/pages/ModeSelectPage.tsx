@@ -49,7 +49,7 @@ const ModeSelectPage = () => {
   const navigate = useNavigate();
   const { field, setBattleMode, setBattleId } = useBattleStore();
 
-  const [selectedMode, setSelectedMode] = useState<BattleMode>('performance');
+  const [selectedMode, setSelectedMode] = useState<BattleMode>('PERFORMANCE');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
