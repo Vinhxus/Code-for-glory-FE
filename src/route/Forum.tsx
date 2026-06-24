@@ -1,6 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import SideNav from '../components/SideNav';
 import { useSettingsStore } from '../store/settings';
+import UserProfileModal from '../components/UserProfileModal';
+import FriendsSidebar from '../components/FriendsSidebar';
+import {
+  getPosts,
+  createPost,
+  reactToPost,
+  ForumPost,
+} from '../services/forumApi';
 
 type Channel = {
   id: string;
@@ -133,7 +141,8 @@ export default function Forum() {
               name: 'show-your-work',
               group: 'community',
               badge: 'Build',
-              topic: 'Khoe mini project, landing page, challenge và milestone mới.',
+              topic:
+                'Khoe mini project, landing page, challenge và milestone mới.',
               presence: 58,
               unread: 9,
               pinned: 1,
@@ -142,7 +151,8 @@ export default function Forum() {
               id: 'general-chat',
               name: 'general-chat',
               group: 'community',
-              topic: 'Trò chuyện linh tinh, chia sẻ tài nguyên và rủ nhau học nhóm.',
+              topic:
+                'Trò chuyện linh tinh, chia sẻ tài nguyên và rủ nhau học nhóm.',
               presence: 91,
               unread: 1,
               pinned: 2,
@@ -154,7 +164,8 @@ export default function Forum() {
               name: 'getting-started',
               group: 'learning',
               badge: 'Starter',
-              topic: 'First questions about HTML, CSS, JS, and how to learn web dev.',
+              topic:
+                'First questions about HTML, CSS, JS, and how to learn web dev.',
               presence: 124,
               unread: 6,
               pinned: 2,
@@ -163,7 +174,8 @@ export default function Forum() {
               id: 'html-css-help',
               name: 'html-css-help',
               group: 'learning',
-              topic: 'Markup, layout, responsive behavior, and day-to-day UI fixes.',
+              topic:
+                'Markup, layout, responsive behavior, and day-to-day UI fixes.',
               presence: 86,
               unread: 2,
               pinned: 4,
@@ -172,7 +184,8 @@ export default function Forum() {
               id: 'js-basics',
               name: 'js-basics',
               group: 'learning',
-              topic: 'Variables, functions, async flows, array methods, and debugging.',
+              topic:
+                'Variables, functions, async flows, array methods, and debugging.',
               presence: 73,
               unread: 0,
               pinned: 3,
@@ -182,7 +195,8 @@ export default function Forum() {
               name: 'show-your-work',
               group: 'community',
               badge: 'Build',
-              topic: 'Share mini projects, landing pages, challenge wins, and milestones.',
+              topic:
+                'Share mini projects, landing pages, challenge wins, and milestones.',
               presence: 58,
               unread: 9,
               pinned: 1,
@@ -191,7 +205,8 @@ export default function Forum() {
               id: 'general-chat',
               name: 'general-chat',
               group: 'community',
-              topic: 'Casual conversation, resources, and finding people to study with.',
+              topic:
+                'Casual conversation, resources, and finding people to study with.',
               presence: 91,
               unread: 1,
               pinned: 2,
@@ -210,8 +225,7 @@ export default function Forum() {
                 author: 'NewbieDev',
                 role: 'member',
                 time: 'Hôm nay 10:42',
-                body:
-                  'Mình mới học HTML được hai hôm. Có cách nào để biết khi nào nên dùng `section`, khi nào nên dùng `div` không mọi người?',
+                body: 'Mình mới học HTML được hai hôm. Có cách nào để biết khi nào nên dùng `section`, khi nào nên dùng `div` không mọi người?',
                 accent: 'from-[#ff7e5f] to-[#fbbf24]',
                 replies: 4,
                 reactions: [
@@ -224,8 +238,7 @@ export default function Forum() {
                 author: 'Mentor_Alex',
                 role: 'mentor',
                 time: 'Hôm nay 10:45',
-                body:
-                  'Rule ngắn gọn: nếu block đó có ý nghĩa nội dung riêng và có thể đặt tiêu đề thì ưu tiên `section`; còn `div` chỉ nên là wrapper trung tính. Nếu bạn muốn, mình có thể chỉ luôn cách nhìn semantic cho một landing page nhỏ.',
+                body: 'Rule ngắn gọn: nếu block đó có ý nghĩa nội dung riêng và có thể đặt tiêu đề thì ưu tiên `section`; còn `div` chỉ nên là wrapper trung tính. Nếu bạn muốn, mình có thể chỉ luôn cách nhìn semantic cho một landing page nhỏ.',
                 accent: 'from-[#4ade80] to-[#22c55e]',
                 replies: 3,
                 reactions: [
@@ -238,8 +251,7 @@ export default function Forum() {
                 author: 'UI_Beans',
                 role: 'builder',
                 time: 'Hôm nay 10:47',
-                body:
-                  'Mình thường tự hỏi: nếu ngày mai bỏ hết CSS đi, block này còn có nghĩa gì với người đọc hay screen reader không? Nếu có thì nên semantic.',
+                body: 'Mình thường tự hỏi: nếu ngày mai bỏ hết CSS đi, block này còn có nghĩa gì với người đọc hay screen reader không? Nếu có thì nên semantic.',
                 accent: 'from-[#a78bfa] to-[#8b5cf6]',
                 reactions: [{ emoji: '👏', count: 6 }],
               },
@@ -250,8 +262,7 @@ export default function Forum() {
                 author: 'PixelMie',
                 role: 'builder',
                 time: 'Hôm nay 11:03',
-                body:
-                  'Có ai gặp lỗi card bị vỡ layout khi title dài quá không? Mình đang phân vân giữa `minmax`, `line-clamp` và `overflow-wrap`.',
+                body: 'Có ai gặp lỗi card bị vỡ layout khi title dài quá không? Mình đang phân vân giữa `minmax`, `line-clamp` và `overflow-wrap`.',
                 accent: 'from-[#38bdf8] to-[#3b82f6]',
                 replies: 8,
                 reactions: [{ emoji: '🧩', count: 4 }],
@@ -261,8 +272,7 @@ export default function Forum() {
                 author: 'CSS_Garden',
                 role: 'mentor',
                 time: 'Hôm nay 11:06',
-                body:
-                  'Nếu card grid thì mình ưu tiên `minmax()` cho cột, còn text dài thì thêm `overflow-wrap: anywhere;`. `line-clamp` chỉ xử lý phần hiển thị thôi.',
+                body: 'Nếu card grid thì mình ưu tiên `minmax()` cho cột, còn text dài thì thêm `overflow-wrap: anywhere;`. `line-clamp` chỉ xử lý phần hiển thị thôi.',
                 accent: 'from-[#4ade80] to-[#14b8a6]',
                 reactions: [{ emoji: '✅', count: 9 }],
               },
@@ -273,8 +283,7 @@ export default function Forum() {
                 author: 'LanCode',
                 role: 'member',
                 time: 'Hôm nay 09:18',
-                body:
-                  'Mình hay bị rối giữa `map`, `filter`, `find`. Có mn nào có mẹo nhớ nhanh không?',
+                body: 'Mình hay bị rối giữa `map`, `filter`, `find`. Có mn nào có mẹo nhớ nhanh không?',
                 accent: 'from-[#fb7185] to-[#f43f5e]',
                 replies: 5,
               },
@@ -283,8 +292,7 @@ export default function Forum() {
                 author: 'CoachMinh',
                 role: 'mentor',
                 time: 'Hôm nay 09:21',
-                body:
-                  '`map` biến đổi toàn bộ mảng, `filter` giữ lại vài phần tử, `find` lấy đúng một phần tử đầu tiên. Cứ nhớ câu này là đủ dùng 80% tình huống rồi.',
+                body: '`map` biến đổi toàn bộ mảng, `filter` giữ lại vài phần tử, `find` lấy đúng một phần tử đầu tiên. Cứ nhớ câu này là đủ dùng 80% tình huống rồi.',
                 accent: 'from-[#4ade80] to-[#22c55e]',
                 reactions: [{ emoji: '📝', count: 11 }],
               },
@@ -295,8 +303,7 @@ export default function Forum() {
                 author: 'AnTran',
                 role: 'builder',
                 time: 'Hôm nay 08:56',
-                body:
-                  'Mình vừa xong landing page đầu tiên bằng HTML/CSS thuần. Phần hero còn hơi cứng, ai rảnh xem giúp mình hierarchy với spacing được không?',
+                body: 'Mình vừa xong landing page đầu tiên bằng HTML/CSS thuần. Phần hero còn hơi cứng, ai rảnh xem giúp mình hierarchy với spacing được không?',
                 accent: 'from-[#f59e0b] to-[#ef4444]',
                 replies: 12,
                 reactions: [{ emoji: '🚀', count: 15 }],
@@ -308,8 +315,7 @@ export default function Forum() {
                 author: 'StudyBuddy',
                 role: 'member',
                 time: 'Hôm nay 12:10',
-                body:
-                  'Tối nay có ai muốn mở phòng pair study 45 phút không? Mình đang học Flexbox với semantic HTML.',
+                body: 'Tối nay có ai muốn mở phòng pair study 45 phút không? Mình đang học Flexbox với semantic HTML.',
                 accent: 'from-[#60a5fa] to-[#2563eb]',
                 replies: 9,
                 reactions: [{ emoji: '🙌', count: 8 }],
@@ -323,8 +329,7 @@ export default function Forum() {
                 author: 'NewbieDev',
                 role: 'member',
                 time: 'Today 10:42',
-                body:
-                  'I just started learning HTML. How do you decide when to use `section` versus `div` in a real page?',
+                body: 'I just started learning HTML. How do you decide when to use `section` versus `div` in a real page?',
                 accent: 'from-[#ff7e5f] to-[#fbbf24]',
                 replies: 4,
                 reactions: [
@@ -337,8 +342,7 @@ export default function Forum() {
                 author: 'Mentor_Alex',
                 role: 'mentor',
                 time: 'Today 10:45',
-                body:
-                  'Short rule: if the block carries standalone meaning and could reasonably have its own heading, prefer `section`; otherwise use `div` as a neutral wrapper. I can break it down with a landing-page example if you want.',
+                body: 'Short rule: if the block carries standalone meaning and could reasonably have its own heading, prefer `section`; otherwise use `div` as a neutral wrapper. I can break it down with a landing-page example if you want.',
                 accent: 'from-[#4ade80] to-[#22c55e]',
                 replies: 3,
                 reactions: [
@@ -351,8 +355,7 @@ export default function Forum() {
                 author: 'UI_Beans',
                 role: 'builder',
                 time: 'Today 10:47',
-                body:
-                  'I usually ask myself: if all CSS disappeared, would this block still communicate meaning to a reader or screen reader? If yes, it should probably be semantic.',
+                body: 'I usually ask myself: if all CSS disappeared, would this block still communicate meaning to a reader or screen reader? If yes, it should probably be semantic.',
                 accent: 'from-[#a78bfa] to-[#8b5cf6]',
                 reactions: [{ emoji: '👏', count: 6 }],
               },
@@ -363,8 +366,7 @@ export default function Forum() {
                 author: 'PixelMie',
                 role: 'builder',
                 time: 'Today 11:03',
-                body:
-                  'Does anyone else fight card layouts when the title gets too long? I am debating between `minmax`, `line-clamp`, and `overflow-wrap`.',
+                body: 'Does anyone else fight card layouts when the title gets too long? I am debating between `minmax`, `line-clamp`, and `overflow-wrap`.',
                 accent: 'from-[#38bdf8] to-[#3b82f6]',
                 replies: 8,
                 reactions: [{ emoji: '🧩', count: 4 }],
@@ -374,8 +376,7 @@ export default function Forum() {
                 author: 'CSS_Garden',
                 role: 'mentor',
                 time: 'Today 11:06',
-                body:
-                  'For grid cards I would start with `minmax()` for the columns, then add `overflow-wrap: anywhere;` for long text. `line-clamp` only controls the visible slice.',
+                body: 'For grid cards I would start with `minmax()` for the columns, then add `overflow-wrap: anywhere;` for long text. `line-clamp` only controls the visible slice.',
                 accent: 'from-[#4ade80] to-[#14b8a6]',
                 reactions: [{ emoji: '✅', count: 9 }],
               },
@@ -386,8 +387,7 @@ export default function Forum() {
                 author: 'LanCode',
                 role: 'member',
                 time: 'Today 09:18',
-                body:
-                  'I keep mixing up `map`, `filter`, and `find`. Does anyone have a quick way to remember them?',
+                body: 'I keep mixing up `map`, `filter`, and `find`. Does anyone have a quick way to remember them?',
                 accent: 'from-[#fb7185] to-[#f43f5e]',
                 replies: 5,
               },
@@ -396,8 +396,7 @@ export default function Forum() {
                 author: 'CoachMinh',
                 role: 'mentor',
                 time: 'Today 09:21',
-                body:
-                  '`map` transforms every item, `filter` keeps some items, and `find` returns the first matching item. That one sentence covers most day-to-day cases.',
+                body: '`map` transforms every item, `filter` keeps some items, and `find` returns the first matching item. That one sentence covers most day-to-day cases.',
                 accent: 'from-[#4ade80] to-[#22c55e]',
                 reactions: [{ emoji: '📝', count: 11 }],
               },
@@ -408,8 +407,7 @@ export default function Forum() {
                 author: 'AnTran',
                 role: 'builder',
                 time: 'Today 08:56',
-                body:
-                  'I just finished my first HTML/CSS landing page. The hero still feels stiff. If anyone has time, I would love feedback on the hierarchy and spacing.',
+                body: 'I just finished my first HTML/CSS landing page. The hero still feels stiff. If anyone has time, I would love feedback on the hierarchy and spacing.',
                 accent: 'from-[#f59e0b] to-[#ef4444]',
                 replies: 12,
                 reactions: [{ emoji: '🚀', count: 15 }],
@@ -421,8 +419,7 @@ export default function Forum() {
                 author: 'StudyBuddy',
                 role: 'member',
                 time: 'Today 12:10',
-                body:
-                  'Anyone interested in a 45-minute pair-study room tonight? I am reviewing Flexbox and semantic HTML.',
+                body: 'Anyone interested in a 45-minute pair-study room tonight? I am reviewing Flexbox and semantic HTML.',
                 accent: 'from-[#60a5fa] to-[#2563eb]',
                 replies: 9,
                 reactions: [{ emoji: '🙌', count: 8 }],
@@ -456,9 +453,17 @@ export default function Forum() {
   const [draft, setDraft] = useState('');
   const [messagesByChannel, setMessagesByChannel] =
     useState<Record<string, ChatMessage[]>>(initialMessages);
+  const [realPosts, setRealPosts] = useState<ForumPost[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
-  const activeChannel = channels.find((channel) => channel.id === activeChannelId) ?? channels[0];
+  const activeChannel =
+    channels.find((channel) => channel.id === activeChannelId) ?? channels[0];
   const activeMessages = messagesByChannel[activeChannelId] ?? [];
+
+  useEffect(() => {
+    // Fetch real posts when channel changes
+    getPosts(activeChannelId).then(setRealPosts).catch(console.error);
+  }, [activeChannelId]);
 
   const sendMessage = () => {
     const value = draft.trim();
@@ -477,6 +482,14 @@ export default function Forum() {
       ...prev,
       [activeChannelId]: [...(prev[activeChannelId] ?? []), nextMessage],
     }));
+
+    // Also send to real API
+    createPost(activeChannelId, value)
+      .then((newPost) => {
+        setRealPosts((prev) => [newPost, ...prev]);
+      })
+      .catch(console.error);
+
     setDraft('');
   };
 
@@ -496,7 +509,9 @@ export default function Forum() {
             <p className="text-[11px] uppercase tracking-[0.22em] text-[color:var(--cg-text-muted)]">
               {content.workspace}
             </p>
-            <h1 className="mt-2 text-2xl font-bold">{content.chatFeelsAlive}</h1>
+            <h1 className="mt-2 text-2xl font-bold">
+              {content.chatFeelsAlive}
+            </h1>
             <p className="mt-2 text-sm leading-6 text-[color:var(--cg-text-muted)]">
               {content.workspaceDesc}
             </p>
@@ -536,8 +551,12 @@ export default function Forum() {
                         >
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex min-w-0 items-center gap-2">
-                              <span className="text-[color:var(--cg-text-muted)]">#</span>
-                              <span className="truncate font-semibold">{channel.name}</span>
+                              <span className="text-[color:var(--cg-text-muted)]">
+                                #
+                              </span>
+                              <span className="truncate font-semibold">
+                                {channel.name}
+                              </span>
                               {channel.badge ? (
                                 <span className="rounded-full border border-[#a78bfa]/30 bg-[#a78bfa]/12 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#c4b5fd]">
                                   {channel.badge}
@@ -554,8 +573,12 @@ export default function Forum() {
                             {channel.topic}
                           </p>
                           <div className="mt-3 flex items-center gap-3 text-[11px] text-[color:var(--cg-text-muted)]">
-                            <span>{channel.presence} {content.onlineNow}</span>
-                            <span>{channel.pinned} {content.pinned}</span>
+                            <span>
+                              {channel.presence} {content.onlineNow}
+                            </span>
+                            <span>
+                              {channel.pinned} {content.pinned}
+                            </span>
                           </div>
                         </button>
                       );
@@ -572,7 +595,9 @@ export default function Forum() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-[color:var(--cg-text-muted)]">#</span>
-                  <h2 className="truncate text-xl font-bold">{activeChannel.name}</h2>
+                  <h2 className="truncate text-xl font-bold">
+                    {activeChannel.name}
+                  </h2>
                   {activeChannel.badge ? (
                     <span className="rounded-full border border-[#4ade80]/30 bg-[#4ade80]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#4ade80]">
                       {activeChannel.badge}
@@ -612,18 +637,21 @@ export default function Forum() {
                       {content.quickActions}
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {[content.actionAsk, content.actionReview, content.actionPair, content.actionShare].map(
-                        (action) => (
-                          <button
-                            key={action}
-                            type="button"
-                            onClick={() => setDraft(action)}
-                            className="rounded-full border border-[color:var(--cg-border)] bg-[color:var(--cg-bg)] px-3 py-1.5 text-xs font-medium text-[color:var(--cg-text-muted)] hover:text-[color:var(--cg-text)]"
-                          >
-                            {action}
-                          </button>
-                        )
-                      )}
+                      {[
+                        content.actionAsk,
+                        content.actionReview,
+                        content.actionPair,
+                        content.actionShare,
+                      ].map((action) => (
+                        <button
+                          key={action}
+                          type="button"
+                          onClick={() => setDraft(action)}
+                          className="rounded-full border border-[color:var(--cg-border)] bg-[color:var(--cg-bg)] px-3 py-1.5 text-xs font-medium text-[color:var(--cg-text-muted)] hover:text-[color:var(--cg-text)]"
+                        >
+                          {action}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -641,7 +669,14 @@ export default function Forum() {
                       />
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-semibold">{message.author}</span>
+                          <button
+                            onClick={() =>
+                              setSelectedUserId(message.authorId || 'fake')
+                            }
+                            className="font-semibold hover:underline"
+                          >
+                            {message.author}
+                          </button>
                           {message.role ? (
                             <span
                               className={cx(
@@ -690,7 +725,9 @@ export default function Forum() {
                               className="rounded-full border border-[color:var(--cg-border)] bg-[color:var(--cg-bg)] px-2.5 py-1 text-xs text-[color:var(--cg-text-muted)] hover:text-[color:var(--cg-text)]"
                             >
                               {message.replies}{' '}
-                              {isVi ? 'phản hồi trong thread' : 'thread replies'}
+                              {isVi
+                                ? 'phản hồi trong thread'
+                                : 'thread replies'}
                             </button>
                           ) : null}
                         </div>
@@ -704,7 +741,12 @@ export default function Forum() {
                 <div className="mx-auto max-w-4xl">
                   <div className="rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] p-3">
                     <div className="flex items-center gap-2 border-b border-[color:var(--cg-border)] pb-3">
-                      {['add', 'attach_file', 'tag_faces', 'alternate_email'].map((icon) => (
+                      {[
+                        'add',
+                        'attach_file',
+                        'tag_faces',
+                        'alternate_email',
+                      ].map((icon) => (
                         <button
                           key={icon}
                           type="button"
@@ -731,7 +773,9 @@ export default function Forum() {
                         onClick={sendMessage}
                         className="inline-flex items-center gap-2 rounded-xl bg-[#4ade80] px-4 py-3 text-sm font-semibold text-[#0f0b3c] transition-opacity hover:opacity-85"
                       >
-                        <span className="material-symbols-outlined text-[18px]">send</span>
+                        <span className="material-symbols-outlined text-[18px]">
+                          send
+                        </span>
                         {isVi ? 'Gửi' : 'Send'}
                       </button>
                     </div>
@@ -748,14 +792,18 @@ export default function Forum() {
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--cg-text-muted)]">
                   {content.members}
                 </p>
-                <h3 className="mt-2 text-lg font-bold">{content.memberTitle}</h3>
+                <h3 className="mt-2 text-lg font-bold">
+                  {content.memberTitle}
+                </h3>
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 <div className="rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--cg-text-muted)]">
                     {content.activeNow}
                   </p>
-                  <p className="mt-2 text-2xl font-bold">{activeChannel.presence}</p>
+                  <p className="mt-2 text-2xl font-bold">
+                    {activeChannel.presence}
+                  </p>
                   <p className="text-sm text-[color:var(--cg-text-muted)]">
                     {content.onlineNow} trong `#{activeChannel.name}`
                   </p>
@@ -784,26 +832,23 @@ export default function Forum() {
                         )}
                       />
                     </div>
-                    <p className="mt-2 text-xs text-[color:var(--cg-text-muted)]">
-                      {member.status === 'typing'
-                        ? isVi
-                          ? 'Đang nhập tin nhắn'
-                          : 'Typing right now'
-                        : member.status === 'idle'
-                          ? isVi
-                            ? 'Đang xem lại thread'
-                            : 'Reviewing threads'
-                          : isVi
-                            ? 'Sẵn sàng trả lời'
-                            : 'Ready to jump in'}
-                    </p>
                   </div>
                 ))}
+
+                <div className="pt-4 mt-4 border-t border-[color:var(--cg-border)]">
+                  <FriendsSidebar />
+                </div>
               </div>
             </aside>
           </div>
         </main>
       </div>
+      {selectedUserId && selectedUserId !== 'fake' && (
+        <UserProfileModal
+          userId={selectedUserId}
+          onClose={() => setSelectedUserId(null)}
+        />
+      )}
     </div>
   );
 }
