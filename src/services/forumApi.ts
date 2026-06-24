@@ -93,6 +93,35 @@ export async function unfollowUser(followingId: string) {
   return api.post(`/social/unfollow/${followingId}`, {});
 }
 
+export async function searchUsers(query: string): Promise<ForumUser[]> {
+  return api.get<ForumUser[]>(
+    `/social/search?query=${encodeURIComponent(query)}`
+  );
+}
+
+/* ─── Direct Messages API ─── */
+export interface DirectMessage {
+  _id: string;
+  senderId: ForumUser;
+  receiverId: string;
+  body: string;
+  read: boolean;
+  createdAt: string;
+}
+
+export async function sendDirectMessage(
+  receiverId: string,
+  body: string
+): Promise<DirectMessage> {
+  return api.post<DirectMessage>(`/social/dm/${receiverId}`, { body });
+}
+
+export async function getDirectMessages(
+  userId: string
+): Promise<DirectMessage[]> {
+  return api.get<DirectMessage[]>(`/social/dm/${userId}`);
+}
+
 /* ─── Forum API ─── */
 export interface ForumPost {
   _id: string;
