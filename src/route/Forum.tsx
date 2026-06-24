@@ -206,6 +206,332 @@ export default function Forum() {
   );
   const [activeChannelId, setActiveChannelId] = useState('getting-started');
   const [draft, setDraft] = useState('');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [emojiCategory, setEmojiCategory] = useState<
+    'smileys' | 'people' | 'nature' | 'food' | 'activity' | 'symbols'
+  >('smileys');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const EMOJI_CATEGORIES = {
+    smileys: {
+      icon: '😊',
+      label: 'Smileys',
+      emojis: [
+        '😀',
+        '😃',
+        '😄',
+        '😁',
+        '😆',
+        '😅',
+        '🤣',
+        '😂',
+        '🙂',
+        '😊',
+        '😇',
+        '🥰',
+        '😍',
+        '😘',
+        '😗',
+        '😙',
+        '😚',
+        '😋',
+        '😛',
+        '😜',
+        '🤪',
+        '😝',
+        '🤑',
+        '🤗',
+        '🤭',
+        '🤫',
+        '🤔',
+        '🤐',
+        '🤨',
+        '😐',
+        '😑',
+        '😶',
+        '😏',
+        '😒',
+        '🙄',
+        '😬',
+        '🤥',
+        '😌',
+        '😔',
+      ],
+    },
+    people: {
+      icon: '👋',
+      label: 'People',
+      emojis: [
+        '👋',
+        '🤚',
+        '✋',
+        '🖖',
+        '👌',
+        '🤌',
+        '✌️',
+        '🤞',
+        '🤟',
+        '🤘',
+        '🤙',
+        '👈',
+        '👉',
+        '👆',
+        '🖕',
+        '👇',
+        '☝️',
+        '👍',
+        '👎',
+        '✊',
+        '👊',
+        '🤛',
+        '🤜',
+        '👏',
+        '🙌',
+        '👐',
+        '🤲',
+        '🤝',
+        '🙏',
+        '✍️',
+        '💅',
+        '🤳',
+        '💪',
+        '🦾',
+        '🦿',
+        '🦵',
+        '🦶',
+        '👂',
+        '🦻',
+      ],
+    },
+    nature: {
+      icon: '🌿',
+      label: 'Nature',
+      emojis: [
+        '🐶',
+        '🐱',
+        '🐭',
+        '🐹',
+        '🐰',
+        '🦊',
+        '🐻',
+        '🐼',
+        '🐨',
+        '🐯',
+        '🦁',
+        '🐮',
+        '🐷',
+        '🐸',
+        '🐵',
+        '🐔',
+        '🐧',
+        '🐦',
+        '🦆',
+        '🦅',
+        '🦉',
+        '🦇',
+        '🐝',
+        '🦋',
+        '🌸',
+        '🌺',
+        '🌻',
+        '🌼',
+        '🌷',
+        '🍀',
+        '🌱',
+        '🌿',
+        '🍃',
+        '🌲',
+        '🌳',
+        '🌴',
+        '☘️',
+        '🌾',
+        '💐',
+      ],
+    },
+    food: {
+      icon: '🍕',
+      label: 'Food',
+      emojis: [
+        '🍎',
+        '🍊',
+        '🍋',
+        '🍇',
+        '🍓',
+        '🫐',
+        '🍈',
+        '🍒',
+        '🍑',
+        '🥭',
+        '🍍',
+        '🥥',
+        '🥝',
+        '🍅',
+        '🍆',
+        '🥑',
+        '🥦',
+        '🌽',
+        '🌶️',
+        '🍄',
+        '🧅',
+        '🧄',
+        '🥔',
+        '🍠',
+        '🫘',
+        '🌰',
+        '🍞',
+        '🥐',
+        '🥖',
+        '🫓',
+        '🥨',
+        '🥯',
+        '🧀',
+        '🍳',
+        '🍕',
+        '🌭',
+        '🥪',
+        '🌮',
+        '🌯',
+      ],
+    },
+    activity: {
+      icon: '⚽',
+      label: 'Activity',
+      emojis: [
+        '⚽',
+        '🏀',
+        '🏈',
+        '⚾',
+        '🥎',
+        '🏐',
+        '🏉',
+        '🥏',
+        '🎾',
+        '🏸',
+        '🏒',
+        '🥍',
+        '🏏',
+        '🪃',
+        '🥅',
+        '⛳',
+        '🪁',
+        '🎿',
+        '🛷',
+        '🥌',
+        '🎯',
+        '🪀',
+        '🪆',
+        '🎱',
+        '🔮',
+        '🧿',
+        '🎮',
+        '🕹️',
+        '🎲',
+        '🧩',
+        '🧸',
+        '🪅',
+        '🎭',
+        '🎨',
+        '🖼️',
+        '🎰',
+        '🚂',
+        '🛳️',
+        '✈️',
+      ],
+    },
+    symbols: {
+      icon: '💡',
+      label: 'Symbols',
+      emojis: [
+        '❤️',
+        '🧡',
+        '💛',
+        '💚',
+        '💙',
+        '💜',
+        '🖤',
+        '🤍',
+        '🤎',
+        '💔',
+        '❣️',
+        '💕',
+        '💞',
+        '💓',
+        '💗',
+        '💖',
+        '💘',
+        '💝',
+        '💟',
+        '☮️',
+        '✝️',
+        '🔥',
+        '💥',
+        '✨',
+        '⭐',
+        '🌟',
+        '💫',
+        '🎉',
+        '🎊',
+        '🏆',
+        '🥇',
+        '🎁',
+        '🎈',
+        '💡',
+        '🔑',
+        '🗝️',
+        '🔒',
+        '🔓',
+        '💰',
+      ],
+    },
+  };
+
+  const insertEmoji = (emoji: string) => {
+    const input = inputRef.current;
+    if (input) {
+      const start = input.selectionStart ?? draft.length;
+      const end = input.selectionEnd ?? draft.length;
+      const next = draft.slice(0, start) + emoji + draft.slice(end);
+      setDraft(next);
+      setTimeout(() => {
+        input.focus();
+        input.setSelectionRange(start + emoji.length, start + emoji.length);
+      }, 0);
+    } else {
+      setDraft((prev) => prev + emoji);
+    }
+  };
+
+  const insertMention = () => {
+    const input = inputRef.current;
+    if (input) {
+      const start = input.selectionStart ?? draft.length;
+      const next = draft.slice(0, start) + '@' + draft.slice(start);
+      setDraft(next);
+      setTimeout(() => {
+        input.focus();
+        input.setSelectionRange(start + 1, start + 1);
+      }, 0);
+    }
+  };
+
+  const wrapText = (prefix: string, suffix = prefix) => {
+    const input = inputRef.current;
+    if (!input) return;
+    const start = input.selectionStart ?? 0;
+    const end = input.selectionEnd ?? 0;
+    const selected = draft.slice(start, end) || 'text';
+    const next =
+      draft.slice(0, start) + prefix + selected + suffix + draft.slice(end);
+    setDraft(next);
+    setTimeout(() => {
+      input.focus();
+      input.setSelectionRange(
+        start + prefix.length,
+        start + prefix.length + selected.length
+      );
+    }, 0);
+  };
 
   const [realPosts, setRealPosts] = useState<ForumPost[]>([]);
   const [directMessages, setDirectMessages] = useState<DirectMessage[]>([]);
@@ -511,58 +837,249 @@ export default function Forum() {
 
               <div className="border-t border-[color:var(--cg-border)] bg-[color:var(--cg-bg)] px-4 py-4 md:px-6 shrink-0">
                 <div className="mx-auto max-w-4xl">
-                  <div className="rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] p-3">
-                    <div className="flex items-center gap-2 border-b border-[color:var(--cg-border)] pb-3">
-                      {[
-                        {
-                          icon: 'add',
-                          title: isVi ? 'Thêm' : 'Add',
-                          action: () =>
-                            alert(
-                              isVi
-                                ? 'Tính năng đang được phát triển'
-                                : 'Feature coming soon'
-                            ),
-                        },
-                        {
-                          icon: 'attach_file',
-                          title: isVi ? 'Đính kèm' : 'Attach File',
-                          action: () => {
-                            const input = document.createElement('input');
-                            input.type = 'file';
-                            input.click();
-                          },
-                        },
-                        {
-                          icon: 'tag_faces',
-                          title: 'Emoji',
-                          action: () => setDraft((prev) => prev + ' 😊'),
-                        },
-                        {
-                          icon: 'alternate_email',
-                          title: isVi ? 'Nhắc tên' : 'Mention',
-                          action: () => setDraft((prev) => prev + '@'),
-                        },
-                      ].map((btn) => (
-                        <button
-                          key={btn.icon}
-                          type="button"
-                          title={btn.title}
-                          onClick={btn.action}
-                          className="rounded-xl p-2 text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)] hover:text-[color:var(--cg-text)] transition-colors"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">
-                            {btn.icon}
-                          </span>
-                        </button>
-                      ))}
+                  <div className="relative rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] p-3">
+                    {/* ── Emoji Picker Panel ─────────────────────────────────── */}
+                    {showEmojiPicker && (
+                      <div className="absolute bottom-full left-0 mb-2 z-50 w-[340px] rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-bg)] shadow-2xl overflow-hidden">
+                        {/* Category Tabs */}
+                        <div className="flex items-center border-b border-[color:var(--cg-border)] px-2 pt-2 gap-1">
+                          {(
+                            Object.entries(EMOJI_CATEGORIES) as [
+                              keyof typeof EMOJI_CATEGORIES,
+                              { icon: string; label: string; emojis: string[] },
+                            ][]
+                          ).map(([key, cat]) => (
+                            <button
+                              key={key}
+                              onClick={() => setEmojiCategory(key)}
+                              title={cat.label}
+                              className={cx(
+                                'flex-1 rounded-t-xl py-1.5 text-base transition-colors',
+                                emojiCategory === key
+                                  ? 'bg-[color:var(--cg-container-a30)] text-[color:var(--cg-text)]'
+                                  : 'text-[color:var(--cg-text-muted)] hover:text-[color:var(--cg-text)]'
+                              )}
+                            >
+                              {cat.icon}
+                            </button>
+                          ))}
+                          <button
+                            onClick={() => setShowEmojiPicker(false)}
+                            className="ml-auto p-1.5 text-[color:var(--cg-text-muted)] hover:text-[color:var(--cg-text)]"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">
+                              close
+                            </span>
+                          </button>
+                        </div>
+                        {/* Emoji Grid */}
+                        <div className="grid grid-cols-8 gap-0.5 p-2 h-[180px] overflow-y-auto">
+                          {EMOJI_CATEGORIES[emojiCategory].emojis.map(
+                            (emoji) => (
+                              <button
+                                key={emoji}
+                                onClick={() => {
+                                  insertEmoji(emoji);
+                                  setShowEmojiPicker(false);
+                                }}
+                                className="flex items-center justify-center rounded-lg p-1.5 text-lg hover:bg-[color:var(--cg-container-a30)] transition-colors"
+                              >
+                                {emoji}
+                              </button>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* ── Toolbar Row ─────────────────────────────────────────── */}
+                    <div className="flex items-center gap-1 border-b border-[color:var(--cg-border)] pb-3">
+                      {/* Attach File */}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        className="hidden"
+                        onChange={() => {
+                          /* TODO: upload */
+                        }}
+                      />
+                      <button
+                        type="button"
+                        title={isVi ? 'Đính kèm file' : 'Attach file'}
+                        onClick={() => fileInputRef.current?.click()}
+                        className="group relative rounded-xl p-2 text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)] hover:text-[#4ade80] transition-all"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          attach_file
+                        </span>
+                        <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[color:var(--cg-bg)] border border-[color:var(--cg-border)] px-2 py-0.5 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                          {isVi ? 'Đính kèm' : 'Attach'}
+                        </span>
+                      </button>
+
+                      {/* Image / Screenshot */}
+                      <button
+                        type="button"
+                        title={isVi ? 'Thêm ảnh' : 'Add image'}
+                        onClick={() => {
+                          const i = document.createElement('input');
+                          i.type = 'file';
+                          i.accept = 'image/*';
+                          i.click();
+                        }}
+                        className="group relative rounded-xl p-2 text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)] hover:text-[#38bdf8] transition-all"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          image
+                        </span>
+                        <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[color:var(--cg-bg)] border border-[color:var(--cg-border)] px-2 py-0.5 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                          {isVi ? 'Ảnh' : 'Image'}
+                        </span>
+                      </button>
+
+                      {/* Emoji Picker Toggle */}
+                      <button
+                        type="button"
+                        title="Emoji"
+                        onClick={() => setShowEmojiPicker((v) => !v)}
+                        className={cx(
+                          'group relative rounded-xl p-2 transition-all',
+                          showEmojiPicker
+                            ? 'bg-[#f59e0b]/15 text-[#f59e0b]'
+                            : 'text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)] hover:text-[#f59e0b]'
+                        )}
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          mood
+                        </span>
+                        <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[color:var(--cg-bg)] border border-[color:var(--cg-border)] px-2 py-0.5 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                          Emoji
+                        </span>
+                      </button>
+
+                      {/* GIF */}
+                      <button
+                        type="button"
+                        title="GIF"
+                        onClick={() => setDraft((p) => p + '[GIF] ')}
+                        className="group relative rounded-xl p-2 text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)] hover:text-[#a78bfa] transition-all"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          gif
+                        </span>
+                        <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[color:var(--cg-bg)] border border-[color:var(--cg-border)] px-2 py-0.5 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                          GIF
+                        </span>
+                      </button>
+
+                      {/* Mention */}
+                      <button
+                        type="button"
+                        title={isVi ? 'Nhắc tên ai đó' : 'Mention someone'}
+                        onClick={insertMention}
+                        className="group relative rounded-xl p-2 text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)] hover:text-[#fb7185] transition-all"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          alternate_email
+                        </span>
+                        <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[color:var(--cg-bg)] border border-[color:var(--cg-border)] px-2 py-0.5 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                          {isVi ? 'Nhắc tên' : 'Mention'}
+                        </span>
+                      </button>
+
+                      {/* Divider */}
+                      <div className="mx-1 h-5 w-px bg-[color:var(--cg-border)]" />
+
+                      {/* Bold */}
+                      <button
+                        type="button"
+                        title={isVi ? 'In đậm' : 'Bold'}
+                        onClick={() => wrapText('**')}
+                        className="group relative rounded-xl p-2 text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)] hover:text-[color:var(--cg-text)] transition-all font-bold text-sm"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          format_bold
+                        </span>
+                        <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[color:var(--cg-bg)] border border-[color:var(--cg-border)] px-2 py-0.5 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                          {isVi ? 'Đậm' : 'Bold'}
+                        </span>
+                      </button>
+
+                      {/* Italic */}
+                      <button
+                        type="button"
+                        title={isVi ? 'In nghiêng' : 'Italic'}
+                        onClick={() => wrapText('_')}
+                        className="group relative rounded-xl p-2 text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)] hover:text-[color:var(--cg-text)] transition-all text-sm italic"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          format_italic
+                        </span>
+                        <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[color:var(--cg-bg)] border border-[color:var(--cg-border)] px-2 py-0.5 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                          {isVi ? 'Nghiêng' : 'Italic'}
+                        </span>
+                      </button>
+
+                      {/* Inline Code */}
+                      <button
+                        type="button"
+                        title={isVi ? 'Code nội dòng' : 'Inline code'}
+                        onClick={() => wrapText('`')}
+                        className="group relative rounded-xl p-2 text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)] hover:text-[#4ade80] transition-all font-mono text-sm"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          code
+                        </span>
+                        <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[color:var(--cg-bg)] border border-[color:var(--cg-border)] px-2 py-0.5 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                          {isVi ? 'Code' : 'Code'}
+                        </span>
+                      </button>
+
+                      {/* Code Block */}
+                      <button
+                        type="button"
+                        title={isVi ? 'Khối code' : 'Code block'}
+                        onClick={() => wrapText('```\n', '\n```')}
+                        className="group relative rounded-xl p-2 text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)] hover:text-[#a78bfa] transition-all"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          data_object
+                        </span>
+                        <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[color:var(--cg-bg)] border border-[color:var(--cg-border)] px-2 py-0.5 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                          {isVi ? 'Khối code' : 'Code block'}
+                        </span>
+                      </button>
+
+                      {/* Divider */}
+                      <div className="mx-1 h-5 w-px bg-[color:var(--cg-border)]" />
+
+                      {/* Link */}
+                      <button
+                        type="button"
+                        title={isVi ? 'Chèn link' : 'Insert link'}
+                        onClick={() => wrapText('[', '](url)')}
+                        className="group relative rounded-xl p-2 text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)] hover:text-[#38bdf8] transition-all"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          link
+                        </span>
+                        <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[color:var(--cg-bg)] border border-[color:var(--cg-border)] px-2 py-0.5 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                          {isVi ? 'Link' : 'Link'}
+                        </span>
+                      </button>
                     </div>
 
+                    {/* ── Message Input Row ──────────────────────────────────── */}
                     <div className="flex items-center gap-3 pt-3">
                       <input
+                        ref={inputRef}
                         type="text"
                         value={draft}
-                        onChange={(event) => setDraft(event.target.value)}
+                        onChange={(event) => {
+                          setDraft(event.target.value);
+                          if (showEmojiPicker) setShowEmojiPicker(false);
+                        }}
                         onKeyDown={onComposerKeyDown}
                         placeholder={`${content.placeholderPrefix} #${activeChannel.name}...`}
                         className="flex-1 bg-transparent px-1 py-3 text-sm text-[color:var(--cg-text)] placeholder:text-[color:var(--cg-text-muted)] focus:outline-none"
@@ -570,7 +1087,8 @@ export default function Forum() {
                       <button
                         type="button"
                         onClick={sendMessage}
-                        className="inline-flex items-center gap-2 rounded-xl bg-[#4ade80] px-4 py-3 text-sm font-semibold text-[#0f0b3c] transition-opacity hover:opacity-85"
+                        disabled={!draft.trim()}
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-[#4ade80] px-4 py-2.5 text-sm font-semibold text-[#0f0b3c] transition-all hover:opacity-85 disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         <span className="material-symbols-outlined text-[18px]">
                           send
@@ -579,8 +1097,10 @@ export default function Forum() {
                       </button>
                     </div>
                   </div>
-                  <p className="mt-2 text-xs text-[color:var(--cg-text-muted)]">
-                    {content.enterHint}
+                  <p className="mt-2 text-[11px] text-[color:var(--cg-text-muted)]">
+                    {isVi
+                      ? 'Enter để gửi · Shift+Enter xuống dòng · ** đậm · _ nghiêng · ` code'
+                      : 'Enter to send · Shift+Enter for newline · **bold** · _italic_ · `code`'}
                   </p>
                 </div>
               </div>
