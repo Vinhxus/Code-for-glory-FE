@@ -36,6 +36,7 @@ import QuestNodeEditor from './feature/admin/QuestNodeEditor';
 import NodeDetail from './feature/admin/NodeDetail';
 import BattleAdmin from './feature/admin/BattleAdmin';
 import CreateBattleProblem from './feature/admin/createBattleProblem';
+import EnforcementAdmin from './feature/admin/Enforcement';
 
 function App() {
   return (
@@ -100,6 +101,9 @@ function App() {
             path="/admin/battle/create"
             element={<CreateBattleProblem />}
           />
+
+          {/* CẤU HÌNH TUYẾN ĐƯỜNG MỚI CHO TRANG GIÁM SÁT HỆ THỐNG */}
+          <Route path="/admin/enforcement" element={<EnforcementAdmin />} />
         </Route>
       </Route>
 
