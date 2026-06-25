@@ -1,19 +1,114 @@
 .tab-container-root {
-  margin-top: 36px;
+  margin-top: 52px; /* Khoảng cách né thanh Header cố định */
   min-height: 100vh;
-  color: var(--cg-text);
+  color: var(--cg-text, #ffffff);
+  background: #12111a; /* Màu nền tối tổng thể */
 }
 
-.tab-wrapper {
-  background: var(--cg-container-a22);
-  border: 1px solid var(--cg-border);
+/* Thanh đầu trang của trang History */
+.history-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.header-bar {
-  position: relative;
+.history-page-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #f59e0b; /* Màu chữ vàng cam giống ảnh */
 }
 
-.back-button {
-  position: absolute;
-  left: 200px;
+/* Nút ba gạch Hamburger */
+.hamburger-menu-btn {
+  display: none; /* Mặc định ẩn trên máy tính */
+  background: #f59e0b; /* Nền màu vàng cam nhạt/đậm tùy biến */
+  color: #12111a;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 8px;
+}
+
+/* --- THIẾT KẾ HỘP MENU THEO ẢNH CỦA BẠN --- */
+.history-menu-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.history-box-blue {
+  background-color: #24608a; /* Màu xanh biển bão hòa chính xác theo ảnh của bạn */
+  width: 100%;
+  max-width: 500px;
+  padding: 30px 20px;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.history-box-title {
+  color: #ff9900; /* Chữ History màu cam nổi bật */
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.history-tabs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Khoảng cách hàng dọc giữa các chữ */
+}
+
+.history-tab-item {
+  background: none;
+  border: none;
+  color: #e2e8f0; /* Màu chữ trắng kem sáng */
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 5px 0;
+}
+
+.history-tab-item:hover,
+.history-tab-item.active {
+  color: #ff9900; /* Khi chọn hoặc di chuột vào thì đổi sang chữ Cam */
+  font-weight: bold;
+}
+
+.recall-btn-custom {
+  color: #4ade80 !important; /* Giữ màu xanh lá cho nút Recall nếu cần thiết */
+}
+
+.history-tab-content {
+  padding: 20px;
+}
+
+/* --- CẤU HÌNH RESPONSIVE TRÊN MOBILE --- */
+@media (max-width: 768px) {
+  .hamburger-menu-btn {
+    display: block; /* Hiện nút 3 gạch trên mobile */
+  }
+
+  /* Mặc định ẩn menu đi, khi nào có class .open mới hiện */
+  .history-menu-container {
+    display: none;
+    position: absolute;
+    top: 120px; /* Xuất hiện ngay dưới thanh tiêu đề */
+    left: 0;
+    right: 0;
+    z-index: 40;
+    padding: 10px;
+  }
+
+  .history-menu-container.open {
+    display: flex;
+  }
+
+  .history-box-blue {
+    max-width: 100%; /* Trên mobile bung rộng ra */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  }
 }

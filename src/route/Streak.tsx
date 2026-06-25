@@ -1,4 +1,6 @@
 import { useMemo } from 'react';
+import './Streak.css';
+
 import {
   eachDayOfInterval,
   endOfMonth,
@@ -106,8 +108,34 @@ export function Streak() {
   );
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-8 p-6 text-zinc-100">
+    <div className="mx-auto flex max-w-4xl flex-col gap-8 p-6 text-zinc-100 relative">
       {/* Header căn giữa to rõ */}
+      <button
+        onClick={() => window.history.back()}
+        className="inline-flex items-center justify-center gap-2 px-3 py-1.5 
+                  text-sm font-normal text-gray-700 bg-gray-100 hover:bg-gray-200 
+                  active:bg-gray-300 active:scale-95 border border-gray-300/50 
+                  rounded-md transition-all duration-150 ease-in-out
+                  dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700 dark:hover:bg-zinc-700
+                  back-button"
+      >
+        {/* Icon mũi tên trái */}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={2}
+          stroke="currentColor"
+          className="w-4 h-4"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
+          />
+        </svg>
+        <span> Back </span>
+      </button>
       <header className="flex flex-col items-center text-center gap-1">
         <h1 className="text-4xl font-black tracking-tight text-blue-400">
           STREAK PROFILE

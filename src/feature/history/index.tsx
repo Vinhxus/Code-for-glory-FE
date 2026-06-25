@@ -15,74 +15,92 @@ interface TabItem {
 }
 
 const TABS: TabItem[] = [
-  { key: 'tracking', label: 'Tracking' },
   { key: 'finished', label: 'Finished' },
   { key: 'unfinished', label: 'Unfinished' },
   { key: 'saved', label: 'Saved' },
+  { key: 'tracking', label: 'Tracking' },
 ];
 
 export default function TabComponent() {
   const [activeTab, setActiveTab] = useState<string>('tracking');
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false); // Trạng thái đóng mở menu trên mobile
+
+  // Tìm label của tab hiện tại để hiển thị làm tiêu đề giống trong ảnh 2
+  const currentTabLabel =
+    TABS.find((t) => t.key === activeTab)?.label || 'History';
 
   return (
     <div className="flex flex-col tab-container-root">
       <Header />
       <SideNav />
-      <div className="flex justify-center pt-6 pb-2 px-4 header-bar relative">
+
+      {/* HEADER BAR CHỨA TIÊU ĐỀ VÀ NÚT HAMBURGER */}
+      <div className="history-header-bar">
+        <h1 className="history-page-title">{currentTabLabel}</h1>
+
+        {/* Nút Hamburger chỉ xuất hiện trên Mobile */}
         <button
-          onClick={() => window.history.back()}
-          className="inline-flex items-center justify-center gap-2 px-3 py-1.5 
-                    text-sm font-normal text-gray-700 bg-gray-100 hover:bg-gray-200 
-                    active:bg-gray-300 active:scale-95 border border-gray-300/50 
-                    rounded-md transition-all duration-150 ease-in-out
-                    dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700 dark:hover:bg-zinc-700 back-button"
+          className="hamburger-menu-btn"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          aria-label="Toggle Menu"
         >
-          {/* Icon mũi tên trái */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
-            strokeWidth={2}
+            strokeWidth={2.5}
             stroke="currentColor"
-            className="w-4 h-4"
           >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
+              d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
             />
           </svg>
-          <span>Back</span>
         </button>
-        <div className="flex gap-1 p-1 rounded-xl tab-wrapper">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setActiveTab(t.key)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${
-                activeTab === t.key
-                  ? 'bg-[var(--cg-amber)] text-[#0f0b3c] font-bold'
-                  : 'text-[var(--cg-text-muted)] hover:bg-yellow-500 text-[#0f0b3c] font-medium'
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-        <HButton
-          className="px-4 py-2 text-2xl bg-amber-600 text-green-600"
-          variant="recall"
-          onClick={() => setActiveTab('recall')}
-        >
-          Recall
-        </HButton>
       </div>
 
-      {activeTab === 'tracking' && <Tracking />}
-      {activeTab === 'finished' && <Finished />}
-      {activeTab === 'unfinished' && <UnFinished />}
-      {activeTab === 'saved' && <Saved />}
-      {activeTab === 'recall' && <Recall />}
+      {/* KHỐI TABS (MENU THIẾT KẾ THEO ẢNH CỦA BẠN) */}
+      <div className={`history-menu-container ${isMenuOpen ? 'open' : ''}`}>
+        <div className="history-box-blue">
+          <h2 className="history-box-title">History</h2>
+          <div className="history-tabs-list">
+            {TABS.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => {
+                  setActiveTab(t.key);
+                  setIsMenuOpen(false); // Bấm xong thì đóng menu lại
+                }}
+                className={`history-tab-item ${activeTab === t.key ? 'active' : ''}`}
+              >
+                {t.label}
+              </button>
+            ))}
+
+            {/* Nút Recall tích hợp thêm vào menu */}
+            <HButton
+              className="history-tab-item recall-btn-custom"
+              variant="recall"
+              onClick={() => {
+                setActiveTab('recall');
+                setIsMenuOpen(false);
+              }}
+            >
+              Recall
+            </HButton>
+          </div>
+        </div>
+      </div>
+
+      {/* NỘI DUNG CỦA TAB */}
+      <div className="history-tab-content">
+        {activeTab === 'tracking' && <Tracking />}
+        {activeTab === 'finished' && <Finished />}
+        {activeTab === 'unfinished' && <UnFinished />}
+        {activeTab === 'saved' && <Saved />}
+        {activeTab === 'recall' && <Recall />}
+      </div>
     </div>
   );
 }
