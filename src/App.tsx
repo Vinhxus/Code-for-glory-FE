@@ -24,7 +24,6 @@ import Shop from './route/Shop';
 import { profileRoutes } from './route/profileRoot';
 import TabComponent from './feature/history';
 import { Streak } from './route/Streak';
-
 // Authentication Pages
 import LoginPage from './feature/auth/loginPage';
 import RegisterPage from './feature/auth/registerPage';
