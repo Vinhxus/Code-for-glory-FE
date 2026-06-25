@@ -62,3 +62,10 @@ export const getAnalysis = async (battleId: string): Promise<CodeAnalysis> => {
   const response = await axiosInstance.get(`/code-analysis/${battleId}`);
   return response.data;
 };
+
+export const cancelMatchmaking = async (battleId: string) => {
+  const response = await axiosInstance.post(
+    `/battles/${battleId}/cancel-match`
+  );
+  return response.data;
+};

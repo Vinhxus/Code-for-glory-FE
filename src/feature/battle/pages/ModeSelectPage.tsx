@@ -1,11 +1,15 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SideNav from '../../../components/SideNav';
 import Header from '../../../components/layout/Header';
 import { useBattleStore } from '../store/battleStore';
-import { createBattle } from '../services/battleService';
 import type { BattleMode } from '../types/battle.types';
 import { BATTLE_ROUTES } from '../constants/battle.constants';
+import { useState, useEffect, useRef } from 'react';
+import {
+  createBattle,
+  getBattleById,
+  cancelMatchmaking,
+} from '../services/battleService';
 
 const MODE: {
   value: BattleMode;
@@ -53,6 +57,40 @@ const ModeSelectPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [searchingBattleId, setSearchingBattleId] = useState<string | null>(
+    null
+  );
+  const pollingRef = useRef<number | null>(null);
+
+  const stopPolling = () => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+  };
+
+  // Dừng polling khi rời trang, tránh leak
+  useEffect(() => {
+    return () => stopPolling();
+  }, []);
+
+  const startPolling = (id: string) => {
+    pollingRef.current = window.setInterval(async () => {
+      try {
+        const battle = await getBattleById(id);
+        if (battle.status === 'IN_PROGRESS') {
+          stopPolling();
+          setBattleMode(selectedMode);
+          setBattleId(battle._id);
+          navigate(`${BATTLE_ROUTES.ARENA}/${battle._id}`);
+        }
+        // status vẫn 'WAITING' → không làm gì, đợi lượt poll kế tiếp
+      } catch {
+        // bỏ qua lỗi tạm thời 1 lần poll, không dừng hẳn
+      }
+    }, 2500);
+  };
+
   if (!field) {
     navigate(BATTLE_ROUTES.FIELD);
     return null;
@@ -64,12 +102,31 @@ const ModeSelectPage = () => {
     try {
       const battle = await createBattle(field, selectedMode);
       setBattleMode(selectedMode);
-      setBattleId(battle._id);
-      navigate(`${BATTLE_ROUTES.ARENA}/${battle._id}`);
+
+      if (battle.status === 'IN_PROGRESS') {
+        setBattleId(battle._id);
+        navigate(`${BATTLE_ROUTES.ARENA}/${battle._id}`);
+        return;
+      }
+
+      setSearchingBattleId(battle._id);
+      startPolling(battle._id);
     } catch {
       setError('Failed to find a match. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleCancelSearch = async () => {
+    if (!searchingBattleId) return;
+    stopPolling();
+    try {
+      await cancelMatchmaking(searchingBattleId);
+    } catch {
+      // dù API lỗi vẫn thoát trạng thái chờ ở FE để user không bị kẹt
+    } finally {
+      setSearchingBattleId(null);
     }
   };
   return (
@@ -165,24 +222,39 @@ const ModeSelectPage = () => {
             <p className="text-sm text-red-400 animate-fade-in-up">{error}</p>
           )}
 
-          {/* CTA  */}
-          <div className="flex flex-col items-center gap-2 animate-fade-in-up">
-            <button
-              onClick={handleFindMatch}
-              disabled={isLoading}
-              className="neon-btn flex items-center gap-2 px-8 py-3 text-sm font-extrabold disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {isLoading ? (
-                <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  Finding Match...
-                </>
-              ) : (
-                '🔍 Find Match'
-              )}
-            </button>
-            <p className="text-xs text-(--cg-text-muted)">Est. wait: ~30s</p>
-          </div>
+          {/* CTA */}
+          {searchingBattleId ? (
+            <div className="flex flex-col items-center gap-4 animate-fade-in-up">
+              <div className="flex items-center gap-3 rounded-2xl border border-(--cg-border) bg-(--cg-container-a16) px-6 py-4">
+                <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-[#ff7e5f]" />
+                <span className="text-sm font-medium">Đang tìm đối thủ...</span>
+              </div>
+              <button
+                onClick={handleCancelSearch}
+                className="rounded-xl border border-(--cg-border) bg-transparent px-6 py-2.5 text-sm font-semibold text-(--cg-text-muted) transition hover:border-red-400/40 hover:text-red-400"
+              >
+                Hủy tìm trận
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-2 animate-fade-in-up">
+              <button
+                onClick={handleFindMatch}
+                disabled={isLoading}
+                className="neon-btn flex items-center gap-2 px-8 py-3 text-sm font-extrabold disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isLoading ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    Finding Match...
+                  </>
+                ) : (
+                  '🔍 Find Match'
+                )}
+              </button>
+              <p className="text-xs text-(--cg-text-muted)">Est. wait: ~30s</p>
+            </div>
+          )}
         </main>
       </div>
     </div>
