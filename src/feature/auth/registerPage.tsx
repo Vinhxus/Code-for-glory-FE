@@ -1,13 +1,14 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "./useAuth";
-import { registerApi } from "./authService";
-import StarBackground from "../../components/layout/starBackground";
-import Logo from "../../components/layout/logo";
-import "./registerPage.css";
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from './useAuth';
+import { registerApi } from './authService';
+import StarBackground from '../../components/layout/starBackground';
+import Logo from '../../components/layout/logo';
+import './registerPage.css';
 
 type FieldError = {
   username?: string;
+  email?: string;
   password?: string;
   confirmPassword?: string;
   general?: string;
@@ -17,34 +18,45 @@ export default function RegisterPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const { register } = useAuth(); // Lấy hàm register từ useAuth
   const [form, setForm] = useState({
-    username: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
   });
   const [errors, setErrors] = useState<FieldError>({});
-  const [successMsg, setSuccessMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: undefined }));
-    setSuccessMsg("");
+    setSuccessMsg('');
   };
 
   const validate = (): boolean => {
     const newErrors: FieldError = {};
 
-    const hasLetter = /[a-zA-Z]/.test(form.password);
-    const hasNumber = /[0-9]/.test(form.password);
-    if (!hasLetter || !hasNumber) {
-      newErrors.password = "Password must contain at least 1 number and 1 letter";
+    if (form.username.length < 3) {
+      newErrors.username = 'Username must be at least 3 characters';
+    }
+
+    if (form.password.length < 8) {
+      // Khớp với @MinLength(8) của Backend
+      newErrors.password = 'Password must be at least 8 characters';
+    } else {
+      const hasLetter = /[a-zA-Z]/.test(form.password);
+      const hasNumber = /[0-9]/.test(form.password);
+      if (!hasLetter || !hasNumber) {
+        newErrors.password =
+          'Password must contain at least 1 number and 1 letter';
+      }
     }
 
     if (form.password !== form.confirmPassword) {
-      newErrors.confirmPassword = "Confirm password must be similar to password";
+      newErrors.confirmPassword = 'Confirm password must match';
     }
 
     setErrors(newErrors);
@@ -54,32 +66,26 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
-    setSuccessMsg("");
+    setSuccessMsg('');
 
     if (!validate()) return;
 
     setIsLoading(true);
     try {
-      await registerApi({
-        name: form.username,
+      await register({
+        username: form.username,
         email: form.email,
         password: form.password,
+        confirmPassword: form.confirmPassword,
       });
 
-      setForm({ username: "", email: "", password: "", confirmPassword: "" });
-      setSuccessMsg("Create account successful, please sign in");
+      setForm({ username: '', email: '', password: '', confirmPassword: '' });
+      setSuccessMsg('Success! Navigate to login...');
 
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
+      setTimeout(() => navigate('/'), 1200);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to register";
-
-      if (message.toLowerCase().includes("username") || message.toLowerCase().includes("exist")) {
-        setErrors({ username: "Username has already exist!" });
-      } else {
-        setErrors({ general: message });
-      }
+      const message = err instanceof Error ? err.message : 'Failed to register';
+      setErrors({ general: message });
     } finally {
       setIsLoading(false);
     }
@@ -103,7 +109,7 @@ export default function RegisterPage() {
             <label className="auth-label">Username:</label>
             <input
               name="username"
-              className={`auth-input ${errors.username ? "auth-input--error" : ""}`}
+              className={`auth-input ${errors.username ? 'auth-input--error' : ''}`}
               placeholder="username"
               value={form.username}
               onChange={handleChange}
@@ -126,8 +132,8 @@ export default function RegisterPage() {
             <input
               name="password"
               type="password"
-              className={`auth-input ${errors.password ? "auth-input--error" : ""}`}
-              placeholder="Password"
+              className={`auth-input ${errors.password ? 'auth-input--error' : ''}`}
+              placeholder="must contain at least 1 number and 1 letter"
               value={form.password}
               onChange={handleChange}
               required
@@ -138,7 +144,7 @@ export default function RegisterPage() {
             <input
               name="confirmPassword"
               type="password"
-              className={`auth-input ${errors.confirmPassword ? "auth-input--error" : ""}`}
+              className={`auth-input ${errors.confirmPassword ? 'auth-input--error' : ''}`}
               placeholder="Confirm password"
               value={form.confirmPassword}
               onChange={handleChange}
@@ -149,14 +155,17 @@ export default function RegisterPage() {
             )}
 
             {successMsg && (
-              <p className="auth-success" style={{
-                color: "#00e676",
-                textAlign: "center",
-                fontSize: "1rem",
-                fontWeight: "600",
-                marginTop: "12px",
-                marginBottom: "0",
-              }}>
+              <p
+                className="auth-success"
+                style={{
+                  color: '#00e676',
+                  textAlign: 'center',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  marginTop: '12px',
+                  marginBottom: '0',
+                }}
+              >
                 {successMsg}
               </p>
             )}
@@ -165,9 +174,9 @@ export default function RegisterPage() {
               type="submit"
               className="auth-btn-primary"
               disabled={isLoading}
-              style={{ marginTop: "24px" }}
+              style={{ marginTop: '24px' }}
             >
-              {isLoading ? "Creating account..." : "Sign up"}
+              {isLoading ? 'Creating account...' : 'Sign up'}
             </button>
           </form>
         </div>

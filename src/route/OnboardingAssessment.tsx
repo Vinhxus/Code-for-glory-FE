@@ -1,10 +1,15 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import QuickSettings from '../components/QuickSettings';
 import { useT } from '../i18n/useT';
 import { useSettingsStore } from '../store/settings';
 
-type TrackId = 'frontend' | 'backend' | 'fullstack' | 'data' | 'devops' | 'mobile';
+type TrackId =
+  | 'frontend'
+  | 'backend'
+  | 'fullstack'
+  | 'data'
+  | 'devops'
+  | 'mobile';
 
 type SurveyState = {
   tracks: TrackId[];
@@ -183,13 +188,22 @@ const QUESTIONS: McqQuestion[] = [
       vi: 'Vì sao không nên mutate trực tiếp state object trong React?',
     },
     options: [
-      { en: 'Because mutating will crash JavaScript', vi: 'Vì mutate sẽ làm JS crash' },
+      {
+        en: 'Because mutating will crash JavaScript',
+        vi: 'Vì mutate sẽ làm JS crash',
+      },
       {
         en: 'Because React relies on reference equality to detect changes and trigger re-renders',
         vi: 'Vì React dựa trên reference để detect thay đổi và trigger re-render',
       },
-      { en: 'Because mutating makes code 10x slower', vi: 'Vì mutate làm code chậm hơn 10x' },
-      { en: 'Because TypeScript forbids mutation', vi: 'Vì TypeScript không cho mutate' },
+      {
+        en: 'Because mutating makes code 10x slower',
+        vi: 'Vì mutate làm code chậm hơn 10x',
+      },
+      {
+        en: 'Because TypeScript forbids mutation',
+        vi: 'Vì TypeScript không cho mutate',
+      },
     ],
     correctIndex: 1,
     explanation: {
@@ -208,7 +222,10 @@ const QUESTIONS: McqQuestion[] = [
     },
     options: [
       { en: 'Every time state changes', vi: 'Mỗi lần state đổi' },
-      { en: 'Only after the initial mount (and cleanup on unmount)', vi: 'Chỉ sau mount (và cleanup khi unmount)' },
+      {
+        en: 'Only after the initial mount (and cleanup on unmount)',
+        vi: 'Chỉ sau mount (và cleanup khi unmount)',
+      },
       { en: 'Before the first render', vi: 'Trước render đầu tiên' },
       { en: 'After every props change', vi: 'Sau mỗi lần props đổi' },
     ],
@@ -223,17 +240,30 @@ const QUESTIONS: McqQuestion[] = [
     track: 'frontend',
     difficulty: 'medium',
     title: { en: 'Fetch & Errors', vi: 'Fetch & Errors' },
-    prompt:
-      { en: 'If fetch gets an HTTP 404, does fetch() reject the promise by default?', vi: 'Khi fetch nhận HTTP 404, fetch() có reject promise không (mặc định)?' },
+    prompt: {
+      en: 'If fetch gets an HTTP 404, does fetch() reject the promise by default?',
+      vi: 'Khi fetch nhận HTTP 404, fetch() có reject promise không (mặc định)?',
+    },
     options: [
-      { en: 'Yes, any status >= 400 rejects', vi: 'Có, status >= 400 đều reject' },
-      { en: 'No, fetch resolves and you must check response.ok / status', vi: 'Không, fetch resolve và bạn phải tự check response.ok / status' },
-      { en: 'It rejects only if the body is empty', vi: 'Chỉ reject nếu body rỗng' },
+      {
+        en: 'Yes, any status >= 400 rejects',
+        vi: 'Có, status >= 400 đều reject',
+      },
+      {
+        en: 'No, fetch resolves and you must check response.ok / status',
+        vi: 'Không, fetch resolve và bạn phải tự check response.ok / status',
+      },
+      {
+        en: 'It rejects only if the body is empty',
+        vi: 'Chỉ reject nếu body rỗng',
+      },
       { en: 'It rejects only on Chrome', vi: 'Chỉ reject trên Chrome' },
     ],
     correctIndex: 1,
-    explanation:
-      { en: 'fetch only rejects on network errors; HTTP errors still resolve (response.ok=false).', vi: 'fetch chỉ reject khi lỗi network; HTTP errors vẫn resolve (response.ok=false).' },
+    explanation: {
+      en: 'fetch only rejects on network errors; HTTP errors still resolve (response.ok=false).',
+      vi: 'fetch chỉ reject khi lỗi network; HTTP errors vẫn resolve (response.ok=false).',
+    },
   },
 
   // ===== Frontend (Hard) =====
@@ -245,45 +275,78 @@ const QUESTIONS: McqQuestion[] = [
     prompt: { en: 'What does React.memo() do?', vi: 'React.memo() giúp gì?' },
     options: [
       { en: 'Reduces bundle size', vi: 'Giảm bundle size' },
-      { en: 'Prevents re-render when props are shallow-equal', vi: 'Ngăn re-render khi props shallow-equal' },
-      { en: 'Automatically optimizes all state updates', vi: 'Tự động optimize tất cả state updates' },
+      {
+        en: 'Prevents re-render when props are shallow-equal',
+        vi: 'Ngăn re-render khi props shallow-equal',
+      },
+      {
+        en: 'Automatically optimizes all state updates',
+        vi: 'Tự động optimize tất cả state updates',
+      },
       { en: 'Replaces useEffect', vi: 'Thay thế useEffect' },
     ],
     correctIndex: 1,
-    explanation:
-      { en: 'React.memo memoizes a component and skips rendering when props are unchanged (shallow compare).', vi: 'React.memo memoize component và skip render nếu props không đổi (shallow compare).' },
+    explanation: {
+      en: 'React.memo memoizes a component and skips rendering when props are unchanged (shallow compare).',
+      vi: 'React.memo memoize component và skip render nếu props không đổi (shallow compare).',
+    },
   },
   {
     id: 'fe_hard_keys',
     track: 'frontend',
     difficulty: 'hard',
     title: { en: 'List Keys', vi: 'Keys trong list' },
-    prompt: { en: 'What issue can happen if you use array index as a key in a list?', vi: 'Dùng index làm key trong list có thể gây issue gì?' },
+    prompt: {
+      en: 'What issue can happen if you use array index as a key in a list?',
+      vi: 'Dùng index làm key trong list có thể gây issue gì?',
+    },
     options: [
       { en: 'No issue', vi: 'Không có issue' },
-      { en: 'On reorder/insert/remove, React may mix up state/DOM, causing UI bugs', vi: 'Khi reorder/insert/remove, React có thể gán nhầm state/DOM gây bug UI' },
+      {
+        en: 'On reorder/insert/remove, React may mix up state/DOM, causing UI bugs',
+        vi: 'Khi reorder/insert/remove, React có thể gán nhầm state/DOM gây bug UI',
+      },
       { en: 'Only affects TypeScript', vi: 'Chỉ ảnh hưởng TypeScript' },
-      { en: 'Only slightly slower; no bugs', vi: 'Chỉ chậm hơn một chút; không bug' },
+      {
+        en: 'Only slightly slower; no bugs',
+        vi: 'Chỉ chậm hơn một chút; không bug',
+      },
     ],
     correctIndex: 1,
-    explanation:
-      { en: 'Keys must be stable per item identity; index changes with position and can mis-assign state.', vi: 'Keys phải stable theo identity item; index thay đổi theo vị trí nên dễ bị “đổi chỗ state”.' },
+    explanation: {
+      en: 'Keys must be stable per item identity; index changes with position and can mis-assign state.',
+      vi: 'Keys phải stable theo identity item; index thay đổi theo vị trí nên dễ bị “đổi chỗ state”.',
+    },
   },
   {
     id: 'fe_hard_accessibility',
     track: 'frontend',
     difficulty: 'hard',
     title: { en: 'Accessibility', vi: 'Accessibility' },
-    prompt: { en: 'How should ARIA be used?', vi: 'ARIA nên được dùng như thế nào?' },
+    prompt: {
+      en: 'How should ARIA be used?',
+      vi: 'ARIA nên được dùng như thế nào?',
+    },
     options: [
-      { en: 'ARIA completely replaces HTML semantics', vi: 'ARIA thay thế hoàn toàn HTML semantics' },
-      { en: 'Prefer correct semantic HTML first; use ARIA only to supplement when needed', vi: 'Ưu tiên dùng semantic HTML đúng trước; ARIA chỉ để bổ sung khi cần' },
+      {
+        en: 'ARIA completely replaces HTML semantics',
+        vi: 'ARIA thay thế hoàn toàn HTML semantics',
+      },
+      {
+        en: 'Prefer correct semantic HTML first; use ARIA only to supplement when needed',
+        vi: 'Ưu tiên dùng semantic HTML đúng trước; ARIA chỉ để bổ sung khi cần',
+      },
       { en: 'ARIA is only for React', vi: 'ARIA chỉ dùng trong React' },
-      { en: "A11y isn't needed for a coding learning app", vi: 'Không cần A11y cho app học code' },
+      {
+        en: "A11y isn't needed for a coding learning app",
+        vi: 'Không cần A11y cho app học code',
+      },
     ],
     correctIndex: 1,
-    explanation:
-      { en: 'Rule of thumb: “No ARIA is better than bad ARIA” — use semantic HTML first.', vi: 'Nguyên tắc: “No ARIA is better than bad ARIA” — dùng semantic HTML trước.' },
+    explanation: {
+      en: 'Rule of thumb: “No ARIA is better than bad ARIA” — use semantic HTML first.',
+      vi: 'Nguyên tắc: “No ARIA is better than bad ARIA” — dùng semantic HTML trước.',
+    },
   },
 
   // ===== Backend (Easy) =====
@@ -292,7 +355,10 @@ const QUESTIONS: McqQuestion[] = [
     track: 'backend',
     difficulty: 'easy',
     title: { en: 'HTTP Status', vi: 'HTTP Status' },
-    prompt: { en: 'Which status code fits when a resource is created successfully?', vi: 'Status code nào phù hợp khi tạo resource thành công?' },
+    prompt: {
+      en: 'Which status code fits when a resource is created successfully?',
+      vi: 'Status code nào phù hợp khi tạo resource thành công?',
+    },
     options: [
       { en: '200', vi: '200' },
       { en: '201', vi: '201' },
@@ -300,39 +366,73 @@ const QUESTIONS: McqQuestion[] = [
       { en: '301', vi: '301' },
     ],
     correctIndex: 1,
-    explanation: { en: '201 Created is used when creating a new resource.', vi: '201 Created dùng khi tạo resource mới thành công.' },
+    explanation: {
+      en: '201 Created is used when creating a new resource.',
+      vi: '201 Created dùng khi tạo resource mới thành công.',
+    },
   },
   {
     id: 'be_easy_json',
     track: 'backend',
     difficulty: 'easy',
     title: { en: 'API Contracts', vi: 'API Contracts' },
-    prompt: { en: 'Why validate request bodies on the server?', vi: 'Vì sao nên validate body request ở server?' },
+    prompt: {
+      en: 'Why validate request bodies on the server?',
+      vi: 'Vì sao nên validate body request ở server?',
+    },
     options: [
-      { en: 'To make the client run faster', vi: 'Để làm client chạy nhanh hơn' },
-      { en: 'To prevent invalid/missing input and improve safety (security + data integrity)', vi: 'Để tránh input sai/thiếu và tăng an toàn (security + data integrity)' },
-      { en: 'To reduce the number of endpoints', vi: 'Để giảm số lượng endpoints' },
-      { en: 'Not needed if using TypeScript', vi: 'Không cần nếu dùng TypeScript' },
+      {
+        en: 'To make the client run faster',
+        vi: 'Để làm client chạy nhanh hơn',
+      },
+      {
+        en: 'To prevent invalid/missing input and improve safety (security + data integrity)',
+        vi: 'Để tránh input sai/thiếu và tăng an toàn (security + data integrity)',
+      },
+      {
+        en: 'To reduce the number of endpoints',
+        vi: 'Để giảm số lượng endpoints',
+      },
+      {
+        en: 'Not needed if using TypeScript',
+        vi: 'Không cần nếu dùng TypeScript',
+      },
     ],
     correctIndex: 1,
-    explanation:
-      { en: "Clients aren't 100% trustworthy; server validation protects the system and data.", vi: 'Client không đáng tin 100%; server validate để bảo vệ hệ thống và dữ liệu.' },
+    explanation: {
+      en: "Clients aren't 100% trustworthy; server validation protects the system and data.",
+      vi: 'Client không đáng tin 100%; server validate để bảo vệ hệ thống và dữ liệu.',
+    },
   },
   {
     id: 'be_easy_sql_injection',
     track: 'backend',
     difficulty: 'easy',
     title: { en: 'Security Basics', vi: 'Bảo mật cơ bản' },
-    prompt: { en: 'A common way to prevent SQL injection is to…', vi: 'Cách phổ biến để tránh SQL Injection?' },
+    prompt: {
+      en: 'A common way to prevent SQL injection is to…',
+      vi: 'Cách phổ biến để tránh SQL Injection?',
+    },
     options: [
-      { en: 'Build SQL by string concatenation', vi: 'Nối chuỗi query bằng string' },
-      { en: 'Use parameterized queries / prepared statements', vi: 'Dùng parameterized queries / prepared statements' },
+      {
+        en: 'Build SQL by string concatenation',
+        vi: 'Nối chuỗi query bằng string',
+      },
+      {
+        en: 'Use parameterized queries / prepared statements',
+        vi: 'Dùng parameterized queries / prepared statements',
+      },
       { en: 'Only allow GET requests', vi: 'Chỉ cho phép GET' },
-      { en: 'Switch to NoSQL so injection disappears', vi: 'Chuyển DB sang NoSQL là hết injection' },
+      {
+        en: 'Switch to NoSQL so injection disappears',
+        vi: 'Chuyển DB sang NoSQL là hết injection',
+      },
     ],
     correctIndex: 1,
-    explanation:
-      { en: 'Parameterized queries separate data from the SQL statement and greatly reduce injection risk.', vi: 'Parameterized query tách data khỏi SQL statement, giảm injection đáng kể.' },
+    explanation: {
+      en: 'Parameterized queries separate data from the SQL statement and greatly reduce injection risk.',
+      vi: 'Parameterized query tách data khỏi SQL statement, giảm injection đáng kể.',
+    },
   },
 
   // ===== Backend (Medium) =====
@@ -341,48 +441,87 @@ const QUESTIONS: McqQuestion[] = [
     track: 'backend',
     difficulty: 'medium',
     title: { en: 'REST Semantics', vi: 'REST Semantics' },
-    prompt: { en: 'In REST, PUT is typically…', vi: 'Trong REST, PUT thường có tính chất gì?' },
+    prompt: {
+      en: 'In REST, PUT is typically…',
+      vi: 'Trong REST, PUT thường có tính chất gì?',
+    },
     options: [
-      { en: 'Non-idempotent (calling multiple times creates multiple records)', vi: 'Non-idempotent (gọi nhiều lần tạo nhiều record)' },
-      { en: 'Idempotent (calling multiple times produces the same result)', vi: 'Idempotent (gọi nhiều lần kết quả tương tự)' },
+      {
+        en: 'Non-idempotent (calling multiple times creates multiple records)',
+        vi: 'Non-idempotent (gọi nhiều lần tạo nhiều record)',
+      },
+      {
+        en: 'Idempotent (calling multiple times produces the same result)',
+        vi: 'Idempotent (gọi nhiều lần kết quả tương tự)',
+      },
       { en: 'Only used for delete', vi: 'Chỉ dùng để delete' },
       { en: 'Only used for file uploads', vi: 'Chỉ dùng cho file upload' },
     ],
     correctIndex: 1,
-    explanation:
-      { en: 'PUT is usually idempotent: applying the same update yields the same result.', vi: 'PUT (thường) idempotent: update/replace resource với cùng payload cho cùng kết quả.' },
+    explanation: {
+      en: 'PUT is usually idempotent: applying the same update yields the same result.',
+      vi: 'PUT (thường) idempotent: update/replace resource với cùng payload cho cùng kết quả.',
+    },
   },
   {
     id: 'be_med_pagination',
     track: 'backend',
     difficulty: 'medium',
     title: { en: 'Pagination', vi: 'Phân trang' },
-    prompt: { en: 'Why is cursor-based pagination often better than offset/limit on large tables?', vi: 'Vì sao cursor-based pagination thường tốt hơn offset/limit ở bảng lớn?' },
+    prompt: {
+      en: 'Why is cursor-based pagination often better than offset/limit on large tables?',
+      vi: 'Vì sao cursor-based pagination thường tốt hơn offset/limit ở bảng lớn?',
+    },
     options: [
       { en: 'Cursor is always simpler', vi: 'Cursor luôn đơn giản hơn' },
-      { en: 'Large offsets force more scanning; cursor based on an indexed ordering is more stable and faster', vi: 'Offset lớn làm DB phải scan nhiều; cursor dựa trên index/ordering nên ổn định và nhanh hơn' },
-      { en: "Offset doesn't work on Postgres", vi: 'Offset không chạy được trên Postgres' },
-      { en: 'Cursor automatically encrypts data', vi: 'Cursor giúp encrypt dữ liệu' },
+      {
+        en: 'Large offsets force more scanning; cursor based on an indexed ordering is more stable and faster',
+        vi: 'Offset lớn làm DB phải scan nhiều; cursor dựa trên index/ordering nên ổn định và nhanh hơn',
+      },
+      {
+        en: "Offset doesn't work on Postgres",
+        vi: 'Offset không chạy được trên Postgres',
+      },
+      {
+        en: 'Cursor automatically encrypts data',
+        vi: 'Cursor giúp encrypt dữ liệu',
+      },
     ],
     correctIndex: 1,
-    explanation:
-      { en: 'Large offsets are expensive; cursor based on a key (id/createdAt) can leverage indexes efficiently.', vi: 'Offset lớn tốn kém; cursor dựa trên key (id/createdAt) giúp query theo index hiệu quả.' },
+    explanation: {
+      en: 'Large offsets are expensive; cursor based on a key (id/createdAt) can leverage indexes efficiently.',
+      vi: 'Offset lớn tốn kém; cursor dựa trên key (id/createdAt) giúp query theo index hiệu quả.',
+    },
   },
   {
     id: 'be_med_n_plus_one',
     track: 'backend',
     difficulty: 'medium',
     title: { en: 'Data Access', vi: 'Truy cập dữ liệu' },
-    prompt: { en: 'What is the N+1 query problem?', vi: 'N+1 query problem là gì?' },
+    prompt: {
+      en: 'What is the N+1 query problem?',
+      vi: 'N+1 query problem là gì?',
+    },
     options: [
-      { en: 'A bug where the query returns N+1 rows', vi: 'Bug khi query bị cộng thêm 1 record' },
-      { en: 'Fetching N items, then running 1 extra query per item (total N+1 queries)', vi: 'Lấy list N items rồi mỗi item query thêm 1 lần (tổng N+1 queries)' },
-      { en: 'When the DB only allows N+1 connections', vi: 'Khi DB chỉ cho phép N+1 connections' },
+      {
+        en: 'A bug where the query returns N+1 rows',
+        vi: 'Bug khi query bị cộng thêm 1 record',
+      },
+      {
+        en: 'Fetching N items, then running 1 extra query per item (total N+1 queries)',
+        vi: 'Lấy list N items rồi mỗi item query thêm 1 lần (tổng N+1 queries)',
+      },
+      {
+        en: 'When the DB only allows N+1 connections',
+        vi: 'Khi DB chỉ cho phép N+1 connections',
+      },
       { en: 'When you join too many tables', vi: 'Khi join quá nhiều bảng' },
     ],
     correctIndex: 1,
-    explanation:
-      { en: 'N+1 happens when the ORM/data layer fails to eager-load properly, causing many extra queries.', vi: 'N+1 xảy ra khi ORM/layer data access không eager load đúng, gây rất nhiều queries.' },
+    explanation: {
+      en: 'N+1 happens when the ORM/data layer fails to eager-load properly, causing many extra queries.',
+      vi: 'N+1 xảy ra khi ORM/layer data access không eager load đúng, gây rất nhiều queries.',
+    },
   },
 
   // ===== Backend (Hard) =====
@@ -391,48 +530,81 @@ const QUESTIONS: McqQuestion[] = [
     track: 'backend',
     difficulty: 'hard',
     title: { en: 'Transactions', vi: 'Transactions' },
-    prompt: { en: 'When do you need a transaction?', vi: 'Khi nào cần transaction?' },
+    prompt: {
+      en: 'When do you need a transaction?',
+      vi: 'Khi nào cần transaction?',
+    },
     options: [
-      { en: 'Every query needs a transaction', vi: 'Mọi query đều cần transaction' },
-      { en: 'When multiple DB operations must be all-or-nothing to avoid partial state', vi: 'Khi nhiều thao tác DB phải all-or-nothing để tránh trạng thái dở dang' },
+      {
+        en: 'Every query needs a transaction',
+        vi: 'Mọi query đều cần transaction',
+      },
+      {
+        en: 'When multiple DB operations must be all-or-nothing to avoid partial state',
+        vi: 'Khi nhiều thao tác DB phải all-or-nothing để tránh trạng thái dở dang',
+      },
       { en: 'Only when using NoSQL', vi: 'Chỉ khi dùng NoSQL' },
       { en: 'Only for SELECT queries', vi: 'Chỉ khi query SELECT' },
     ],
     correctIndex: 1,
-    explanation:
-      { en: 'Transactions ensure consistency when multiple related inserts/updates must succeed together.', vi: 'Transaction đảm bảo tính nhất quán khi có nhiều bước update/insert liên quan.' },
+    explanation: {
+      en: 'Transactions ensure consistency when multiple related inserts/updates must succeed together.',
+      vi: 'Transaction đảm bảo tính nhất quán khi có nhiều bước update/insert liên quan.',
+    },
   },
   {
     id: 'be_hard_jwt',
     track: 'backend',
     difficulty: 'hard',
     title: { en: 'Auth', vi: 'Auth' },
-    prompt: { en: 'Where should you store a JWT in a web app to reduce XSS risk?', vi: 'JWT nên lưu ở đâu để giảm rủi ro XSS?' },
+    prompt: {
+      en: 'Where should you store a JWT in a web app to reduce XSS risk?',
+      vi: 'JWT nên lưu ở đâu để giảm rủi ro XSS?',
+    },
     options: [
       { en: 'LocalStorage', vi: 'LocalStorage' },
-      { en: 'HttpOnly secure cookie (with CSRF protection)', vi: 'HttpOnly secure cookie (kèm CSRF protection)' },
+      {
+        en: 'HttpOnly secure cookie (with CSRF protection)',
+        vi: 'HttpOnly secure cookie (kèm CSRF protection)',
+      },
       { en: 'Window.name', vi: 'Window.name' },
-      { en: "Don't store it; hard-code it", vi: 'Không cần lưu; hard-code vào code' },
+      {
+        en: "Don't store it; hard-code it",
+        vi: 'Không cần lưu; hard-code vào code',
+      },
     ],
     correctIndex: 1,
-    explanation:
-      { en: "HttpOnly cookies can't be read by JS (reduces XSS token theft), but you must mitigate CSRF.", vi: 'HttpOnly cookie không bị JS đọc trực tiếp (giảm XSS leak), nhưng cần chống CSRF.' },
+    explanation: {
+      en: "HttpOnly cookies can't be read by JS (reduces XSS token theft), but you must mitigate CSRF.",
+      vi: 'HttpOnly cookie không bị JS đọc trực tiếp (giảm XSS leak), nhưng cần chống CSRF.',
+    },
   },
   {
     id: 'be_hard_rate_limit',
     track: 'backend',
     difficulty: 'hard',
     title: { en: 'Reliability', vi: 'Độ ổn định' },
-    prompt: { en: 'What is rate limiting used for?', vi: 'Rate limiting dùng để làm gì?' },
+    prompt: {
+      en: 'What is rate limiting used for?',
+      vi: 'Rate limiting dùng để làm gì?',
+    },
     options: [
       { en: 'To reduce network latency', vi: 'Giảm độ trễ mạng' },
-      { en: 'To prevent abuse/DoS, protect backend resources, and enforce fairness', vi: 'Chống abuse/DoS, bảo vệ backend và fairness giữa users' },
+      {
+        en: 'To prevent abuse/DoS, protect backend resources, and enforce fairness',
+        vi: 'Chống abuse/DoS, bảo vệ backend và fairness giữa users',
+      },
       { en: 'To improve SEO', vi: 'Tăng SEO' },
-      { en: 'To automatically cache responses', vi: 'Để cache response tự động' },
+      {
+        en: 'To automatically cache responses',
+        vi: 'Để cache response tự động',
+      },
     ],
     correctIndex: 1,
-    explanation:
-      { en: 'Rate limiting helps keep systems stable and reduces spam/DoS risk.', vi: 'Rate limit giúp hệ thống ổn định hơn và giảm nguy cơ bị spam/DoS.' },
+    explanation: {
+      en: 'Rate limiting helps keep systems stable and reduces spam/DoS risk.',
+      vi: 'Rate limit giúp hệ thống ổn định hơn và giảm nguy cơ bị spam/DoS.',
+    },
   },
 ];
 
@@ -461,7 +633,10 @@ const CODE_TASKS: Record<SkillTrack, Record<Difficulty, CodeTask>> = {
     hard: {
       track: 'frontend',
       difficulty: 'hard',
-      title: { en: 'FE Hard — Data Fetching + Abort', vi: 'FE Hard — Data Fetching + Abort' },
+      title: {
+        en: 'FE Hard — Data Fetching + Abort',
+        vi: 'FE Hard — Data Fetching + Abort',
+      },
       prompt: {
         en: 'Design a hook `useUserSearch(query)`.\nRequirements:\n- When query changes: call /api/users?q=... (mock) and update loading/error/data.\n- Cancel the previous request if query changes quickly (AbortController).\n- Avoid race conditions (only use the latest response).\n\nYou can write pseudo-code; it does not need to run.',
         vi: 'Thiết kế hook `useUserSearch(query)`.\nYêu cầu:\n- Khi query thay đổi: gọi /api/users?q=... (mock) và cập nhật loading/error/data.\n- Hủy request cũ nếu query đổi nhanh (AbortController).\n- Tránh race condition (chỉ lấy response mới nhất).\n\nBạn có thể viết pseudo-code, không cần chạy được.',
@@ -483,7 +658,10 @@ const CODE_TASKS: Record<SkillTrack, Record<Difficulty, CodeTask>> = {
     medium: {
       track: 'backend',
       difficulty: 'medium',
-      title: { en: 'BE Medium — Pagination API', vi: 'BE Medium — Pagination API' },
+      title: {
+        en: 'BE Medium — Pagination API',
+        vi: 'BE Medium — Pagination API',
+      },
       prompt: {
         en: 'Design an endpoint GET /posts?limit=20&cursor=...\nRequirements:\n- Return { items, nextCursor }\n- Cursor based on createdAt or id.\n- Describe the SQL/pseudo query and response format.\n\nNo running code required, but be clear.',
         vi: 'Thiết kế endpoint GET /posts?limit=20&cursor=...\nYêu cầu:\n- Trả về { items, nextCursor }\n- Cursor dựa trên createdAt hoặc id.\n- Mô tả query SQL/pseudo + format response.\n\nKhông cần code chạy nhưng mô tả rõ.',
@@ -493,7 +671,10 @@ const CODE_TASKS: Record<SkillTrack, Record<Difficulty, CodeTask>> = {
     hard: {
       track: 'backend',
       difficulty: 'hard',
-      title: { en: 'BE Hard — Auth Middleware', vi: 'BE Hard — Auth Middleware' },
+      title: {
+        en: 'BE Hard — Auth Middleware',
+        vi: 'BE Hard — Auth Middleware',
+      },
       prompt: {
         en: 'Write pseudo-code middleware `auth()`:\n- Read token from Authorization: Bearer <token>\n- Verify JWT (assume verifyJwt)\n- Attach userId to req.context\n- On failure: 401\n\nBonus: distinguish 401 vs 403 (insufficient permissions).',
         vi: 'Viết pseudo-code middleware `auth()`:\n- Nhận token từ Authorization: Bearer <token>\n- Verify JWT (giả định có verifyJwt)\n- Gắn userId vào req.context\n- Nếu fail: 401\n\nBonus: phân biệt 401 vs 403 (không đủ quyền).',
@@ -511,7 +692,8 @@ function formatDifficulty(d: Difficulty) {
 
 function difficultyColor(d: Difficulty) {
   if (d === 'easy') return 'border-[#4ADE80]/35 bg-[#4ADE80]/10 text-[#A7F3D0]';
-  if (d === 'medium') return 'border-[#FFA500]/35 bg-[#FFA500]/10 text-[#FFD8A8]';
+  if (d === 'medium')
+    return 'border-[#FFA500]/35 bg-[#FFA500]/10 text-[#FFD8A8]';
   return 'border-[#FF7E5F]/35 bg-[#FF7E5F]/10 text-[#FFC3B6]';
 }
 
@@ -526,7 +708,9 @@ function McqBlock({
 }) {
   const t = useT();
   const language = useSettingsStore((s) => s.language);
-  const isCorrect = typeof selectedIndex === 'number' && selectedIndex === question.correctIndex;
+  const isCorrect =
+    typeof selectedIndex === 'number' &&
+    selectedIndex === question.correctIndex;
   const answered = typeof selectedIndex === 'number';
 
   const title = pickText(question.title, language);
@@ -613,15 +797,58 @@ function OnboardingAssessment() {
   const logoSrc = '/component_2_2x.png';
   const t = useT();
   const language = useSettingsStore((s) => s.language);
+  const ui =
+    language === 'vi'
+      ? {
+          skillAssessment: 'ĐÁNH GIÁ KỸ NĂNG',
+          step: 'BƯỚC',
+          skipToPractice: 'Bỏ qua tới Practice',
+          answerLevel: 'Hãy trả lời mức hiện tại. Qua được thì mở mức kế tiếp.',
+          frontendMiniCode: 'FRONTEND · MINI CODE',
+          backendMiniCode: 'BACKEND · MINI CODE',
+          results: 'KẾT QUẢ',
+          frontendScore: 'ĐIỂM FRONTEND',
+          backendScore: 'ĐIỂM BACKEND',
+          missionBrief: 'TÓM TẮT NHIỆM VỤ',
+          preview: 'XEM TRƯỚC',
+          tracks: 'Track',
+          frontendMax: 'Mức Frontend tối đa',
+          backendMax: 'Mức Backend tối đa',
+          autosave: 'Tự lưu',
+          on: 'BẬT',
+        }
+      : {
+          skillAssessment: 'SKILL ASSESSMENT',
+          step: 'STEP',
+          skipToPractice: 'Skip to Practice',
+          answerLevel: 'Answer the current level. Pass to unlock the next.',
+          frontendMiniCode: 'FRONTEND · MINI CODE',
+          backendMiniCode: 'BACKEND · MINI CODE',
+          results: 'RESULTS',
+          frontendScore: 'FRONTEND SCORE',
+          backendScore: 'BACKEND SCORE',
+          missionBrief: 'MISSION BRIEF',
+          preview: 'PREVIEW',
+          tracks: 'Tracks',
+          frontendMax: 'Frontend max',
+          backendMax: 'Backend max',
+          autosave: 'Autosave',
+          on: 'ON',
+        };
 
   const survey = useMemo(() => loadSurvey(), []);
   const tracks = survey?.tracks ?? [];
 
-  const wantsFrontend = tracks.includes('frontend') || tracks.includes('fullstack');
-  const wantsBackend = tracks.includes('backend') || tracks.includes('fullstack');
+  const wantsFrontend =
+    tracks.includes('frontend') || tracks.includes('fullstack');
+  const wantsBackend =
+    tracks.includes('backend') || tracks.includes('fullstack');
 
   const steps = useMemo(() => {
-    const s: Array<{ id: 'frontend' | 'backend' | 'code' | 'finish'; label: string }> = [];
+    const s: Array<{
+      id: 'frontend' | 'backend' | 'code' | 'finish';
+      label: string;
+    }> = [];
     if (wantsFrontend) s.push({ id: 'frontend', label: 'Frontend' });
     if (wantsBackend) s.push({ id: 'backend', label: 'Backend' });
     s.push({ id: 'code', label: 'Mini Code' });
@@ -643,8 +870,12 @@ function OnboardingAssessment() {
     state.maxDifficultyByTrack.backend ?? 'easy';
 
   // Keep old variable names for UI sections below (preview/results).
-  const maxDifficultyFrontend = wantsFrontend ? currentFrontendDifficulty : undefined;
-  const maxDifficultyBackend = wantsBackend ? currentBackendDifficulty : undefined;
+  const maxDifficultyFrontend = wantsFrontend
+    ? currentFrontendDifficulty
+    : undefined;
+  const maxDifficultyBackend = wantsBackend
+    ? currentBackendDifficulty
+    : undefined;
 
   const frontendLevelQuestions = useMemo(() => {
     if (!wantsFrontend) return [];
@@ -661,7 +892,8 @@ function OnboardingAssessment() {
     );
   }, [wantsBackend, currentBackendDifficulty]);
 
-  const progressPct = steps.length === 0 ? 0 : ((stepIndex + 1) / steps.length) * 100;
+  const progressPct =
+    steps.length === 0 ? 0 : ((stepIndex + 1) / steps.length) * 100;
 
   function persist(next: AssessmentState) {
     try {
@@ -753,7 +985,9 @@ function OnboardingAssessment() {
   const scoreFrontend = useMemo(() => {
     if (!wantsFrontend) return null;
     const list = QUESTIONS.filter((q) => q.track === 'frontend');
-    const answered = list.filter((q) => typeof state.answers[q.id] === 'number');
+    const answered = list.filter(
+      (q) => typeof state.answers[q.id] === 'number'
+    );
     const score = answered.reduce(
       (acc, q) => acc + (state.answers[q.id] === q.correctIndex ? 1 : 0),
       0
@@ -764,7 +998,9 @@ function OnboardingAssessment() {
   const scoreBackend = useMemo(() => {
     if (!wantsBackend) return null;
     const list = QUESTIONS.filter((q) => q.track === 'backend');
-    const answered = list.filter((q) => typeof state.answers[q.id] === 'number');
+    const answered = list.filter(
+      (q) => typeof state.answers[q.id] === 'number'
+    );
     const score = answered.reduce(
       (acc, q) => acc + (state.answers[q.id] === q.correctIndex ? 1 : 0),
       0
@@ -967,9 +1203,9 @@ function OnboardingAssessment() {
 
           <div className="flex w-full max-w-sm flex-col gap-2">
             <div className="flex items-center justify-between text-[11px] font-semibold tracking-[0.28em] text-[rgba(199,201,255,0.55)]">
-              <span>SKILL ASSESSMENT</span>
+              <span>{ui.skillAssessment}</span>
               <span>
-                STEP {stepIndex + 1}/{steps.length}
+                {ui.step} {stepIndex + 1}/{steps.length}
               </span>
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-[color:var(--cg-container-a16)] ring-1 ring-[rgba(255,255,255,0.08)]">
@@ -981,13 +1217,12 @@ function OnboardingAssessment() {
           </div>
 
           <div className="flex shrink-0 items-center gap-3">
-            <QuickSettings />
             <button
               type="button"
               className="text-xs font-semibold text-[color:var(--cg-text-muted)] transition hover:text-[color:var(--cg-text)]"
               onClick={() => navigate('/practice')}
             >
-              Skip to Practice
+              {ui.skipToPractice}
             </button>
           </div>
         </div>
@@ -1015,7 +1250,7 @@ function OnboardingAssessment() {
                     {t('assess.chooseMax')}
                   </h2>
                   <p className="mt-2 text-xs leading-5 text-[color:var(--cg-text-muted)]">
-                    Answer the current level. Pass to unlock the next.
+                    {ui.answerLevel}
                   </p>
                   <div className="mt-5 flex flex-wrap items-center gap-2">
                     {(['easy', 'medium', 'hard'] as const).map((d) => (
@@ -1057,7 +1292,7 @@ function OnboardingAssessment() {
                     {t('assess.chooseMax')}
                   </h2>
                   <p className="mt-2 text-xs leading-5 text-[color:var(--cg-text-muted)]">
-                    Answer the current level. Pass to unlock the next.
+                    {ui.answerLevel}
                   </p>
                   <div className="mt-5 flex flex-wrap items-center gap-2">
                     {(['easy', 'medium', 'hard'] as const).map((d) => (
@@ -1106,7 +1341,7 @@ function OnboardingAssessment() {
                   <div className="rounded-3xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a22)] p-7 shadow-[0_40px_160px_rgba(0,0,0,0.30)] backdrop-blur">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div className="text-[11px] font-semibold tracking-[0.28em] text-[rgba(199,201,255,0.55)]">
-                        FRONTEND · MINI CODE
+                        {ui.frontendMiniCode}
                       </div>
                       <div className="flex items-center gap-2">
                         {(['easy', 'medium', 'hard'] as const).map((d) => (
@@ -1135,7 +1370,8 @@ function OnboardingAssessment() {
                     </div>
 
                     {(() => {
-                      const d = state.codeAnswers.frontend?.difficulty ?? 'easy';
+                      const d =
+                        state.codeAnswers.frontend?.difficulty ?? 'easy';
                       const task = CODE_TASKS.frontend[d];
                       return (
                         <>
@@ -1149,10 +1385,13 @@ function OnboardingAssessment() {
                             rows={12}
                             value={
                               state.codeAnswers.frontend?.code ??
-                              (task.starter ?? '')
+                              task.starter ??
+                              ''
                             }
                             onChange={(e) =>
-                              setCodeAnswer('frontend', { code: e.target.value })
+                              setCodeAnswer('frontend', {
+                                code: e.target.value,
+                              })
                             }
                             className={cx(
                               'mt-4 w-full resize-none rounded-2xl border px-4 py-3 font-mono text-[12px] leading-5 outline-none transition',
@@ -1201,7 +1440,7 @@ function OnboardingAssessment() {
                   <div className="rounded-3xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a22)] p-7 shadow-[0_40px_160px_rgba(0,0,0,0.30)] backdrop-blur">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div className="text-[11px] font-semibold tracking-[0.28em] text-[rgba(199,201,255,0.55)]">
-                        BACKEND · MINI CODE
+                        {ui.backendMiniCode}
                       </div>
                       <div className="flex items-center gap-2">
                         {(['easy', 'medium', 'hard'] as const).map((d) => (
@@ -1217,7 +1456,10 @@ function OnboardingAssessment() {
                             onClick={() => {
                               const starter =
                                 CODE_TASKS.backend[d].starter ?? '';
-                              setCodeAnswer('backend', { difficulty: d, code: starter });
+                              setCodeAnswer('backend', {
+                                difficulty: d,
+                                code: starter,
+                              });
                             }}
                           >
                             {formatDifficulty(d)}
@@ -1241,7 +1483,8 @@ function OnboardingAssessment() {
                             rows={12}
                             value={
                               state.codeAnswers.backend?.code ??
-                              (task.starter ?? '')
+                              task.starter ??
+                              ''
                             }
                             onChange={(e) =>
                               setCodeAnswer('backend', { code: e.target.value })
@@ -1264,8 +1507,8 @@ function OnboardingAssessment() {
                                   type="button"
                                   className={cx(
                                     'h-8 w-8 rounded-xl border text-xs font-bold transition',
-                                    (state.codeAnswers.backend?.confidence ?? 3) ===
-                                      n
+                                    (state.codeAnswers.backend?.confidence ??
+                                      3) === n
                                       ? 'border-[rgba(255,165,0,0.65)] bg-[rgba(255,165,0,0.16)] text-[color:var(--cg-text)]'
                                       : 'border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] text-[color:var(--cg-text-muted)] hover:text-[color:var(--cg-text)]'
                                   )}
@@ -1290,7 +1533,7 @@ function OnboardingAssessment() {
               <div className="space-y-6">
                 <div className="rounded-3xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a22)] p-8 shadow-[0_40px_160px_rgba(0,0,0,0.30)] backdrop-blur">
                   <div className="text-[11px] font-semibold tracking-[0.28em] text-[rgba(199,201,255,0.55)]">
-                    RESULTS
+                    {ui.results}
                   </div>
                   <h2 className="mt-3 text-2xl font-semibold tracking-tight">
                     {t('assess.results.title')}
@@ -1302,7 +1545,7 @@ function OnboardingAssessment() {
                   <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-bg-a55)] p-5">
                       <div className="text-[11px] font-semibold tracking-[0.28em] text-[rgba(199,201,255,0.55)]">
-                        FRONTEND SCORE
+                        {ui.frontendScore}
                       </div>
                       <div className="mt-3 text-2xl font-semibold">
                         {scoreFrontend
@@ -1321,10 +1564,12 @@ function OnboardingAssessment() {
 
                     <div className="rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-bg-a55)] p-5">
                       <div className="text-[11px] font-semibold tracking-[0.28em] text-[rgba(199,201,255,0.55)]">
-                        BACKEND SCORE
+                        {ui.backendScore}
                       </div>
                       <div className="mt-3 text-2xl font-semibold">
-                        {scoreBackend ? `${scoreBackend.score}/${scoreBackend.total}` : '—'}
+                        {scoreBackend
+                          ? `${scoreBackend.score}/${scoreBackend.total}`
+                          : '—'}
                       </div>
                       <div className="mt-2 text-xs text-[color:var(--cg-text-muted)]">
                         {t('assess.results.selectedLevel')}{' '}
@@ -1367,7 +1612,7 @@ function OnboardingAssessment() {
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <div className="text-[11px] font-semibold tracking-[0.28em] text-[rgba(199,201,255,0.55)]">
-                        MISSION BRIEF
+                        {ui.missionBrief}
                       </div>
                       <h3 className="mt-2 text-lg font-semibold tracking-tight">
                         {missionBrief.title}
@@ -1391,31 +1636,35 @@ function OnboardingAssessment() {
 
             <div className="rounded-3xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] p-6 backdrop-blur">
               <div className="text-[11px] font-semibold tracking-[0.28em] text-[rgba(199,201,255,0.55)]">
-                PREVIEW
+                {ui.preview}
               </div>
               <div className="mt-4 space-y-3 text-xs text-[color:var(--cg-text-muted)]">
                 <div className="flex items-center justify-between gap-3">
-                  <span>Tracks</span>
+                  <span>{ui.tracks}</span>
                   <span className="font-semibold text-[color:var(--cg-text)]">
                     {tracks.length ? tracks.join(', ') : '—'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-3">
-                  <span>Frontend max</span>
+                  <span>{ui.frontendMax}</span>
                   <span className="font-semibold text-[color:var(--cg-text)]">
-                    {maxDifficultyFrontend ? formatDifficulty(maxDifficultyFrontend) : '—'}
+                    {maxDifficultyFrontend
+                      ? formatDifficulty(maxDifficultyFrontend)
+                      : '—'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-3">
-                  <span>Backend max</span>
+                  <span>{ui.backendMax}</span>
                   <span className="font-semibold text-[color:var(--cg-text)]">
-                    {maxDifficultyBackend ? formatDifficulty(maxDifficultyBackend) : '—'}
+                    {maxDifficultyBackend
+                      ? formatDifficulty(maxDifficultyBackend)
+                      : '—'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-3">
-                  <span>Autosave</span>
+                  <span>{ui.autosave}</span>
                   <span className="font-semibold text-[color:var(--cg-text)]">
-                    ON
+                    {ui.on}
                   </span>
                 </div>
               </div>

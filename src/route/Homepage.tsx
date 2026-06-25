@@ -89,11 +89,9 @@ function Homepage() {
       </div>
 
       <SideNav />
+      <Header />
 
       <div className="relative z-10 md:pl-[96px]">
-        {/* Header */}
-        <Header />
-
         <main className="max-w-7xl mx-auto px-8 py-12 space-y-10">
           {/* Hero */}
           <section className="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
@@ -126,7 +124,7 @@ function Homepage() {
                   {t('home.hero.start')} →
                 </button>
                 <Link
-                  to="/learning-path"
+                  to="/career-path"
                   className="inline-flex items-center gap-2 rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-6 py-3.5 text-sm font-semibold backdrop-blur-md transition hover:bg-[color:var(--cg-container-a22)] hover:border-[#a78bfa]/40"
                 >
                   <span className="material-symbols-outlined text-[16px] text-[#a78bfa]">
@@ -352,7 +350,7 @@ function Homepage() {
               </div>
 
               <p className="mt-3 text-center text-[11px] text-[color:var(--cg-text-muted)] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                Click để xem Frontend & Backend Roadmap đầy đủ →
+                Click để xem Career Path (Frontend & Backend) đầy đủ →
               </p>
             </div>
           </Link>
@@ -483,37 +481,71 @@ function Homepage() {
                   digital universe through mastery and conquest.
                 </p>
                 <div className="flex gap-3 pt-2">
-                  {['language', 'chat', 'flutter'].map((icon) => (
-                    <button
+                  {[
+                    { icon: 'language', path: '/network' },
+                    { icon: 'chat', path: '/forum' },
+                    { icon: 'flutter', path: '/mobile' },
+                  ].map(({ icon, path }) => (
+                    <Link
                       key={icon}
+                      to={path}
                       className="h-9 w-9 flex items-center justify-center rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] transition hover:border-[#ff7e5f]/40 hover:text-[#ff7e5f]"
                     >
                       <span className="material-symbols-outlined text-[18px]">
                         {icon}
                       </span>
-                    </button>
+                    </Link>
                   ))}
                 </div>
               </div>
               {[
-                [t('home.footer.platform'), ['Courses', 'Arena', 'Pricing']],
-                [t('home.footer.community'), ['Discord', 'Events', 'Guilds']],
-              ].map(([title, items]) => (
-                <div key={title as string}>
+                {
+                  title: t('home.footer.platform'),
+                  items: [
+                    { label: 'Courses', path: '/courses' },
+                    { label: 'Arena', path: '/arena' },
+                    { label: 'Pricing', path: '/pricing' },
+                  ],
+                },
+                {
+                  title: t('home.footer.community'),
+                  items: [
+                    {
+                      label: 'Discord',
+                      path: 'https://discord.com',
+                      isExternal: true,
+                    },
+                    { label: 'Events', path: '/events' },
+                    { label: 'Guilds', path: '/guilds' },
+                  ],
+                },
+              ].map((section) => (
+                <div key={section.title as string}>
                   <div className="text-xs font-bold tracking-widest text-[color:var(--cg-text)] uppercase mb-4">
-                    {title}
+                    {section.title}
                   </div>
                   <div className="space-y-3 text-sm">
-                    {(items as string[]).map((item) => (
-                      <button
-                        key={item}
-                        type="button"
-                        className="block text-left hover:text-[#ff7e5f] transition-colors"
-                        onClick={() => navigate('/survey')}
-                      >
-                        {item}
-                      </button>
-                    ))}
+                    {section.items.map((item) =>
+                      item.isExternal ? (
+                        <a
+                          key={item.label}
+                          href={item.path}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block text-left hover:text-[#ff7e5f] transition-colors"
+                        >
+                          {item.label}
+                        </a>
+                      ) : (
+                        <Link
+                          key={item.label}
+                          to={item.path}
+                          className="block text-left hover:text-[#ff7e5f] transition-colors"
+                        >
+                          {item.label}
+                        </Link>
+                      )
+                    )}
                   </div>
                 </div>
               ))}
@@ -524,18 +556,17 @@ function Homepage() {
               </div>
               <div className="flex items-center gap-6">
                 {[
-                  t('home.footer.terms'),
-                  t('home.footer.privacy'),
-                  t('home.footer.support'),
+                  { label: t('home.footer.terms'), path: '/terms' },
+                  { label: t('home.footer.privacy'), path: '/privacy' },
+                  { label: t('home.footer.support'), path: '/support' },
                 ].map((item) => (
-                  <button
-                    key={item}
-                    type="button"
+                  <Link
+                    key={item.label}
+                    to={item.path}
                     className="hover:text-[color:var(--cg-text)] transition"
-                    onClick={() => navigate('/survey')}
                   >
-                    {item}
-                  </button>
+                    {item.label}
+                  </Link>
                 ))}
               </div>
             </div>

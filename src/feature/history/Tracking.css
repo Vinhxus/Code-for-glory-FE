@@ -57,7 +57,7 @@
 
 .hero-chart {
   width: 160px;
-  display: none; /* hidden on mobile, shown on sm+ */
+  display: none;
 }
 
 @media (min-width: 640px) {
@@ -66,7 +66,6 @@
   }
 }
 
-/* ── Bar Chart ── */
 .bar-chart {
   display: flex;
   align-items: flex-end;
@@ -81,7 +80,6 @@
   transition: height 0.3s ease;
 }
 
-/* ── Main Content ── */
 .main-content {
   display: flex;
   flex-direction: column;
@@ -96,7 +94,6 @@
   }
 }
 
-/* ── Error Chronology (Left) ── */
 .error-chronology {
   flex: 1;
   min-width: 0;
@@ -132,7 +129,6 @@
   gap: 8px;
 }
 
-/* ── Error Row ── */
 .error-row {
   display: flex;
   align-items: center;
@@ -167,7 +163,7 @@
 
 .error-icon-wrap .material-symbols-outlined {
   font-size: 16px;
-  color: rgb(251, 191, 36); /* amber-400 */
+  color: rgb(251, 191, 36);
 }
 
 .error-title {
@@ -208,7 +204,6 @@
   transform: scale(0.95);
 }
 
-/* ── Right Sidebar ── */
 .right-sidebar {
   width: 100%;
   display: flex;
@@ -223,7 +218,6 @@
   }
 }
 
-/* ── Card (shared) ── */
 .card {
   border-radius: 16px;
   padding: 16px;
@@ -238,14 +232,12 @@
   color: var(--cg-text);
 }
 
-/* ── Radar Chart ── */
 .radar-wrap {
   position: relative;
   display: flex;
   justify-content: center;
 }
 
-/* ── Radar Tags ── */
 .radar-tags {
   display: flex;
   gap: 8px;
@@ -271,7 +263,6 @@
   border: 1px solid rgba(255, 165, 0, 0.25);
 }
 
-/* ── Advice Card ── */
 .advice-header {
   display: flex;
   align-items: center;

@@ -1,16 +1,21 @@
-import { NavLink } from 'react-router-dom';
+import { useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useT } from '../i18n/useT';
 import type { I18nKey } from '../i18n/translations';
+import { useAuth } from '../feature/auth/useAuth';
 
 type NavItem = {
   to: string;
   end?: boolean;
   icon: string;
   labelKey: I18nKey;
+  // Hỗ trợ kiểu text cứng nếu hệ thống đa ngôn ngữ i18n chưa dịch kịp chuỗi admin
+  fallbackLabel?: string;
   color: string;
   glow: string;
 };
 
+// ================= MENU CHO NGƯỜI CHƠI THÔNG THƯỜNG =================
 const NAV_ITEMS: NavItem[] = [
   {
     to: '/',
@@ -43,8 +48,63 @@ const NAV_ITEMS: NavItem[] = [
   },
 ];
 
+// ================= MENU DÀNH RIÊNG CHO TÀI KHOẢN ADMIN =================
+const ADMIN_NAV_ITEMS: NavItem[] = [
+  {
+    to: '/admin/quest-node',
+    icon: 'shield_person',
+    labelKey: 'nav.map', // mượn tạm key dịch map
+    fallbackLabel: 'Admin Map',
+    color: '#f59e0b',
+    glow: 'rgba(245,158,11,0.45)',
+  },
+  {
+    to: '/admin/battle',
+    icon: 'gavel',
+    labelKey: 'nav.battle', // mượn tạm key dịch battle
+    fallbackLabel: 'Admin Battle',
+    color: '#ef4444',
+    glow: 'rgba(239,68,68,0.45)',
+  },
+];
+
+const STREAK_COLOR = '#fbbf24';
+const STREAK_GLOW = 'rgba(251,191,36,0.45)';
+
 function SideNav() {
   const t = useT();
+  const navigate = useNavigate();
+  const [showMenu, setShowMenu] = useState(false);
+
+  // Lấy thông tin user hiện tại từ useAuth để check quyền
+  const { user, logout } = useAuth();
+
+  const isVi = t('nav.map') === 'Bản đồ';
+  const text = isVi
+    ? {
+        logout: 'Đăng xuất',
+        player: 'Người chơi',
+        novice: 'Tân binh',
+        streak: 'Streak',
+        adminSection: 'Quản trị hệ thống',
+      }
+    : {
+        logout: 'Log out',
+        player: 'Player',
+        novice: 'Novice',
+        streak: 'Streak',
+        adminSection: 'Admin Panel',
+      };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      navigate('/login');
+    }
+  };
 
   return (
     <aside
@@ -65,9 +125,9 @@ function SideNav() {
         (e.currentTarget as HTMLElement).style.width = '72px';
         (e.currentTarget as HTMLElement).style.boxShadow =
           '0 0 40px rgba(0,0,0,0.3)';
+        setShowMenu(false);
       }}
     >
-      {/* Ambient sidebar glow */}
       <div
         className="pointer-events-none absolute inset-0 opacity-30"
         style={{
@@ -108,7 +168,6 @@ function SideNav() {
         </span>
       </div>
 
-      {/* Top Divider */}
       <div
         className="w-full h-px mb-4"
         style={{
@@ -117,8 +176,8 @@ function SideNav() {
         }}
       />
 
-      {/* Nav items */}
-      <nav className="flex w-full flex-1 flex-col gap-1 px-2">
+      {/* Nav items cho Học viên */}
+      <nav className="flex w-full flex-col gap-1 px-2">
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}
@@ -144,7 +203,6 @@ function SideNav() {
           >
             {({ isActive }) => (
               <>
-                {/* Icon */}
                 <span
                   className="material-symbols-outlined flex-shrink-0 text-[22px] transition-all duration-200"
                   style={{
@@ -158,7 +216,6 @@ function SideNav() {
                   {item.icon}
                 </span>
 
-                {/* Label — slides in when sidebar expands */}
                 <span
                   className="text-[13px] font-semibold whitespace-nowrap overflow-hidden"
                   style={{
@@ -188,7 +245,6 @@ function SideNav() {
                   {t(item.labelKey)}
                 </span>
 
-                {/* Active dot when collapsed */}
                 {isActive && (
                   <span
                     className="absolute right-2.5 top-1/2 -translate-y-1/2 h-1.5 w-1.5 rounded-full flex-shrink-0"
@@ -202,9 +258,120 @@ function SideNav() {
             )}
           </NavLink>
         ))}
+
+        {/* ================= KHU VỰC ADMIN PANEL (CHỈ XUẤT HIỆN KHI ROLE LÀ ADMIN) ================= */}
+        {user?.role === 'admin' && ( // Kiểm tra quyền admin từ hệ thống[cite: 2]
+          <>
+            {/* Thanh ngăn cách giữa phần user và phần quản trị */}
+            <div
+              className="w-full h-px my-3"
+              style={{
+                background:
+                  'linear-gradient(90deg, transparent, var(--cg-border), transparent)',
+              }}
+            />
+
+            {/* Tiêu đề nhóm Admin nhỏ nhắn */}
+            <span
+              className="text-[10px] font-bold uppercase tracking-wider px-3 mb-1 block select-none whitespace-nowrap transition-opacity duration-200"
+              style={{ color: 'var(--cg-coral)', opacity: 0 }}
+              ref={(el) => {
+                if (!el) return;
+                const parent = el.closest('aside');
+                if (!parent) return;
+                const obs = new ResizeObserver(() => {
+                  el.style.opacity =
+                    (parent as HTMLElement).offsetWidth > 100 ? '0.6' : '0';
+                });
+                obs.observe(parent);
+              }}
+            >
+              {text.adminSection}
+            </span>
+
+            {/* Quét mảng danh sách menu admin */}
+            {ADMIN_NAV_ITEMS.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  [
+                    'group relative flex w-full items-center gap-3 rounded-xl py-3 px-3 transition-all duration-200',
+                    isActive
+                      ? 'text-white'
+                      : 'text-[color:var(--cg-text-muted)] hover:text-white',
+                  ].join(' ')
+                }
+                style={({ isActive }) =>
+                  isActive
+                    ? {
+                        background: `linear-gradient(90deg, ${item.glow} 0%, transparent 100%)`,
+                        boxShadow: 'inset 3px 0 0 ' + item.color,
+                      }
+                    : {}
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <span
+                      className="material-symbols-outlined flex-shrink-0 text-[22px] transition-all duration-200"
+                      style={{
+                        color: isActive ? item.color : undefined,
+                        filter: isActive
+                          ? `drop-shadow(0 0 8px ${item.glow})`
+                          : undefined,
+                        transform: isActive ? 'scale(1.12)' : undefined,
+                      }}
+                    >
+                      {item.icon}
+                    </span>
+
+                    <span
+                      className="text-[13px] font-semibold whitespace-nowrap overflow-hidden"
+                      style={{
+                        maxWidth: 120,
+                        opacity: 0,
+                        transform: 'translateX(-6px)',
+                        transition:
+                          'opacity 0.18s ease 0.08s, transform 0.18s ease 0.08s',
+                      }}
+                      ref={(el) => {
+                        if (!el) return;
+                        const parent = el.closest('aside');
+                        if (!parent) return;
+                        const obs = new ResizeObserver(() => {
+                          const w = (parent as HTMLElement).offsetWidth;
+                          if (w > 100) {
+                            el.style.opacity = '1';
+                            el.style.transform = 'translateX(0)';
+                          } else {
+                            el.style.opacity = '0';
+                            el.style.transform = 'translateX(-6px)';
+                          }
+                        });
+                        obs.observe(parent);
+                      }}
+                    >
+                      {item.fallbackLabel}
+                    </span>
+
+                    {isActive && (
+                      <span
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 h-1.5 w-1.5 rounded-full flex-shrink-0"
+                        style={{
+                          background: item.color,
+                          boxShadow: `0 0 6px ${item.glow}`,
+                        }}
+                      />
+                    )}
+                  </>
+                )}
+              </NavLink>
+            ))}
+          </>
+        )}
       </nav>
 
-      {/* Bottom Divider */}
       <div
         className="w-full h-px mt-2 mb-3"
         style={{
@@ -213,10 +380,106 @@ function SideNav() {
         }}
       />
 
-      {/* User Avatar at bottom */}
-      <div className="w-full px-2">
-        <div className="flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 hover:bg-[color:var(--cg-container-a16)] cursor-pointer group">
-          {/* Avatar with XP ring */}
+      {/* Nút Streak */}
+      <div className="w-full px-2 mb-2">
+        <NavLink
+          to="/streak"
+          className={({ isActive }) =>
+            [
+              'group relative flex w-full items-center gap-3 rounded-xl py-3 px-3 transition-all duration-200',
+              isActive
+                ? 'text-[#fbbf24]'
+                : 'text-[color:var(--cg-text-muted)] hover:text-[color:var(--cg-text)]',
+            ].join(' ')
+          }
+          style={({ isActive }) =>
+            isActive
+              ? {
+                  background:
+                    'linear-gradient(90deg, rgba(251,191,36,0.15) 0%, transparent 100%)',
+                  boxShadow: 'inset 3px 0 0 ' + STREAK_COLOR,
+                }
+              : {}
+          }
+        >
+          {({ isActive }) => (
+            <>
+              <span
+                className="material-symbols-outlined flex-shrink-0 text-[22px] transition-all duration-200"
+                style={{
+                  color: isActive ? STREAK_COLOR : undefined,
+                  filter: isActive
+                    ? `drop-shadow(0 0 8px ${STREAK_GLOW})`
+                    : undefined,
+                  transform: isActive ? 'scale(1.12)' : undefined,
+                }}
+              >
+                local_fire_department
+              </span>
+
+              <span
+                className="text-[13px] font-semibold whitespace-nowrap overflow-hidden"
+                style={{
+                  maxWidth: 120,
+                  opacity: 0,
+                  transform: 'translateX(-6px)',
+                  transition:
+                    'opacity 0.18s ease 0.08s, transform 0.18s ease 0.08s',
+                }}
+                ref={(el) => {
+                  if (!el) return;
+                  const parent = el.closest('aside');
+                  if (!parent) return;
+                  const obs = new ResizeObserver(() => {
+                    const w = (parent as HTMLElement).offsetWidth;
+                    if (w > 100) {
+                      el.style.opacity = '1';
+                      el.style.transform = 'translateX(0)';
+                    } else {
+                      el.style.opacity = '0';
+                      el.style.transform = 'translateX(-6px)';
+                    }
+                  });
+                  obs.observe(parent);
+                }}
+              >
+                {text.streak}
+              </span>
+
+              {isActive && (
+                <span
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 h-1.5 w-1.5 rounded-full flex-shrink-0"
+                  style={{
+                    background: STREAK_COLOR,
+                    boxShadow: `0 0 6px ${STREAK_GLOW}`,
+                  }}
+                />
+              )}
+            </>
+          )}
+        </NavLink>
+      </div>
+
+      {/* Avatar & Logout */}
+      <div className="w-full px-2 relative">
+        {showMenu && (
+          <div className="absolute bottom-full left-2 right-2 mb-2 rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-sidebar)] p-1.5 shadow-lg backdrop-blur-xl z-50">
+            <button
+              onClick={handleLogout}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-[color:var(--cg-text)] transition-colors hover:bg-[#ff7e5f]/10 hover:text-[#ff7e5f]"
+            >
+              <span className="material-symbols-outlined text-[18px]">
+                logout
+              </span>
+              <span className="whitespace-nowrap">{text.logout}</span>
+            </button>
+          </div>
+        )}
+
+        <div
+          className="flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 hover:bg-[color:var(--cg-container-a16)] cursor-pointer group"
+          onClick={() => setShowMenu(!showMenu)}
+        >
           <div className="relative flex-shrink-0 w-8 h-8">
             <svg
               className="absolute inset-0 animate-spin-slow"
@@ -246,9 +509,12 @@ function SideNav() {
               />
             </svg>
             <div className="absolute inset-[3px] rounded-full bg-gradient-to-br from-[#ff7e5f] to-[#a78bfa] flex items-center justify-center">
-              <span className="text-[9px] font-bold text-white">U</span>
+              <span className="text-[9px] font-bold text-white">
+                {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+              </span>
             </div>
           </div>
+
           <div
             className="overflow-hidden"
             style={{
@@ -274,11 +540,11 @@ function SideNav() {
               obs.observe(parent);
             }}
           >
-            <div className="text-[12px] font-bold text-[color:var(--cg-text)] whitespace-nowrap">
-              Player
+            <div className="text-[12px] font-bold text-[color:var(--cg-text)] whitespace-nowrap truncate max-w-[100px]">
+              {user?.name ?? text.player}
             </div>
             <div className="text-[10px] text-[color:var(--cg-coral)] font-semibold whitespace-nowrap">
-              Lv.1 Novice
+              {user?.role === 'admin' ? 'Administrator' : `Lv.1 ${text.novice}`}
             </div>
           </div>
         </div>

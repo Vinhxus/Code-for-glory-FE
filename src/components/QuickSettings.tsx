@@ -9,6 +9,23 @@ function QuickSettings() {
 
   const langLabel = useMemo(() => (language === 'en' ? 'EN' : 'VI'), [language]);
   const isDark = theme === 'dark';
+  const text = useMemo(
+    () =>
+      language === 'vi'
+        ? {
+            toggleLanguage: 'Chuyển ngôn ngữ',
+            toggleTheme: 'Chuyển giao diện',
+            dark: 'Tối',
+            light: 'Sáng',
+          }
+        : {
+            toggleLanguage: 'Toggle language',
+            toggleTheme: 'Toggle theme',
+            dark: 'Dark',
+            light: 'Light',
+          },
+    [language]
+  );
 
   return (
     <div className="flex items-center gap-1.5 rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-bg-a72)] p-1.5 shadow-lg backdrop-blur">
@@ -17,7 +34,7 @@ function QuickSettings() {
         type="button"
         onClick={toggleLanguage}
         className="group inline-flex items-center gap-1.5 rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-3 py-2 text-xs font-bold tracking-widest text-[color:var(--cg-text)] transition-all duration-200 hover:bg-[color:var(--cg-container-a22)] hover:border-[#ff7e5f]/30 hover:shadow-[0_0_12px_rgba(255,126,95,0.15)]"
-        title="Toggle language"
+        title={text.toggleLanguage}
       >
         <span className="material-symbols-outlined text-[16px] text-[color:var(--cg-coral)] group-hover:scale-110 transition-transform">
           translate
@@ -30,7 +47,7 @@ function QuickSettings() {
         type="button"
         onClick={toggleTheme}
         className="group inline-flex items-center gap-1.5 rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-3 py-2 text-xs font-bold tracking-widest text-[color:var(--cg-text)] transition-all duration-200 hover:bg-[color:var(--cg-container-a22)] hover:border-[color:var(--cg-green)]/30 hover:shadow-[0_0_12px_rgba(74,222,128,0.15)]"
-        title="Toggle theme"
+        title={text.toggleTheme}
       >
         <span
           className="material-symbols-outlined text-[16px] text-[color:var(--cg-green)] group-hover:scale-110 transition-transform"
@@ -38,7 +55,7 @@ function QuickSettings() {
         >
           {isDark ? 'dark_mode' : 'light_mode'}
         </span>
-        {isDark ? 'Dark' : 'Light'}
+        {isDark ? text.dark : text.light}
       </button>
     </div>
   );

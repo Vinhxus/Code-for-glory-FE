@@ -1,13 +1,33 @@
 import { NavLink } from 'react-router-dom';
 import QuickSettings from '../QuickSettings';
+import { useNavigate } from 'react-router-dom';
+import { useSettingsStore } from '../../store/settings';
 import './Header.css';
 
-const NAV_ITEMS = [
-  { to: '/leaderboard', label: 'Leaderboard' },
-  { to: '/shop', label: 'Shop' },
-];
-
 export default function Header() {
+  const navigate = useNavigate();
+  const language = useSettingsStore((s) => s.language);
+  const text =
+    language === 'vi'
+      ? {
+          leaderboard: 'Bảng xếp hạng',
+          shop: 'Cửa hàng',
+          notifications: 'Thông báo',
+          profile: 'Hồ sơ',
+        }
+      : {
+          leaderboard: 'Leaderboard',
+          shop: 'Shop',
+          notifications: 'Notifications',
+          profile: 'Profile',
+        };
+  const navItems = [
+    { to: '/leaderboard', label: text.leaderboard },
+    { to: '/shop', label: text.shop },
+  ];
+  const handleProfileClick = () => {
+    navigate('/profile');
+  };
   const getNavLinkClass = ({ isActive }: { isActive: boolean }) =>
     `header-nav-link${isActive ? ' active' : ''}`;
   return (
@@ -18,7 +38,7 @@ export default function Header() {
         </NavLink>
 
         <nav className="header-nav">
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <NavLink key={item.to} to={item.to} className={getNavLinkClass}>
               {item.label}
             </NavLink>
@@ -27,13 +47,17 @@ export default function Header() {
 
         <div className="header-actions">
           <QuickSettings />
-          <button className="header-icon-btn" aria-label="Notifications">
+          <button className="header-icon-btn" aria-label={text.notifications}>
             <span className="material-symbols-outlined">notifications</span>
           </button>
 
-          <button className="header-profile-btn" aria-label="Profile">
+          <button
+            className="header-profile-btn"
+            aria-label={text.profile}
+            onClick={handleProfileClick}
+          >
             <span className="material-symbols-outlined">account_circle</span>
-            Profile
+            {text.profile}
           </button>
         </div>
       </header>

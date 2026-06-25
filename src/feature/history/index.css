@@ -9,12 +9,6 @@
   border: 1px solid var(--cg-border);
 }
 
-.tab-button.inactive {
-  color: var(--cg-text-muted);
-}
-
-.tab-button.active {
-  background: var(--cg-amber);
-  color: #0f0b3c;
-  font-weight: 700;
+.header-bar {
+  position: relative;
 }
