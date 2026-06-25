@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from './useAuth';
-import { registerApi } from './authService';
 import StarBackground from '../../components/layout/starBackground';
 import Logo from '../../components/layout/logo';
 import './registerPage.css';
@@ -19,15 +18,35 @@ export default function RegisterPage() {
   const navigate = useNavigate();
 
   const { register } = useAuth(); // Lấy hàm register từ useAuth
-  const [form, setForm] = useState({
+  const EMPTY_FORM = {
     username: '',
     email: '',
     password: '',
     confirmPassword: '',
-  });
+  };
+  const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState<FieldError>({});
   const [successMsg, setSuccessMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Đảm bảo form luôn trống khi vào trang, kể cả khi browser phục hồi
+  // trang từ back-forward cache (bfcache) sau khi bấm nút Back/Forward.
+  useEffect(() => {
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        setForm(EMPTY_FORM);
+        setErrors({});
+        setSuccessMsg('');
+      }
+    };
+
+    window.addEventListener('pageshow', handlePageShow);
+
+    // Dọn dẹp listener khi component unmount nhé bạn
+    return () => {
+      window.removeEventListener('pageshow', handlePageShow);
+    };
+  }, []); // Mảng dependency rỗng để chỉ lắng nghe sự kiện khi vào trang
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -79,7 +98,7 @@ export default function RegisterPage() {
         confirmPassword: form.confirmPassword,
       });
 
-      setForm({ username: '', email: '', password: '', confirmPassword: '' });
+      setForm(EMPTY_FORM);
       setSuccessMsg('Success! Navigate to login...');
 
       setTimeout(() => navigate('/'), 1200);
@@ -105,7 +124,7 @@ export default function RegisterPage() {
 
           {errors.general && <p className="auth-error">{errors.general}</p>}
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} autoComplete="off">
             <label className="auth-label">Username:</label>
             <input
               name="username"
@@ -113,6 +132,7 @@ export default function RegisterPage() {
               placeholder="username"
               value={form.username}
               onChange={handleChange}
+              autoComplete="off"
               required
             />
             {errors.username && <p className="auth-error">{errors.username}</p>}
@@ -125,6 +145,7 @@ export default function RegisterPage() {
               placeholder="Email"
               value={form.email}
               onChange={handleChange}
+              autoComplete="off"
               required
             />
 
@@ -136,6 +157,7 @@ export default function RegisterPage() {
               placeholder="must contain at least 1 number and 1 letter"
               value={form.password}
               onChange={handleChange}
+              autoComplete="new-password"
               required
             />
             {errors.password && <p className="auth-error">{errors.password}</p>}
@@ -148,6 +170,7 @@ export default function RegisterPage() {
               placeholder="Confirm password"
               value={form.confirmPassword}
               onChange={handleChange}
+              autoComplete="new-password"
               required
             />
             {errors.confirmPassword && (
@@ -156,15 +179,8 @@ export default function RegisterPage() {
 
             {successMsg && (
               <p
-                className="auth-success"
-                style={{
-                  color: '#00e676',
-                  textAlign: 'center',
-                  fontSize: '1rem',
-                  fontWeight: '600',
-                  marginTop: '12px',
-                  marginBottom: '0',
-                }}
+                className="auth-success-text"
+                style={{ marginTop: '12px', color: '#10b981' }}
               >
                 {successMsg}
               </p>
@@ -181,7 +197,9 @@ export default function RegisterPage() {
           </form>
         </div>
 
-        <Logo />
+        <div className="auth-logo-section">
+          <Logo />
+        </div>
       </div>
     </div>
   );

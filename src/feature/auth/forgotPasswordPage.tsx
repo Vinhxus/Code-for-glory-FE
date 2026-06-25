@@ -96,7 +96,9 @@ export default function ForgotPasswordPage() {
           )}
         </div>
 
-        <Logo />
+        <div className="auth-logo-section">
+          <Logo />
+        </div>
       </div>
     </div>
   );
