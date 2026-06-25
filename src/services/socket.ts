@@ -7,7 +7,8 @@ import { API_BASE_URL, getToken } from './apiClient';
 
 // Host gốc cho socket.io (không kèm /api). battlesSocket dùng lại để nối
 // vào namespace `/battles`.
-export const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || API_BASE_URL;
+export const SOCKET_URL =
+  import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000';
 
 let socket: Socket | null = null;
 
