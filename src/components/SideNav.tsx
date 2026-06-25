@@ -66,6 +66,14 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
     color: '#ef4444',
     glow: 'rgba(239,68,68,0.45)',
   },
+  {
+    to: '/admin/enforcement',
+    icon: 'policy',
+    labelKey: 'nav.enforcement', // Tạo key dịch để sau này dễ localization
+    fallbackLabel: 'Enforcement',
+    color: '#10b981',
+    glow: 'rgba(16,185,129,0.45)',
+  },
 ];
 
 const STREAK_COLOR = '#fbbf24';

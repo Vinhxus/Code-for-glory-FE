@@ -31,18 +31,12 @@ import ForgotPasswordPage from './feature/auth/forgotPasswordPage';
 
 // Route Guards (Bảo mật)
 import { ProtectedRoute } from './feature/auth/protectedRoute';
-import ForgotPasswordPage from './feature/auth/forgotPasswordPage';
-import RegisterPage from './feature/auth/registerPage';
-import LoginPage from './feature/auth/loginPage';
-import Tracking from './feature/history/Tracking';
-import TabComponent from './feature/history';
-import { useAuth } from './feature/auth/useAuth';
-import BattleRoutes from './feature/battle/BattleRoutes';
 import RequireAdmin from './feature/auth/RequireAdmin';
 import QuestNodeEditor from './feature/admin/QuestNodeEditor';
 import NodeDetail from './feature/admin/NodeDetail';
 import BattleAdmin from './feature/admin/BattleAdmin';
 import CreateBattleProblem from './feature/admin/createBattleProblem';
+import EnforcementAdmin from './feature/admin/Enforcement';
 
 function App() {
   return (
@@ -107,11 +101,6 @@ function App() {
             path="/admin/battle/create"
             element={<CreateBattleProblem />}
           />
-          <Route path="/onboarding/summary" element={<OnboardingSummary />} />
-
-          <Route path="/battle/*" element={<BattleRoutes />} />
-          <Route path="/practice" element={<Practice />} />
-          <Route path="/history" element={<TabComponent />} />
         </Route>
       </Route>
 
