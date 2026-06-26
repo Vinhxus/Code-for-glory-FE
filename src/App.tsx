@@ -13,7 +13,16 @@ import Courses from './route/Courses';
 import Arena from './route/Arena';
 import Pricing from './route/Pricing';
 import Events from './route/Events';
-import Guilds from './route/Guilds';
+import EventDetail from './route/EventDetail';
+import {
+  GuildsAll,
+  GuildBackend,
+  GuildFrontend,
+  GuildDataScience,
+  GuildDevOps,
+  GuildSecurity,
+  GuildMobile,
+} from './route/GuildPages';
 import Terms from './route/Terms';
 import Privacy from './route/Privacy';
 import Support from './route/Support';
@@ -76,7 +85,14 @@ function App() {
         <Route path="/arena" element={<Arena />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/events" element={<Events />} />
-        <Route path="/guilds" element={<Guilds />} />
+        <Route path="/events/:id" element={<EventDetail />} />
+        <Route path="/guilds" element={<GuildsAll />} />
+        <Route path="/guilds/backend" element={<GuildBackend />} />
+        <Route path="/guilds/frontend" element={<GuildFrontend />} />
+        <Route path="/guilds/data-science" element={<GuildDataScience />} />
+        <Route path="/guilds/devops" element={<GuildDevOps />} />
+        <Route path="/guilds/security" element={<GuildSecurity />} />
+        <Route path="/guilds/mobile" element={<GuildMobile />} />
         <Route path="/support" element={<Support />} />
         <Route path="/network" element={<Network />} />
         <Route path="/forum" element={<Forum />} />
