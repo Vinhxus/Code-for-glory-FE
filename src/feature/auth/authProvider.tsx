@@ -7,13 +7,18 @@ import {
   logoutApi,
   type LoginRequest,
   type RegisterRequest,
-  type AuthUser,
 } from './authService';
 
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+}
+
 interface AuthState {
-  user: AuthUser | null;
-  accessToken: string | null;
-  refreshToken: string | null;
+  user: User | null;
+  token: string | null;
   isAuthenticated: boolean;
 }
 
@@ -24,32 +29,20 @@ export interface AuthContextValue extends AuthState {
 }
 
 function getInitialAuthState(): AuthState {
-  const storedAccessToken = localStorage.getItem('access_token');
-  const storedRefreshToken = localStorage.getItem('refresh_token');
+  const storedToken = localStorage.getItem('access_token');
   const storedUser = localStorage.getItem('user');
 
-  if (storedAccessToken && storedRefreshToken && storedUser) {
+  if (storedToken && storedUser) {
     try {
-      const parsedUser: AuthUser = JSON.parse(storedUser);
-      return {
-        user: parsedUser,
-        accessToken: storedAccessToken,
-        refreshToken: storedRefreshToken,
-        isAuthenticated: true,
-      };
+      const parsedUser: User = JSON.parse(storedUser);
+      return { user: parsedUser, token: storedToken, isAuthenticated: true };
     } catch {
       localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');
     }
   }
 
-  return {
-    user: null,
-    accessToken: null,
-    refreshToken: null,
-    isAuthenticated: false,
-  };
+  return { user: null, token: null, isAuthenticated: false };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -57,49 +50,68 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>(getInitialAuthState);
 
   const login = useCallback(async (data: LoginRequest) => {
-    const res = await loginApi(data);
+    // Giả lập delay mạng 500ms cho giống thật
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
-    // Lưu thông tin user để getInitialAuthState() có thể khôi phục khi nhấn F5
-    localStorage.setItem('user', JSON.stringify(res.user));
+    let mockUser: User;
+    const mockToken = 'mock-jwt-token-xyz-123';
 
-    setState({
-      user: res.user,
-      accessToken: res.accessToken,
-      refreshToken: res.refreshToken,
-      isAuthenticated: true,
-    });
+    // Kiểm tra tài khoản để trả về đúng Role
+    if (data.email === 'admin@gmail.com') {
+      mockUser = {
+        id: 'mock-admin-id-999',
+        email: 'admin@gmail.com',
+        name: 'Quốc Vinh (Admin)',
+        role: 'admin', // Trả về quyền admin để pass qua RequireAdmin.tsx
+      };
+    } else {
+      // Mặc định bất kỳ email nào khác nhập vào sẽ là User thường
+      mockUser = {
+        id: 'mock-user-id-001',
+        email: data.email || 'user@gmail.com',
+        name: 'Hoàng Vinh (User)',
+        role: 'user',
+      };
+    }
+
+    // Lưu thông tin vào localStorage y hệt như logic cũ của bạn
+    localStorage.setItem('access_token', mockToken);
+    localStorage.setItem('user', JSON.stringify(mockUser));
+
+    // Cập nhật State cho toàn hệ thống Frontend sử dụng
+    setState({ user: mockUser, token: mockToken, isAuthenticated: true });
   }, []);
 
   const register = useCallback(async (data: RegisterRequest) => {
-    // Đăng ký tài khoản mới trên BE
-    await registerApi(data);
+    // Giả lập delay mạng khi bấm đăng ký
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    // Khi đăng ký xong, tự động đăng nhập luôn với quyền user thường
+    const mockUser: User = {
+      id: 'mock-new-user-id',
+      name: data.username,
+      email: data.email,
+      role: 'user',
+    };
+    const mockToken = 'mock-jwt-token-after-register';
 
-    // Sau khi đăng ký thành công, tự động gọi login
-    const res = await loginApi({ email: data.email, password: data.password });
-    localStorage.setItem('user', JSON.stringify(res.user));
-
-    setState({
-      user: res.user,
-      accessToken: res.accessToken,
-      refreshToken: res.refreshToken,
-      isAuthenticated: true,
-    });
+    localStorage.setItem('access_token', mockToken);
+    localStorage.setItem('user', JSON.stringify(mockUser));
+    setState({ user: mockUser, token: mockToken, isAuthenticated: true });
   }, []);
 
   const logout = useCallback(async () => {
     try {
-      await logoutApi();
+      await logoutApi().catch((err) =>
+        console.error('Backend logout error:', err)
+      );
     } finally {
-      // Đảm bảo xóa sạch localStorage dữ liệu user
+      localStorage.removeItem('access_token');
       localStorage.removeItem('user');
 
-      setState({
-        user: null,
-        accessToken: null,
-        refreshToken: null,
-        isAuthenticated: false,
-      });
+      // Cập nhật lại state về null để các Route nhận biết
+      setState({ user: null, token: null, isAuthenticated: false });
 
+      // về trang login
       navigate('/login', { replace: true });
     }
   }, [navigate]);

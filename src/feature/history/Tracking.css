@@ -6,6 +6,72 @@
   margin-top: 16px;
 }
 
+@media (max-width: 768px) {
+  .tracking-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin-left: 80px;
+    margin-top: 16px;
+  }
+
+  /* --- RESPONSIVE TRÊN MOBILE --- */
+  @media (max-width: 768px) {
+    .tracking-wrapper {
+      margin-left: 0; /* Bỏ margin của SideNav máy tính */
+      margin-top: 0;
+      padding: 12px; /* Tạo khoảng cách thở đều cho toàn bộ nội dung */
+    }
+
+    .hero-inner {
+      padding: 16px;
+      flex-direction: column; /* Đưa text và chart (nếu có) xếp dọc */
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .hero-title {
+      font-size: 18px; /* Thu nhỏ tiêu đề vừa vặn màn hình */
+    }
+
+    /* Biến đổi hàng lỗi thành dạng khối dọc để dễ đọc và dễ bấm */
+    .error-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .error-row-left {
+      align-items: flex-start;
+    }
+
+    /* Nút bấm VIEW FIX chiếm full width trên mobile cho dễ thao tác */
+    .error-row .view-fix-btn,
+    .error-row button {
+      width: 100%;
+      text-align: center;
+      padding: 10px 0;
+    }
+
+    .right-sidebar {
+      width: 100% !important;
+      margin-top: 8px; /* Khoảng cách giữa danh sách lỗi và hộp Advice */
+    }
+  }
+
+  /* Giữ nguyên các class style cơ bản khác bên dưới của bạn... */
+  .hero-banner {
+    margin: 16px 16px 0 16px;
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(135deg, #1a1660 0%, #0f0b3c 100%);
+    border: 1px solid rgba(255, 165, 0, 0.15);
+    min-height: 120px;
+  }
+}
+
 .hero-banner {
   margin: 16px 16px 0 16px;
   border-radius: 16px;
@@ -35,8 +101,25 @@
   padding: 28px 32px;
 }
 
+@media (max-width: 767px) {
+  .hero-inner {
+    padding: 20px 16px;
+    gap: 12px;
+  }
+}
+
 .hero-text {
   max-width: 384px;
+}
+
+@media (max-width: 767px) {
+  .hero-text {
+    max-width: 100%;
+  }
+
+  .hero-title {
+    font-size: 19px;
+  }
 }
 
 .hero-title {
