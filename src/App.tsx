@@ -118,6 +118,9 @@ function App() {
             path="/admin/battle/create"
             element={<CreateBattleProblem />}
           />
+
+          {/* CẤU HÌNH TUYẾN ĐƯỜNG MỚI CHO TRANG GIÁM SÁT HỆ THỐNG */}
+          <Route path="/admin/enforcement" element={<EnforcementAdmin />} />
         </Route>
       </Route>
 
