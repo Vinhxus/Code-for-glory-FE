@@ -33,6 +33,7 @@ import Shop from './route/Shop';
 import { profileRoutes } from './route/profileRoot';
 import TabComponent from './feature/history';
 import { Streak } from './route/Streak';
+import BattleRoutes from './feature/battle/BattleRoutes';
 // Authentication Pages
 import LoginPage from './feature/auth/loginPage';
 import RegisterPage from './feature/auth/registerPage';
@@ -75,7 +76,7 @@ function App() {
           element={<OnboardingAssessment />}
         />
         <Route path="/onboarding/summary" element={<OnboardingSummary />} />
-        <Route path="/battle" element={<Placeholder title="Battle" />} />
+        <Route path="/battle/*" element={<BattleRoutes />} />
         <Route path="/practice" element={<Practice />} />
         <Route path="/history" element={<TabComponent />} />
 
