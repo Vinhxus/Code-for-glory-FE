@@ -67,7 +67,7 @@ function Homepage() {
   );
 
   return (
-    <div className="min-h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)] selection:bg-[color:var(--cg-coral-a18)] select-none overflow-x-hidden">
+    <div className="min-h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)] selection:bg-[color:var(--cg-coral-a18)] select-none overflow-x-hidden py-4">
       {/* Background */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <div

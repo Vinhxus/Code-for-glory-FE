@@ -1,6 +1,10 @@
 .incomplete-root {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--color-gray-800) 0%, #1c1948 100%);
+  background: linear-gradient(
+    135deg,
+    var(--cg-bg) 0%,
+    rgba(79, 70, 229, 0.12) 100%
+  );
   color: var(--cg-text);
   padding: 32px 24px;
   max-width: 960px;

@@ -6,6 +6,72 @@
   margin-top: 16px;
 }
 
+@media (max-width: 768px) {
+  .tracking-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin-left: 80px;
+    margin-top: 16px;
+  }
+
+  /* --- RESPONSIVE TRÊN MOBILE --- */
+  @media (max-width: 768px) {
+    .tracking-wrapper {
+      margin-left: 0; /* Bỏ margin của SideNav máy tính */
+      margin-top: 0;
+      padding: 12px; /* Tạo khoảng cách thở đều cho toàn bộ nội dung */
+    }
+
+    .hero-inner {
+      padding: 16px;
+      flex-direction: column; /* Đưa text và chart (nếu có) xếp dọc */
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .hero-title {
+      font-size: 18px; /* Thu nhỏ tiêu đề vừa vặn màn hình */
+    }
+
+    /* Biến đổi hàng lỗi thành dạng khối dọc để dễ đọc và dễ bấm */
+    .error-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .error-row-left {
+      align-items: flex-start;
+    }
+
+    /* Nút bấm VIEW FIX chiếm full width trên mobile cho dễ thao tác */
+    .error-row .view-fix-btn,
+    .error-row button {
+      width: 100%;
+      text-align: center;
+      padding: 10px 0;
+    }
+
+    .right-sidebar {
+      width: 100% !important;
+      margin-top: 8px; /* Khoảng cách giữa danh sách lỗi và hộp Advice */
+    }
+  }
+
+  /* Giữ nguyên các class style cơ bản khác bên dưới của bạn... */
+  .hero-banner {
+    margin: 16px 16px 0 16px;
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(135deg, #1a1660 0%, #0f0b3c 100%);
+    border: 1px solid rgba(255, 165, 0, 0.15);
+    min-height: 120px;
+  }
+}
+
 .hero-banner {
   margin: 16px 16px 0 16px;
   border-radius: 16px;
@@ -14,6 +80,40 @@
   background: linear-gradient(135deg, #1a1660 0%, #0f0b3c 100%);
   border: 1px solid rgba(255, 165, 0, 0.15);
   min-height: 120px;
+}
+
+.hero-banner::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -10%;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse,
+    rgba(255, 126, 95, 0.18) 0%,
+    transparent 70%
+  );
+  filter: blur(50px);
+  pointer-events: none;
+}
+
+.hero-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -60%;
+  right: -10%;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse,
+    rgba(167, 139, 250, 0.16) 0%,
+    transparent 70%
+  );
+  filter: blur(50px);
+  pointer-events: none;
 }
 
 .hero-grid-overlay {
@@ -35,8 +135,25 @@
   padding: 28px 32px;
 }
 
+@media (max-width: 767px) {
+  .hero-inner {
+    padding: 20px 16px;
+    gap: 12px;
+  }
+}
+
 .hero-text {
   max-width: 384px;
+}
+
+@media (max-width: 767px) {
+  .hero-text {
+    max-width: 100%;
+  }
+
+  .hero-title {
+    font-size: 19px;
+  }
 }
 
 .hero-title {
@@ -136,12 +253,21 @@
   padding: 12px 16px;
   border-radius: 8px;
   border: 1px solid var(--cg-border);
-  background: var(--cg-container-a22);
-  transition: border-color 0.2s ease;
+  background: var(--cg-container-a16);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .error-row:hover {
   border-color: rgba(245, 158, 11, 0.4);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.25),
+    0 0 20px rgba(245, 158, 11, 0.08);
+  transform: translateY(-1px);
 }
 
 .error-row-left {
@@ -198,6 +324,7 @@
 
 .view-fix-btn:hover {
   background: rgba(245, 158, 11, 0.2);
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.3);
 }
 
 .view-fix-btn:active {
@@ -221,8 +348,21 @@
 .card {
   border-radius: 16px;
   padding: 16px;
-  background: var(--cg-container-a22);
+  background: var(--cg-container-a16);
   border: 1px solid var(--cg-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.card:hover {
+  border-color: rgba(251, 191, 36, 0.3);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.25),
+    0 0 24px rgba(251, 191, 36, 0.08);
 }
 
 .card-title {
@@ -325,6 +465,7 @@
 
 .enter-lesson-btn:hover {
   opacity: 0.9;
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
 }
 
 .enter-lesson-btn:active {
