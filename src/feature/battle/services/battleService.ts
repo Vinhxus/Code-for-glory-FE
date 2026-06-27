@@ -51,6 +51,9 @@ export const getSubmissions = async (
   return response.data;
 };
 
+// ⚠️ CHƯA CÓ BACKEND: BE hiện không có module/route `code-analysis`.
+// Hai hàm dưới sẽ trả 404 cho tới khi BE bổ sung controller `/code-analysis`
+// (xem AnalyzeCodePage). Cần quyết định sản phẩm trước khi nối.
 export const createAnalysis = async (
   payload: CreateAnalysisPayload
 ): Promise<CodeAnalysis> => {
@@ -63,9 +66,9 @@ export const getAnalysis = async (battleId: string): Promise<CodeAnalysis> => {
   return response.data;
 };
 
+// BE không có route cancel-match riêng; huỷ tìm trận = abandon trận đang ở
+// trạng thái WAITING (service BE chấp nhận WAITING -> CANCELLED).
 export const cancelMatchmaking = async (battleId: string) => {
-  const response = await axiosInstance.post(
-    `/battles/${battleId}/cancel-match`
-  );
+  const response = await axiosInstance.post(`/battles/${battleId}/abandon`);
   return response.data;
 };
