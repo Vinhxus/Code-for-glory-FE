@@ -478,3 +478,137 @@ body {
   letter-spacing: 0.06em;
   margin-top: 3px;
 }
+
+/* ═══════════════════════════════════════
+   RESPONSIVE — TABLET (≤ 860px)
+═══════════════════════════════════════ */
+@media (max-width: 860px) {
+  .page {
+    padding: 56px 16px 24px;
+  }
+
+  /* back button no longer fits to the left of the page,
+     pin it inside the top of the page instead */
+  .btn-back {
+    position: absolute;
+    left: 16px;
+    top: 18px;
+  }
+
+  .card {
+    padding: 18px 18px;
+  }
+
+  .row-top {
+    grid-template-columns: 1fr;
+  }
+
+  .row-courses {
+    grid-template-columns: 1fr;
+  }
+
+  .skills-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .achievements-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .card-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-block {
+    border-right: none;
+    border-bottom: 1px solid var(--cg-border);
+  }
+
+  .stat-block:nth-last-child(-n + 2) {
+    border-bottom: none;
+  }
+
+  .rank-cols {
+    gap: 28px;
+  }
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE — MOBILE (≤ 600px)
+═══════════════════════════════════════ */
+@media (max-width: 600px) {
+  .card-profile {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .btn-edit {
+    position: static;
+    align-self: stretch;
+    text-align: center;
+    margin-top: 4px;
+    padding: 9px 14px;
+  }
+
+  .avatar-wrap {
+    width: 64px;
+    height: 64px;
+  }
+
+  .username {
+    font-size: 1.2rem;
+  }
+
+  .profile-stats {
+    gap: 18px;
+  }
+
+  .achievements-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .achievement-card {
+    padding: 12px;
+  }
+
+  .stat-block-val {
+    font-size: 1.25rem;
+  }
+
+  .course-bar-track {
+    margin: 0 -18px;
+  }
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE — SMALL MOBILE (≤ 400px)
+═══════════════════════════════════════ */
+@media (max-width: 400px) {
+  .page {
+    padding: 52px 12px 20px;
+  }
+
+  .card {
+    margin-top: 2rem;
+    padding: 14px 14px;
+  }
+
+  .profile-stats {
+    gap: 14px;
+  }
+
+  .stat-block {
+    padding: 14px 8px;
+  }
+
+  .rank-cols {
+    gap: 18px;
+  }
+
+  .rank-badge {
+    width: 80px;
+    height: 80px;
+  }
+}

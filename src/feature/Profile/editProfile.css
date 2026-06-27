@@ -641,12 +641,108 @@ body {
   opacity: 1;
 }
 
+.edit-bottom-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-bottom: 12px;
+}
+
 @media (max-width: 620px) {
+  .edit-page {
+    margin-top: 4rem;
+    padding: 18px 14px;
+    gap: 12px;
+  }
+
+  .edit-card {
+    padding: 18px 18px;
+  }
+
   .edit-form-grid {
     grid-template-columns: 1fr;
   }
+
   .edit-avatar-section {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  /* topbar: keep title visible, wrap actions onto their own row */
+  .edit-topbar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .edit-topbar-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  /* skills: let header wrap so the name field has room to breathe */
+  .skill-edit-header {
+    flex-wrap: wrap;
+  }
+
+  .skill-edit-name {
+    flex-basis: 100%;
+    order: 3;
+  }
+
+  .skill-edit-percent {
+    margin-left: auto;
+  }
+
+  /* privacy: let label/desc wrap above the toggle on narrow screens */
+  .privacy-row {
+    align-items: flex-start;
+  }
+
+  /* danger zone: stack info above the action button */
+  .edit-danger-zone {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .btn-danger {
+    align-self: stretch;
+  }
+
+  /* bottom save shortcut: full-width stacked buttons */
+  .edit-bottom-actions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 420px) {
+  .edit-topbar-title {
+    font-size: 0.95rem;
+  }
+
+  .edit-topbar-actions {
+    gap: 8px;
+  }
+
+  .btn-cancel,
+  .btn-save {
+    flex: 1;
+    padding: 8px 10px;
+    text-align: center;
+  }
+
+  .edit-avatar-wrap {
+    width: 80px;
+    height: 80px;
+  }
+
+  .skill-edit-tags {
+    gap: 5px;
+  }
+
+  .edit-toast {
+    width: calc(100% - 32px);
+    text-align: center;
+    bottom: 16px;
   }
 }
