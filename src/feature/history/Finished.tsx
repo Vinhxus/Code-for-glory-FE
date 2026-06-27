@@ -54,7 +54,7 @@ function useRealtimeLessons(onNewLesson: (lesson: Lesson) => void): void {
     // ── DEMO: Giả lập BE push card sau 5 giây ────────────────────────────────
     const timer = setTimeout(() => {
       onNewLesson({
-        id: Date.now(),
+        id: Date.now().toString(),
         title: 'Distributed Neural Networks',
         status: 'MASTERED',
         completedAt: new Date().toLocaleDateString('en-US', {
