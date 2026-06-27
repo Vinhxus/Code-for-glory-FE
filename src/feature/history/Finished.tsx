@@ -1,13 +1,12 @@
-import { useState, useEffect, useCallback, type FC } from 'react';
+import { useState, useEffect, type FC } from 'react';
 import './Finished.css';
 import HButton from '../../components/history/HButton';
-export interface Lesson {
-  id: number;
-  title: string;
-  status: 'MASTERED' | 'IN_PROGRESS' | 'SAVED';
-  completedAt: string;
-  score: number;
-  icon: string;
+import {
+  getFinishedLessons,
+  type FinishedLesson,
+} from '../../services/historyApi';
+
+export interface Lesson extends FinishedLesson {
   isLatest?: boolean;
   isNew?: boolean;
 }
@@ -154,14 +153,22 @@ const Finished: FC = () => {
   });
   const [loading, setLoading] = useState<boolean>(true);
 
-  const onNewLesson = useCallback((lesson: Lesson) => {
-    setLessons((prev) => {
-      const updated = prev.map((l) => ({ ...l, isLatest: false }));
-      return [{ ...lesson, isLatest: true }, ...updated];
-    });
-  }, []);
-
   useEffect(() => {
+    let active = true;
+    getFinishedLessons()
+      .then((data) => {
+        if (active) setLessons(data);
+      })
+      .catch((err) => {
+        console.error('Failed to load finished lessons', err);
+        if (active) setLessons([]);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
     fetchCompletedLessons()
       .then((data) => {
         setLessons(data.chronicles);
@@ -174,8 +181,6 @@ const Finished: FC = () => {
         setLoading(false);
       });
   }, []);
-
-  useRealtimeLessons(onNewLesson);
 
   return (
     <div className="archives-root">

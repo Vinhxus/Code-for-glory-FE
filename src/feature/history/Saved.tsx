@@ -1,14 +1,10 @@
-import React, { useMemo, useState, type FC, useEffect } from 'react';
+import React, { useEffect, useMemo, useState, type FC } from 'react';
 import './Saved.css';
-
-interface LoreItem {
-  id: string;
-  title: string;
-  description: string;
-  bannerUrl: string;
-  tags: string[];
-  isBookmarked: boolean;
-}
+import {
+  getSavedLore,
+  removeBookmark,
+  type SavedLore as LoreItem,
+} from '../../services/historyApi';
 
 interface LoreCardProps {
   data: LoreItem;
@@ -76,6 +72,30 @@ export const Saved: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
 
+  useEffect(() => {
+    let active = true;
+    getSavedLore()
+      .then((data) => {
+        if (active) setLoreList(data);
+      })
+      .catch((err) => {
+        console.error('Failed to load saved lore', err);
+        if (active) setLoreList([]);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const handleRemoveBookmark = (id: string) => {
+    // Optimistic removal — keep the card gone even if the request lags.
+    setLoreList((prevList) => prevList.filter((item) => item.id !== id));
+    removeBookmark(id).catch((err) => {
+      console.error('Failed to remove bookmark', err);
+    });
   // Fetch dữ liệu bài đã lưu khi vào tab (Hook luôn ở trên đầu)
   useEffect(() => {
     fetch('/api/history/saved')
@@ -146,6 +166,8 @@ export const Saved: React.FC = () => {
       </div>
 
       <div className="lore-grid">
+        {loading && <div className="loading-text">Data loading...</div>}
+
         {filteredLore.map((item) => (
           <LoreCard
             key={item.id}

@@ -1,6 +1,13 @@
 import { useState, useEffect, type FC } from 'react';
 import './UnFinished.css';
 import HButton from '../../components/history/HButton';
+import {
+  getUnfinished,
+  type UnfinishedQuest as Quest,
+  type BattleDraft,
+} from '../../services/historyApi';
+
+export type { Quest, BattleDraft };
 
 export interface Quest {
   id: string;
@@ -108,6 +115,30 @@ export const Unfinished: FC = () => {
 
   // Gọi API lấy cả Quests và Drafts đang làm dở khi tab được render
   useEffect(() => {
+    let active = true;
+    getUnfinished()
+      .then((data) => {
+        if (!active) return;
+        setQuests(data.quests);
+        setDrafts(data.drafts);
+      })
+      .catch((err) => {
+        console.error('Failed to load unfinished history', err);
+        if (active) {
+          setQuests([]);
+          setDrafts([]);
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const handleDeleteDraft = (id: string) => {
+    setDrafts((prev) => prev.filter((d) => d.id !== id));
     fetch('/api/history/unfinished')
       .then((res) => {
         if (!res.ok) throw new Error('Failed to fetch unfinished items');
