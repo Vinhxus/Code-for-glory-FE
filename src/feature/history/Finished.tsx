@@ -1,13 +1,12 @@
-import { useState, useEffect, useCallback, type FC } from 'react';
+import { useState, useEffect, type FC } from 'react';
 import './Finished.css';
 import HButton from '../../components/history/HButton';
-export interface Lesson {
-  id: number;
-  title: string;
-  status: 'MASTERED' | 'IN_PROGRESS' | 'SAVED';
-  completedAt: string;
-  score: number;
-  icon: string;
+import {
+  getFinishedLessons,
+  type FinishedLesson,
+} from '../../services/historyApi';
+
+export interface Lesson extends FinishedLesson {
   isLatest?: boolean;
   isNew?: boolean;
 }
@@ -20,106 +19,6 @@ interface BarChartProps {
 interface LessonCardProps {
   lesson: Lesson;
   index: number;
-}
-
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-const MOCK_COMPLETED: Lesson[] = [
-  {
-    id: 1,
-    title: 'Quantum Algorithm Efficiency',
-    status: 'MASTERED',
-    completedAt: 'Oct 24, 2024',
-    score: 98,
-    icon: '⚛',
-    isLatest: true,
-  },
-  {
-    id: 2,
-    title: 'Neural Firewall Architectures',
-    status: 'MASTERED',
-    completedAt: 'Oct 21, 2024',
-    score: 85,
-    icon: '🛡',
-    isLatest: false,
-  },
-  {
-    id: 3,
-    title: 'Swarm Intelligence Protocols',
-    status: 'MASTERED',
-    completedAt: 'Oct 10, 2024',
-    score: 88,
-    icon: '🔬',
-    isLatest: false,
-  },
-  {
-    id: 4,
-    title: 'Recursive Thought Encryption',
-    status: 'MASTERED',
-    completedAt: 'Oct 05, 2024',
-    score: 82,
-    icon: '🔐',
-    isLatest: false,
-  },
-  {
-    id: 5,
-    title: 'Neural Nexus Convergence',
-    status: 'MASTERED',
-    completedAt: 'Sep 30, 2024',
-    score: 91,
-    icon: '🧠',
-    isLatest: false,
-  },
-];
-
-// ─── Fetch data từ API ────────────────────────────────────────────────────────
-async function fetchCompletedLessons(): Promise<Lesson[]> {
-  // Thay bằng endpoint thật:
-  // const res = await fetch("/api/lessons/completed");
-  // return res.json();
-  return new Promise((resolve) =>
-    setTimeout(() => resolve(MOCK_COMPLETED), 600)
-  );
-}
-
-// ─── Hook nhận card mới từ BE ─────────────────────────────────────────────────
-function useRealtimeLessons(onNewLesson: (lesson: Lesson) => void): void {
-  useEffect(() => {
-    // ── OPTION A: WebSocket ──────────────────────────────────────────────────
-    // const ws = new WebSocket("wss://your-api.com/ws/lessons");
-    // ws.onmessage = (event: MessageEvent) => {
-    //   const data = JSON.parse(event.data);
-    //   if (data.type === "LESSON_COMPLETED") onNewLesson(data.lesson);
-    // };
-    // return () => ws.close();
-
-    // ── OPTION B: Polling mỗi 15 giây ───────────────────────────────────────
-    // let lastId: number | null = null;
-    // const interval = setInterval(async () => {
-    //   const res = await fetch("/api/lessons/latest");
-    //   const lesson: Lesson = await res.json();
-    //   if (lesson.id !== lastId) { lastId = lesson.id; onNewLesson(lesson); }
-    // }, 15000);
-    // return () => clearInterval(interval);
-
-    // ── DEMO: Giả lập BE push card sau 5 giây ────────────────────────────────
-    const timer = setTimeout(() => {
-      onNewLesson({
-        id: Date.now(),
-        title: 'Distributed Neural Networks',
-        status: 'MASTERED',
-        completedAt: new Date().toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-        }),
-        score: 95,
-        icon: '🌐',
-        isLatest: true,
-        isNew: true,
-      });
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, [onNewLesson]);
 }
 
 // ─── Bar Chart ────────────────────────────────────────────────────────────────
@@ -192,21 +91,23 @@ const Finished: FC = () => {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const onNewLesson = useCallback((lesson: Lesson) => {
-    setLessons((prev) => {
-      const updated = prev.map((l) => ({ ...l, isLatest: false }));
-      return [{ ...lesson, isLatest: true }, ...updated];
-    });
-  }, []);
-
   useEffect(() => {
-    fetchCompletedLessons().then((data) => {
-      setLessons(data);
-      setLoading(false);
-    });
+    let active = true;
+    getFinishedLessons()
+      .then((data) => {
+        if (active) setLessons(data);
+      })
+      .catch((err) => {
+        console.error('Failed to load finished lessons', err);
+        if (active) setLessons([]);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
-
-  useRealtimeLessons(onNewLesson);
 
   return (
     <div className="archives-root">

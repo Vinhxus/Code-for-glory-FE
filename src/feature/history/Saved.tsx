@@ -1,14 +1,10 @@
-import React, { useMemo, useState, type FC } from 'react';
+import React, { useEffect, useMemo, useState, type FC } from 'react';
 import './Saved.css';
-
-interface LoreItem {
-  id: string;
-  title: string;
-  description: string;
-  bannerUrl: string;
-  tags: string[];
-  isBookmarked: boolean;
-}
+import {
+  getSavedLore,
+  removeBookmark,
+  type SavedLore as LoreItem,
+} from '../../services/historyApi';
 
 interface LoreCardProps {
   data: LoreItem;
@@ -71,33 +67,35 @@ const LoreCard: FC<LoreCardProps> = ({ data, onRemoveBookmark }) => {
   );
 };
 
-const INITIAL_LORE_DATA: LoreItem[] = [
-  {
-    id: '1',
-    title: 'The Sigils of State',
-    description:
-      'Mastering complex state management using custom hooks and the Context API within the...',
-    bannerUrl: 'https://picsum.photos/id/1005/400/250',
-    tags: ['React', 'Advanced Architecture'],
-    isBookmarked: true,
-  },
-  {
-    id: '2',
-    title: 'Asynchronous Alchemy',
-    description:
-      'Optimizing event-loop performance for high-throughput digital environments using advanced...',
-    bannerUrl: 'https://picsum.photos/id/1018/400/250',
-    tags: ['Node.js', 'Performance'],
-    isBookmarked: true,
-  },
-];
-
 export const Saved: React.FC = () => {
-  const [loreList, setLoreList] = useState<LoreItem[]>(INITIAL_LORE_DATA);
+  const [loreList, setLoreList] = useState<LoreItem[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    let active = true;
+    getSavedLore()
+      .then((data) => {
+        if (active) setLoreList(data);
+      })
+      .catch((err) => {
+        console.error('Failed to load saved lore', err);
+        if (active) setLoreList([]);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleRemoveBookmark = (id: string) => {
+    // Optimistic removal — keep the card gone even if the request lags.
     setLoreList((prevList) => prevList.filter((item) => item.id !== id));
+    removeBookmark(id).catch((err) => {
+      console.error('Failed to remove bookmark', err);
+    });
   };
 
   const filteredLore = useMemo(() => {
@@ -133,6 +131,8 @@ export const Saved: React.FC = () => {
       </div>
 
       <div className="lore-grid">
+        {loading && <div className="loading-text">Data loading...</div>}
+
         {filteredLore.map((item) => (
           <LoreCard
             key={item.id}

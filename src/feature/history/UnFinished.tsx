@@ -1,24 +1,13 @@
 import { useState, useEffect, type FC } from 'react';
 import './UnFinished.css';
 import HButton from '../../components/history/HButton';
+import {
+  getUnfinished,
+  type UnfinishedQuest as Quest,
+  type BattleDraft,
+} from '../../services/historyApi';
 
-export interface Quest {
-  id: number;
-  title: string;
-  stepLabel: string;
-  currentStep: number;
-  totalSteps: number;
-  progress: number;
-  icon: string;
-}
-
-export interface BattleDraft {
-  id: number;
-  title: string;
-  description: string;
-  intensity: 'HIGH' | 'MEDIUM' | 'LOW';
-  timeAgo: string;
-}
+export type { Quest, BattleDraft };
 
 interface QuestCardProps {
   quest: Quest;
@@ -26,71 +15,7 @@ interface QuestCardProps {
 
 interface DraftCardProps {
   draft: BattleDraft;
-  onDelete: (id: number) => void;
-}
-
-const MOCK_QUESTS: Quest[] = [
-  {
-    id: 1,
-    title: 'Advanced Mana Scripting',
-    stepLabel: 'Conditional Invocations',
-    currentStep: 4,
-    totalSteps: 12,
-    progress: 32,
-    icon: '📟',
-  },
-  {
-    id: 2,
-    title: 'Cyber-Sigil Defense',
-    stepLabel: 'Barrier Encryption',
-    currentStep: 8,
-    totalSteps: 10,
-    progress: 80,
-    icon: '🛡',
-  },
-  {
-    id: 3,
-    title: 'Ether-Database Architecture',
-    stepLabel: 'Introduction to Flux-Tables',
-    currentStep: 1,
-    totalSteps: 15,
-    progress: 5,
-    icon: '🗄',
-  },
-];
-
-const MOCK_DRAFTS: BattleDraft[] = [
-  {
-    id: 1,
-    title: 'The Void-Array Challenge',
-    description:
-      'Algorithm optimization draft for high-frequency trading in the digital market.',
-    intensity: 'HIGH',
-    timeAgo: '3d ago',
-  },
-  {
-    id: 2,
-    title: 'Sigil-Parsing Sprint',
-    description:
-      'Unfinished logic for rapid sigil recognition and classification draft.',
-    intensity: 'MEDIUM',
-    timeAgo: '4d ago',
-  },
-];
-
-// ─── Fetch functions ──────────────────────────────────────────────────────────
-async function fetchQuests(): Promise<Quest[]> {
-  // Thay bằng endpoint thật:
-  // const res = await fetch("/api/quests/in-progress");
-  // return res.json();
-  return new Promise((resolve) => setTimeout(() => resolve(MOCK_QUESTS), 600));
-}
-
-async function fetchDrafts(): Promise<BattleDraft[]> {
-  // Thay bằng endpoint thật:
-  // const res = await fetch("/api/battle-drafts");
-  // return res.json();
-  return new Promise((resolve) => setTimeout(() => resolve(MOCK_DRAFTS), 700));
+  onDelete: (id: string) => void;
 }
 
 // ─── Quest Card ───────────────────────────────────────────────────────────────
@@ -156,14 +81,29 @@ const Unfinished: FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    Promise.all([fetchQuests(), fetchDrafts()]).then(([q, d]) => {
-      setQuests(q);
-      setDrafts(d);
-      setLoading(false);
-    });
+    let active = true;
+    getUnfinished()
+      .then((data) => {
+        if (!active) return;
+        setQuests(data.quests);
+        setDrafts(data.drafts);
+      })
+      .catch((err) => {
+        console.error('Failed to load unfinished history', err);
+        if (active) {
+          setQuests([]);
+          setDrafts([]);
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
-  const handleDeleteDraft = (id: number) => {
+  const handleDeleteDraft = (id: string) => {
     setDrafts((prev) => prev.filter((d) => d.id !== id));
   };
 
