@@ -7,17 +7,13 @@ import {
   logoutApi,
   type LoginRequest,
   type RegisterRequest,
+  type AuthUser,
 } from './authService';
 
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-}
-
 interface AuthState {
-  user: User | null;
-  token: string | null;
+  user: AuthUser | null;
+  accessToken: string | null;
+  refreshToken: string | null;
   isAuthenticated: boolean;
 }
 
@@ -28,20 +24,32 @@ export interface AuthContextValue extends AuthState {
 }
 
 function getInitialAuthState(): AuthState {
-  const storedToken = localStorage.getItem('access_token');
+  const storedAccessToken = localStorage.getItem('access_token');
+  const storedRefreshToken = localStorage.getItem('refresh_token');
   const storedUser = localStorage.getItem('user');
 
-  if (storedToken && storedUser) {
+  if (storedAccessToken && storedRefreshToken && storedUser) {
     try {
-      const parsedUser: User = JSON.parse(storedUser);
-      return { user: parsedUser, token: storedToken, isAuthenticated: true };
+      const parsedUser: AuthUser = JSON.parse(storedUser);
+      return {
+        user: parsedUser,
+        accessToken: storedAccessToken,
+        refreshToken: storedRefreshToken,
+        isAuthenticated: true,
+      };
     } catch {
       localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');
     }
   }
 
-  return { user: null, token: null, isAuthenticated: false };
+  return {
+    user: null,
+    accessToken: null,
+    refreshToken: null,
+    isAuthenticated: false,
+  };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -50,23 +58,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (data: LoginRequest) => {
     const res = await loginApi(data);
-    // loginApi đã set access_token, chỉ cần set user
+
+    // Lưu thông tin user để getInitialAuthState() có thể khôi phục khi nhấn F5
     localStorage.setItem('user', JSON.stringify(res.user));
-    setState({ user: res.user, token: res.token, isAuthenticated: true });
+
+    setState({
+      user: res.user,
+      accessToken: res.accessToken,
+      refreshToken: res.refreshToken,
+      isAuthenticated: true,
+    });
   }, []);
 
   const register = useCallback(async (data: RegisterRequest) => {
+    // Đăng ký tài khoản mới trên BE
     await registerApi(data);
+
+    // Sau khi đăng ký thành công, tự động gọi login
     const res = await loginApi({ email: data.email, password: data.password });
     localStorage.setItem('user', JSON.stringify(res.user));
-    setState({ user: res.user, token: res.token, isAuthenticated: true });
+
+    setState({
+      user: res.user,
+      accessToken: res.accessToken,
+      refreshToken: res.refreshToken,
+      isAuthenticated: true,
+    });
   }, []);
 
   const logout = useCallback(async () => {
-    await logoutApi(); // đã xóa access_token bên trong rồi
-    localStorage.removeItem('user');
-    setState({ user: null, token: null, isAuthenticated: false });
-    navigate('/login'); // redirect sau khi clear state
+    try {
+      await logoutApi();
+    } finally {
+      // Đảm bảo xóa sạch localStorage dữ liệu user
+      localStorage.removeItem('user');
+
+      setState({
+        user: null,
+        accessToken: null,
+        refreshToken: null,
+        isAuthenticated: false,
+      });
+
+      navigate('/login', { replace: true });
+    }
   }, [navigate]);
 
   return (

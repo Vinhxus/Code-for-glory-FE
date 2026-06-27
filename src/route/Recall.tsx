@@ -1,8 +1,8 @@
 import './Recall.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface RecallCard {
-  id: number;
+  id: string;
   icon: string;
   tag: string;
   tagColor: 'coral' | 'amber' | 'purple';
@@ -12,92 +12,92 @@ interface RecallCard {
   fix: string;
 }
 
-const RECALL_CARDS: RecallCard[] = [
-  {
-    id: 1,
-    icon: 'memory',
-    tag: 'MEMORY',
-    tagColor: 'coral',
-    title: 'Memory Leak Sigil',
-    context: 'kernel/allocation.arc',
-    prompt: 'What curse caused unbound heap growth here?',
-    fix: 'An unreleased reference loop kept the allocation alive. Bind a finalizer — or call free() in the cleanup ward — before the scope exits.',
-  },
-  {
-    id: 2,
-    icon: 'autorenew',
-    tag: 'LOGIC',
-    tagColor: 'amber',
-    title: 'Recursion Loop Abyss',
-    context: 'logic/gate.handler.arc',
-    prompt: 'Why did the gate handler spiral into infinite descent?',
-    fix: 'The base-case ward was missing. Add a termination clause that runs before the recursive invocation is cast again.',
-  },
-  {
-    id: 3,
-    icon: 'error_outline',
-    tag: 'POINTER',
-    tagColor: 'purple',
-    title: 'Null Pointer Wraith',
-    context: 'entity/spawner.arc',
-    prompt: 'What summoned the wraith when accessing .health?',
-    fix: 'The entity was never instantiated. Guard the dereference with an existence check before reading its properties.',
-  },
-  {
-    id: 4,
-    icon: 'swap_horiz',
-    tag: 'TYPE',
-    tagColor: 'coral',
-    title: 'Type Coercion Curse',
-    context: 'combat/damage.calc.arc',
-    prompt: "Why did '10' + 5 conjure '105' instead of 15?",
-    fix: 'Implicit string coercion took over the operator. Cast both operands explicitly before the arithmetic ritual runs.',
-  },
-  {
-    id: 5,
-    icon: 'bolt',
-    tag: 'CONCURRENCY',
-    tagColor: 'amber',
-    title: 'Race Condition Phantom',
-    context: 'async/queue.worker.arc',
-    prompt: 'Why did two workers corrupt the same ledger entry?',
-    fix: 'Shared state was left unsynchronized. Wrap the critical section in a mutex ward so only one worker enters at a time.',
-  },
-];
-
 export default function Recall() {
+  const [cards, setCards] = useState<RecallCard[]>([]);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
-  const [saved, setSaved] = useState<Set<number>>(new Set());
+  const [saved, setSaved] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const card = RECALL_CARDS[index];
-  const isSaved = saved.has(card.id);
+  // 1. Fetch danh sách Flashcard cần ôn tập hôm nay từ Backend
+  useEffect(() => {
+    fetch('/api/history/recall')
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch recall cards');
+        return res.json();
+      })
+      .then((data: RecallCard[]) => {
+        setCards(data || []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Error loading recall chamber:', err);
+        setLoading(false);
+      });
+  }, []);
+
+  // 2. Gửi lệnh lưu/hủy lưu thẻ về Backend (Bookmark)
+  const toggleSave = async (e: React.MouseEvent, cardId: string) => {
+    e.stopPropagation();
+    const isCurrentlySaved = saved.has(cardId);
+
+    try {
+      const method = isCurrentlySaved ? 'DELETE' : 'POST';
+      const res = await fetch(`/api/history/recall/${cardId}/bookmark`, {
+        method,
+      });
+
+      if (res.ok) {
+        setSaved((prev) => {
+          const next = new Set(prev);
+          if (next.has(cardId)) {
+            next.delete(cardId);
+          } else {
+            next.add(cardId);
+          }
+          return next;
+        });
+      }
+    } catch (err) {
+      console.error('Error toggling bookmark for card:', err);
+    }
+  };
+
+  // 3. Hàm chấm điểm chất lượng nhớ (Hệ thống SM-2 dùng điểm từ 0-5)
+  const handleRateQuality = async (qualityScore: number) => {
+    if (cards.length === 0) return;
+    const currentCard = cards[index];
+
+    try {
+      const res = await fetch(`/api/history/recall/${currentCard.id}/review`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quality: qualityScore }), // điểm 0 - 5 phục vụ lastQuality trong schema
+      });
+
+      if (res.ok) {
+        // Chuyển sang thẻ tiếp theo sau khi đã chấm điểm thành công
+        goNext();
+      }
+    } catch (err) {
+      console.error('Error submitting review quality:', err);
+    }
+  };
 
   function goNext() {
+    if (cards.length === 0) return;
     setFlipped(false);
-    setIndex((i) => (i + 1) % RECALL_CARDS.length);
+    setIndex((i) => (i + 1) % cards.length);
   }
 
   function goPrev() {
+    if (cards.length === 0) return;
     setFlipped(false);
-    setIndex((i) => (i - 1 + RECALL_CARDS.length) % RECALL_CARDS.length);
+    setIndex((i) => (i - 1 + cards.length) % cards.length);
   }
 
   function toggleFlip() {
     setFlipped((f) => !f);
-  }
-
-  function toggleSave(e: React.MouseEvent) {
-    e.stopPropagation();
-    setSaved((prev) => {
-      const next = new Set(prev);
-      if (next.has(card.id)) {
-        next.delete(card.id);
-      } else {
-        next.add(card.id);
-      }
-      return next;
-    });
   }
 
   function handleCardKeyDown(e: React.KeyboardEvent) {
@@ -106,6 +106,28 @@ export default function Recall() {
       toggleFlip();
     }
   }
+
+  if (loading)
+    return (
+      <div
+        className="recall-wrapper"
+        style={{ color: 'var(--cg-text-muted)', padding: '40px' }}
+      >
+        Chamber is opening...
+      </div>
+    );
+  if (cards.length === 0)
+    return (
+      <div
+        className="recall-wrapper"
+        style={{ color: 'var(--cg-text-muted)', padding: '40px' }}
+      >
+        🎉 Excellent! All sigils are perfectly remembered for today.
+      </div>
+    );
+
+  const card = cards[index];
+  const isSaved = saved.has(card.id);
 
   return (
     <div className="recall-wrapper">
@@ -120,10 +142,10 @@ export default function Recall() {
 
       <div className="recall-progress">
         <span>
-          Card {index + 1} of {RECALL_CARDS.length}
+          Card {index + 1} of {cards.length}
         </span>
         <div className="recall-dots">
-          {RECALL_CARDS.map((c, i) => (
+          {cards.map((c, i) => (
             <span
               key={c.id}
               className={`recall-dot ${i === index ? 'recall-dot-active' : ''}`}
@@ -145,14 +167,15 @@ export default function Recall() {
               : 'Showing error, tap to reveal fix'
           }
         >
+          {/* Mặt trước thẻ */}
           <div className="flashcard-face flashcard-front">
             <div className="flashcard-top">
-              <span className={`tag-chip tag-chip-${card.tagColor}`}>
+              <span className={`tag-chip tag-chip-${card.tagColor || 'amber'}`}>
                 {card.tag}
               </span>
               <button
                 className={`save-btn ${isSaved ? 'save-btn-active' : ''}`}
-                onClick={toggleSave}
+                onClick={(e) => toggleSave(e, card.id)}
                 aria-label={isSaved ? 'Remove from saved' : 'Save card'}
               >
                 <span className="material-symbols-outlined">
@@ -162,22 +185,24 @@ export default function Recall() {
             </div>
 
             <div className="flashcard-icon-wrap">
-              <span className="material-symbols-outlined">{card.icon}</span>
+              <span className="material-symbols-outlined">
+                {card.icon || 'help_outline'}
+              </span>
             </div>
 
             <h3 className="flashcard-title">{card.title}</h3>
             <p className="flashcard-context">Context: {card.context}</p>
             <p className="flashcard-prompt">{card.prompt}</p>
-
             <p className="flashcard-hint">Tap to reveal the fix</p>
           </div>
 
+          {/* Mặt sau thẻ */}
           <div className="flashcard-face flashcard-back">
             <div className="flashcard-top">
               <span className="tag-chip tag-chip-green">RESOLVED WARD</span>
               <button
                 className={`save-btn ${isSaved ? 'save-btn-active' : ''}`}
-                onClick={toggleSave}
+                onClick={(e) => toggleSave(e, card.id)}
                 aria-label={isSaved ? 'Remove from saved' : 'Save card'}
               >
                 <span className="material-symbols-outlined">
@@ -188,6 +213,34 @@ export default function Recall() {
 
             <p className="flashcard-fix-label">The Fix</p>
             <p className="flashcard-fix">{card.fix}</p>
+
+            {/* Bộ nút chấm điểm nhanh theo chất lượng SM-2 (0-5) khi lật mặt sau */}
+            <div
+              className="sm2-rating-bar"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <p className="rating-label">How well did you remember?</p>
+              <div className="rating-buttons">
+                <button
+                  onClick={() => handleRateQuality(1)}
+                  className="rate-btn rate-forgot"
+                >
+                  Forgot ❌
+                </button>
+                <button
+                  onClick={() => handleRateQuality(3)}
+                  className="rate-btn rate-hard"
+                >
+                  Hard ⏳
+                </button>
+                <button
+                  onClick={() => handleRateQuality(5)}
+                  className="rate-btn rate-easy"
+                >
+                  Easy ✨
+                </button>
+              </div>
+            </div>
 
             <p className="flashcard-hint">Tap to flip back</p>
           </div>

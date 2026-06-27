@@ -28,7 +28,32 @@ export default function TabComponent() {
     <div className="flex flex-col tab-container-root">
       <Header />
       <SideNav />
-      <div className="flex justify-center pt-6 pb-2 px-4 header-bar">
+      <div className="flex justify-center pt-6 pb-2 px-4 header-bar relative">
+        <button
+          onClick={() => window.history.back()}
+          className="inline-flex items-center justify-center gap-2 px-3 py-1.5 
+                    text-sm font-normal text-gray-700 bg-gray-100 hover:bg-gray-200 
+                    active:bg-gray-300 active:scale-95 border border-gray-300/50 
+                    rounded-md transition-all duration-150 ease-in-out
+                    dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700 dark:hover:bg-zinc-700 back-button"
+        >
+          {/* Icon mũi tên trái */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+            className="w-4 h-4"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
+            />
+          </svg>
+          <span>Back</span>
+        </button>
         <div className="flex gap-1 p-1 rounded-xl tab-wrapper">
           {TABS.map((t) => (
             <button

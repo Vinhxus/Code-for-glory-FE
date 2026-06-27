@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from './useAuth';
-import { loginApi } from './authService';
 import StarBackground from '../../components/layout/starBackground';
 import Logo from '../../components/layout/logo';
 import './loginPage.css';
@@ -23,7 +22,7 @@ export default function LoginPage() {
       await login({ email, password });
       navigate('/');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Đăng nhập thất bại');
+      setError(err instanceof Error ? err.message : 'Login fail');
     } finally {
       setIsLoading(false);
     }
@@ -42,7 +41,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit}>
             <label className="auth-label">Email:</label>
             <input
-              type="text"
+              type="email"
               className="auth-input"
               placeholder="Email"
               value={email}
@@ -88,7 +87,9 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <Logo />
+        <div className="auth-logo-section">
+          <Logo />
+        </div>
       </div>
     </div>
   );
