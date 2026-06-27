@@ -41,12 +41,41 @@ interface LoginRawResponse {
 
 export const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
 
+// BE bọc MỌI response trong envelope:
+//  - thành công: { data: <payload>, meta }
+//  - lỗi:        { data: null, error: { message: string | string[] }, meta }
+// handleResponse bóc lớp envelope này ra để caller dùng trực tiếp payload,
+// và gộp mảng message (vd lỗi validation) thành một chuỗi.
+function extractErrorMessage(payload: unknown): string | null {
+  if (!payload || typeof payload !== 'object') return null;
+  const err = (payload as { error?: { message?: unknown } }).error;
+  const raw =
+    err && typeof err === 'object' && 'message' in err
+      ? (err as { message?: unknown }).message
+      : (payload as { message?: unknown }).message;
+  if (Array.isArray(raw)) return raw.join(', ');
+  return raw != null ? String(raw) : null;
+}
+
 async function handleResponse<T>(res: Response): Promise<T> {
+  if (res.status === 204) return undefined as T;
+
+  const payload = await res.json().catch(() => null);
+
   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message ?? `Lỗi ${res.status}`);
+    throw new Error(extractErrorMessage(payload) ?? `Lỗi ${res.status}`);
   }
-  return res.json() as Promise<T>;
+
+  // Bóc envelope { data, meta } nếu có; ngược lại trả nguyên payload.
+  if (
+    payload &&
+    typeof payload === 'object' &&
+    'data' in payload &&
+    'meta' in payload
+  ) {
+    return (payload as { data: T }).data;
+  }
+  return payload as T;
 }
 
 export async function loginApi(data: LoginRequest): Promise<AuthResponse> {
@@ -118,6 +147,66 @@ export async function logoutApi(): Promise<void> {
   }
 }
 
+// ===== Password reset flow (forgot -> verify OTP -> reset) =====
+
+export interface VerifyOtpResponse {
+  resetToken: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  resetToken: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+/** Bước 1: yêu cầu gửi mã OTP về email. BE luôn trả 200 dù email có tồn tại hay không. */
+export async function forgotPasswordApi(email: string): Promise<void> {
+  const res = await fetch(`${BASE_URL}/auth/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email.toLowerCase().trim() }),
+  });
+  await handleResponse<unknown>(res);
+}
+
+/** Bước 2: xác thực mã OTP (6 số), nhận về resetToken dùng cho bước 3. */
+export async function verifyOtpApi(
+  email: string,
+  code: string
+): Promise<string> {
+  const res = await fetch(`${BASE_URL}/auth/verify-otp`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: email.toLowerCase().trim(),
+      code: code.trim(),
+    }),
+  });
+  const data = await handleResponse<VerifyOtpResponse>(res);
+  if (!data?.resetToken) {
+    throw new Error('Verify fail: missing reset token from system.');
+  }
+  return data.resetToken;
+}
+
+/** Bước 3: đặt mật khẩu mới bằng resetToken vừa nhận. */
+export async function resetPasswordApi(
+  data: ResetPasswordRequest
+): Promise<void> {
+  const res = await fetch(`${BASE_URL}/auth/reset-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: data.email.toLowerCase().trim(),
+      resetToken: data.resetToken,
+      newPassword: data.newPassword,
+      confirmPassword: data.confirmPassword,
+    }),
+  });
+  await handleResponse<unknown>(res);
+}
+
 export interface RefreshResponse {
   accessToken: string;
   refreshToken: string;
@@ -143,7 +232,8 @@ export async function refreshApi(): Promise<RefreshResponse> {
     throw new Error('Refresh token expired or invalid');
   }
 
-  const data = (await res.json()) as RefreshResponse;
+  // BE bọc response trong { data, meta } -> bóc lớp envelope ra.
+  const data = await handleResponse<RefreshResponse>(res);
 
   // Lưu token mới vào kho
   localStorage.setItem('access_token', data.accessToken);

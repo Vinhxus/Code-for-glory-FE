@@ -38,6 +38,8 @@ import BattleRoutes from './feature/battle/BattleRoutes';
 import LoginPage from './feature/auth/loginPage';
 import RegisterPage from './feature/auth/registerPage';
 import ForgotPasswordPage from './feature/auth/forgotPasswordPage';
+import VerifyOtpPage from './feature/auth/verifyOtpPage';
+import ResetPasswordPage from './feature/auth/resetPasswordPage';
 
 // Route Guards (Bảo mật)
 import { ProtectedRoute } from './feature/auth/protectedRoute';
@@ -55,6 +57,8 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/verify-otp" element={<VerifyOtpPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
 
