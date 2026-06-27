@@ -9,23 +9,6 @@ import {
 
 export type { Quest, BattleDraft };
 
-export interface Quest {
-  id: string;
-  title: string;
-  stepLabel: string;
-  currentStep: number;
-  totalSteps: number;
-  progress: number;
-  icon: string;
-}
-
-export interface BattleDraft {
-  id: string;
-  title: string;
-  description: string;
-  intensity: 'HIGH' | 'MEDIUM' | 'LOW';
-  timeAgo: string;
-}
 interface QuestCardProps {
   quest: Quest;
 }
@@ -137,33 +120,15 @@ export const Unfinished: FC = () => {
     };
   }, []);
 
-  const handleDeleteDraft = (id: string) => {
-    setDrafts((prev) => prev.filter((d) => d.id !== id));
-    fetch('/api/history/unfinished')
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch unfinished items');
-        return res.json();
-      })
-      .then((data: { quests: Quest[]; drafts: BattleDraft[] }) => {
-        setQuests(data.quests || []);
-        setDrafts(data.drafts || []);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Error fetching unfinished tasks:', err);
-        setLoading(false);
-      });
-  }, []);
-
   // Hàm xử lý xóa bản nháp (gọi API DELETE lên Backend)
   const handleDeleteDraft = async (id: string) => {
+    // Optimistic removal — keep the card gone even if the request lags.
+    setDrafts((prev) => prev.filter((d) => d.id !== id));
     try {
       const res = await fetch(`/api/history/drafts/${id}`, {
         method: 'DELETE',
       });
-      if (res.ok) {
-        setDrafts((prev) => prev.filter((d) => d.id !== id));
-      } else {
+      if (!res.ok) {
         console.error('Failed to delete draft on server');
       }
     } catch (err) {

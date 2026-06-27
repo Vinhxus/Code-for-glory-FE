@@ -96,32 +96,6 @@ export const Saved: React.FC = () => {
     removeBookmark(id).catch((err) => {
       console.error('Failed to remove bookmark', err);
     });
-  // Fetch dữ liệu bài đã lưu khi vào tab (Hook luôn ở trên đầu)
-  useEffect(() => {
-    fetch('/api/history/saved')
-      .then((res) => res.json())
-      .then((data: LoreItem[]) => {
-        setLoreList(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
-  }, []);
-
-  // Logic xóa bookmark
-  const handleRemoveBookmark = async (id: string) => {
-    try {
-      const res = await fetch(`/api/history/saved/${id}`, {
-        method: 'DELETE',
-      });
-      if (res.ok) {
-        setLoreList((prevList) => prevList.filter((item) => item.id !== id));
-      }
-    } catch (err) {
-      console.error('Error deleting bookmark:', err);
-    }
   };
 
   // Khai báo useMemo
