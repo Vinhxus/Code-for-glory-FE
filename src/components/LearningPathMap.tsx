@@ -11,10 +11,18 @@ import {
   type ProgressDto,
 } from '../services/learningPathApi';
 import { useSettingsStore } from '../store/settings';
+import {
+  getStartingStage,
+  getPreUnlockedStages,
+  stageLabelText,
+  clearOnboardingData,
+  type StartingStage,
+} from './learningPathUtils';
 
 const cx = (...classes: Array<string | false | null | undefined>) =>
   classes.filter(Boolean).join(' ');
 
+// ─── Tab definitions ──────────────────────────────────────────────
 const TABS: {
   key: RoadmapKey;
   label: string;
@@ -23,23 +31,23 @@ const TABS: {
   color: string;
   glow: string;
 }[] = [
-  {
-    key: 'frontend',
-    label: 'Frontend',
-    icon: '🧩',
-    sub: 'UI · Web · React',
-    color: '#ff7e5f',
-    glow: 'rgba(255,126,95,0.3)',
-  },
-  {
-    key: 'backend',
-    label: 'Backend',
-    icon: '⚙️',
-    sub: 'API · DB · Auth',
-    color: '#fbbf24',
-    glow: 'rgba(251,191,36,0.3)',
-  },
-];
+    {
+      key: 'frontend',
+      label: 'Frontend',
+      icon: '🧩',
+      sub: 'UI · Web · React',
+      color: '#ff7e5f',
+      glow: 'rgba(255,126,95,0.3)',
+    },
+    {
+      key: 'backend',
+      label: 'Backend',
+      icon: '⚙️',
+      sub: 'API · DB · Auth',
+      color: '#fbbf24',
+      glow: 'rgba(251,191,36,0.3)',
+    },
+  ];
 
 const STATS: {
   labelKey: I18nKey;
@@ -47,64 +55,130 @@ const STATS: {
   icon: string;
   color: string;
 }[] = [
-  {
-    labelKey: 'roadmap.topics',
-    value: '30',
-    icon: 'library_books',
-    color: '#ff7e5f',
-  },
-  {
-    labelKey: 'roadmap.completed',
-    value: '0',
-    icon: 'check_circle',
-    color: '#4ade80',
-  },
-  {
-    labelKey: 'roadmap.inProgress',
-    value: '1',
-    icon: 'pending',
-    color: '#fbbf24',
-  },
-];
+    {
+      labelKey: 'roadmap.topics',
+      value: '30',
+      icon: 'library_books',
+      color: '#ff7e5f',
+    },
+    {
+      labelKey: 'roadmap.completed',
+      value: '0',
+      icon: 'check_circle',
+      color: '#4ade80',
+    },
+    {
+      labelKey: 'roadmap.inProgress',
+      value: '1',
+      icon: 'pending',
+      color: '#fbbf24',
+    },
+  ];
 
-const STORAGE_KEY = 'cg_survey_v2';
+// ─── Stage badge colours ──────────────────────────────────────────
+const STAGE_STYLE: Record<
+  StartingStage,
+  { bg: string; border: string; text: string; icon: string }
+> = {
+  beginner: {
+    bg: 'rgba(74,222,128,0.12)',
+    border: 'rgba(74,222,128,0.30)',
+    text: '#4ade80',
+    icon: '🌱',
+  },
+  intermediate: {
+    bg: 'rgba(251,191,36,0.12)',
+    border: 'rgba(251,191,36,0.30)',
+    text: '#fbbf24',
+    icon: '⭐',
+  },
+  advanced: {
+    bg: 'rgba(255,126,95,0.12)',
+    border: 'rgba(255,126,95,0.30)',
+    text: '#ff7e5f',
+    icon: '🔥',
+  },
+};
 
 function LearningPathMap() {
   const t = useT();
   const language = useSettingsStore((s) => s.language);
   const isVi = language === 'vi';
+
+  // ── Track selection (reads from assessment on mount) ─────────────
   const [selected, setSelected] = useState<RoadmapKey>('frontend');
-  const [surveyData, setSurveyData] = useState<{
-    careerPath?: string;
-    hoursPerDay?: number;
-    testScore?: number;
-  } | null>(null);
+
+  // ── Starting stage derived from onboarding results ───────────────
+  const [startingStage, setStartingStage] = useState<StartingStage>('beginner');
+  const [hoursPerDay, setHoursPerDay] = useState<number | null>(null);
+
+  // ── Backend data ─────────────────────────────────────────────────
   const [apiNodes, setApiNodes] = useState<LearningPathNodeDto[]>([]);
   const [apiProgress, setApiProgress] = useState<ProgressDto[]>([]);
   const [loadingRoadmap, setLoadingRoadmap] = useState(false);
   const [roadmapError, setRoadmapError] = useState('');
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
+  // ── Reset confirmation ───────────────────────────────────────────
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
-      // Defer setState to avoid synchronously setting state inside effect body
-      // which can trigger cascading renders. Using a microtask via setTimeout 0.
-      setTimeout(() => {
-        setSurveyData(parsed);
-        if (parsed.careerPath === 'backend') {
-          setSelected('backend');
-        } else if (parsed.careerPath === 'frontend') {
-          setSelected('frontend');
+  // ── Read ALL onboarding data on mount ────────────────────────────
+  // Uses the canonical storage keys from learningPathUtils, NOT cg_survey_v2.
+  useEffect(() => {
+    // Derive track preference from assessment or survey
+    try {
+      const assessmentRaw = localStorage.getItem('cg_skill_assessment_v1');
+      const surveyRaw = localStorage.getItem('cg_survey_v1');
+
+      let preferredTrack: RoadmapKey = 'frontend';
+      if (assessmentRaw) {
+        const a = JSON.parse(assessmentRaw) as {
+          surveyTracks?: string[];
+          maxDifficultyByTrack?: Record<string, string>;
+        };
+        const tracks = a.surveyTracks ?? [];
+        if (tracks.includes('backend') && !tracks.includes('frontend')) {
+          preferredTrack = 'backend';
         }
+      } else if (surveyRaw) {
+        const s = JSON.parse(surveyRaw) as { tracks?: string[] };
+        const tracks = s.tracks ?? [];
+        if (tracks.includes('backend') && !tracks.includes('frontend')) {
+          preferredTrack = 'backend';
+        }
+      }
+
+      // Derive hours/day from survey (for ETA calculation)
+      if (surveyRaw) {
+        const s = JSON.parse(surveyRaw) as { weeklyTime?: string };
+        // weeklyTime is stored as '2-4' | '5-7' | '8-12' | '13+'
+        // Convert weekly hours → daily hours (÷ 7) using midpoint
+        const midpoints: Record<string, number> = {
+          '2-4': 3 / 7,
+          '5-7': 6 / 7,
+          '8-12': 10 / 7,
+          '13+': 14 / 7,
+        };
+        if (s.weeklyTime && midpoints[s.weeklyTime]) {
+          setHoursPerDay(midpoints[s.weeklyTime]);
+        }
+      }
+
+      // Defer to avoid synchronous setState in effect body
+      setTimeout(() => {
+        setSelected(preferredTrack);
+        setStartingStage(getStartingStage(preferredTrack));
       }, 0);
     } catch {
-      // ignore parse errors
+      // ignore – defaults remain
     }
   }, []);
 
+  // Re-derive stage whenever the selected track changes
+  useEffect(() => {
+    setStartingStage(getStartingStage(selected));
+  }, [selected]);
+
+  // ── Fetch roadmap nodes from backend ─────────────────────────────
   useEffect(() => {
     const fetchRoadmap = async () => {
       try {
@@ -146,45 +220,59 @@ function LearningPathMap() {
     void fetchRoadmap();
   }, [selected]);
 
-  const totalLessonHours = 120; // Default mockup for total hours
-
+  // ── ETA calculation ───────────────────────────────────────────────
+  const TOTAL_LESSON_HOURS = 120;
   const estimatedMonths = useMemo(() => {
-    if (!surveyData?.hoursPerDay) return 6;
-    const days = totalLessonHours / surveyData.hoursPerDay;
-    const months = Math.max(1, Math.ceil(days / 30));
-    return months;
-  }, [surveyData]);
+    if (!hoursPerDay) return 6;
+    const days = TOTAL_LESSON_HOURS / hoursPerDay;
+    return Math.max(1, Math.ceil(days / 30));
+  }, [hoursPerDay]);
 
-  const testScore = surveyData?.testScore ?? 0;
-  const levelText =
-    testScore === 5
-      ? isVi
-        ? 'Senior'
-        : 'Senior'
-      : testScore >= 3
-        ? isVi
-          ? 'Trung cấp'
-          : 'Mid-level'
-        : isVi
-          ? 'Junior'
-          : 'Junior';
-  const selectedLabel = isVi
-    ? selected === 'frontend'
-      ? 'Frontend'
-      : 'Backend'
-    : selected === 'frontend'
-      ? 'Frontend'
-      : 'Backend';
+  // ── Derived display values ────────────────────────────────────────
+  const preUnlocked = useMemo(
+    () => getPreUnlockedStages(startingStage),
+    [startingStage]
+  );
+
+  const stageStyle = STAGE_STYLE[startingStage];
+  const stageLabel = stageLabelText(startingStage, isVi ? 'vi' : 'en');
+  const selectedLabel =
+    selected === 'frontend'
+      ? isVi ? 'Frontend' : 'Frontend'
+      : isVi ? 'Backend' : 'Backend';
+
   const headerTitle = isVi ? 'Lộ trình học' : 'Learning Path';
-  const introText = surveyData
-    ? isVi
-      ? `Chúc mừng bạn đã bắt đầu roadmap ${selectedLabel} ${levelText} trong ${estimatedMonths} tháng!`
-      : `Congratulations on starting your ${selectedLabel} ${levelText} roadmap for ${estimatedMonths} months!`
-    : t('roadmap.welcome.empty');
+
+  // Build intro text dynamically based on actual starting stage
+  const introText = useMemo(() => {
+    if (startingStage === 'beginner') {
+      return isVi
+        ? `Bạn sẽ bắt đầu từ giai đoạn Cơ bản trong lộ trình ${selectedLabel} (khoảng ${estimatedMonths} tháng).`
+        : `You'll start from the Beginner stage on the ${selectedLabel} roadmap (~${estimatedMonths} months).`;
+    }
+    if (startingStage === 'intermediate') {
+      return isVi
+        ? `Giai đoạn Cơ bản đã được mở khoá. Bạn sẽ bắt đầu học từ giai đoạn Trung cấp (khoảng ${estimatedMonths} tháng).`
+        : `Beginner stage is pre-unlocked. You'll start from Intermediate stage (~${estimatedMonths} months).`;
+    }
+    return isVi
+      ? `Giai đoạn Cơ bản và Trung cấp đã được mở khoá. Bạn sẽ bắt đầu từ giai đoạn Nâng cao (khoảng ${estimatedMonths} tháng).`
+      : `Beginner & Intermediate stages are pre-unlocked. Starting at Advanced stage (~${estimatedMonths} months).`;
+  }, [startingStage, selectedLabel, estimatedMonths, isVi]);
+
+  // ── Reset handler ─────────────────────────────────────────────────
+  function handleReset() {
+    clearOnboardingData();
+    setStartingStage('beginner');
+    setHoursPerDay(null);
+    setShowResetConfirm(false);
+    // Reload the page so all components pick up the cleared state cleanly
+    window.location.reload();
+  }
 
   return (
     <div className="w-full animate-fade-in">
-      {/* Header */}
+      {/* ── Header ─────────────────────────────────────────────── */}
       <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
         <div className="flex flex-col gap-2">
           <div className="badge-coral w-fit">
@@ -194,13 +282,48 @@ function LearningPathMap() {
           <h1 className="font-['Lexend'] text-4xl font-bold tracking-tight">
             {headerTitle}
           </h1>
-          <p className="text-sm leading-6 text-[color:var(--cg-text-muted)] max-w-md">
+          <p className="max-w-md text-sm leading-6 text-[color:var(--cg-text-muted)]">
             {introText}
           </p>
+
+          {/* ── Starting stage badge ──────────────────────────── */}
+          <div className="mt-1 flex items-center gap-2">
+            <div
+              className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold tracking-wide border"
+              style={{
+                background: stageStyle.bg,
+                borderColor: stageStyle.border,
+                color: stageStyle.text,
+              }}
+            >
+              <span>{stageStyle.icon}</span>
+              <span>
+                {isVi ? 'Xuất phát:' : 'Starting:'} {stageLabel}
+              </span>
+            </div>
+
+            {/* Pre-unlocked stage pills */}
+            {preUnlocked.length > 0 && (
+              <div className="flex items-center gap-1">
+                {preUnlocked.map((s) => (
+                  <div
+                    key={s}
+                    className="inline-flex items-center gap-1 rounded-full border border-[rgba(74,222,128,0.25)] bg-[rgba(74,222,128,0.08)] px-2.5 py-1 text-[10px] font-medium text-[#4ade80]"
+                  >
+                    <span className="material-symbols-outlined text-[12px]">
+                      lock_open
+                    </span>
+                    {stageLabelText(s, isVi ? 'vi' : 'en')}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Tab toggle */}
+        {/* ── Right column: tab + stats ─────────────────────── */}
         <div className="flex flex-col items-end gap-4">
+          {/* Track toggle */}
           <div
             className="flex items-center gap-1 rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] p-1 backdrop-blur"
             role="tablist"
@@ -223,27 +346,27 @@ function LearningPathMap() {
                   style={
                     active
                       ? {
-                          background: `linear-gradient(135deg, ${tab.color}, ${tab.color}cc)`,
-                          boxShadow: `0 4px 20px ${tab.glow}`,
-                        }
+                        background: `linear-gradient(135deg, ${tab.color}, ${tab.color}cc)`,
+                        boxShadow: `0 4px 20px ${tab.glow}`,
+                      }
                       : {}
                   }
                 >
                   <span className="text-base leading-none">{tab.icon}</span>
-                      <span>
-                        {isVi
-                          ? tab.key === 'frontend'
-                            ? 'Frontend'
-                            : 'Backend'
-                          : tab.label}
-                      </span>
+                  <span>
+                    {isVi
+                      ? tab.key === 'frontend'
+                        ? 'Frontend'
+                        : 'Backend'
+                      : tab.label}
+                  </span>
                   {active && (
                     <span className="ml-1 hidden text-[11px] font-normal opacity-80 md:inline">
-                          {isVi
-                            ? tab.key === 'frontend'
-                              ? 'UI · Web · React'
-                              : 'API · CSDL · Auth'
-                            : tab.sub}
+                      {isVi
+                        ? tab.key === 'frontend'
+                          ? 'UI · Web · React'
+                          : 'API · CSDL · Auth'
+                        : tab.sub}
                     </span>
                   )}
                 </button>
@@ -267,28 +390,73 @@ function LearningPathMap() {
                 <span className="text-xs font-bold" style={{ color: s.color }}>
                   {s.value}
                 </span>
-                <span className="text-[10px] text-[color:var(--cg-text-muted)] font-medium">
+                <span className="text-[10px] font-medium text-[color:var(--cg-text-muted)]">
                   {t(s.labelKey)}
                 </span>
               </div>
             ))}
           </div>
+
+          {/* Reset assessment button */}
+          {!showResetConfirm ? (
+            <button
+              type="button"
+              onClick={() => setShowResetConfirm(true)}
+              className="flex items-center gap-1.5 rounded-xl border border-[color:var(--cg-border)] bg-transparent px-3 py-1.5 text-[11px] font-medium text-[color:var(--cg-text-muted)] transition hover:border-[rgba(255,126,95,0.35)] hover:text-[#ff7e5f]"
+            >
+              <span className="material-symbols-outlined text-[13px]">
+                restart_alt
+              </span>
+              {isVi ? 'Làm lại assessment' : 'Reset assessment'}
+            </button>
+          ) : (
+            <div className="flex items-center gap-2 rounded-xl border border-[rgba(255,126,95,0.35)] bg-[rgba(255,126,95,0.08)] px-3 py-2">
+              <span className="text-[11px] text-[rgba(255,255,255,0.70)]">
+                {isVi ? 'Xác nhận xoá kết quả?' : 'Confirm reset?'}
+              </span>
+              <button
+                type="button"
+                onClick={handleReset}
+                className="rounded-lg bg-[#ff7e5f] px-2.5 py-1 text-[11px] font-bold text-[#0f0b3c] transition hover:brightness-110"
+              >
+                {isVi ? 'Xoá' : 'Yes, reset'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowResetConfirm(false)}
+                className="rounded-lg border border-[color:var(--cg-border)] px-2.5 py-1 text-[11px] font-medium text-[color:var(--cg-text-muted)] transition hover:text-[color:var(--cg-text)]"
+              >
+                {isVi ? 'Huỷ' : 'Cancel'}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Divider */}
+      {/* ── Divider ──────────────────────────────────────────────── */}
       <div
-        className="mt-8 mb-8 h-px w-full"
+        className="mb-8 mt-8 h-px w-full"
         style={{
           background:
             'linear-gradient(90deg, transparent, var(--cg-border), transparent)',
         }}
       />
 
-      {/* Roadmap */}
+      {/* ── Roadmap viewer ───────────────────────────────────────── */}
+      {/*
+        New props passed to RoadmapViewer:
+          startingStage    – 'beginner' | 'intermediate' | 'advanced'
+          preUnlockedStages – stages to render as auto-completed
+
+        RoadmapViewer should:
+          • Lock all nodes that belong to a stage ABOVE startingStage
+          • Mark nodes in preUnlockedStages as "completed" (green check, passthrough)
+          • Highlight / auto-scroll to the first node of startingStage
+      */}
       <RoadmapViewer
         selected={selected}
-        surveyData={surveyData}
+        startingStage={startingStage}
+        preUnlockedStages={preUnlocked}
         apiNodes={apiNodes}
         apiProgress={apiProgress}
         loading={loadingRoadmap}
