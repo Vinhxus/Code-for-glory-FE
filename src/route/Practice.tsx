@@ -17,6 +17,7 @@ import {
   type SubmissionStatus,
 } from '../services/practiceApi';
 import { useSettingsStore } from '../store/settings';
+import { TheoryViewer } from './TheoryViewer';
 
 const cx = (...classes: Array<string | false | null | undefined>) =>
   classes.filter(Boolean).join(' ');
@@ -2436,6 +2437,7 @@ function Practice() {
         allProblems: 'Tất cả bài',
         description: 'Mô tả',
         solutions: 'Lời giải',
+        theory: 'Lý Thuyết',
         accepted: 'Đã nhận',
         rate: 'Tỷ lệ',
         task: 'Yêu cầu',
@@ -2514,6 +2516,7 @@ function Practice() {
         allProblems: 'All problems',
         description: 'Description',
         solutions: 'Solutions',
+        theory: 'Theory',
         accepted: 'Accepted',
         rate: 'Rate',
         task: 'The Task',
@@ -2549,9 +2552,9 @@ function Practice() {
       };
 
   // UI States
-  const [leftTab, setLeftTab] = useState<'description' | 'solutions'>(
-    'description'
-  );
+  const [leftTab, setLeftTab] = useState<
+    'description' | 'solutions' | 'theory'
+  >('description');
   const [consoleTab, setConsoleTab] = useState<
     'testcase' | 'testresult' | 'submissions'
   >('testcase');
@@ -3578,10 +3581,30 @@ function Practice() {
                   </span>{' '}
                   {ui.solutions}
                 </button>
+                <div className="w-px h-4 bg-[color:var(--cg-border)] mx-1" />
+                <button
+                  onClick={() => setLeftTab('theory')}
+                  className={cx(
+                    'flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors border-b-2',
+                    leftTab === 'theory'
+                      ? 'text-[#FF7E5F] border-[#FF7E5F]'
+                      : 'text-[color:var(--cg-text-muted)] border-transparent hover:text-[color:var(--cg-text)]'
+                  )}
+                >
+                  <span className="material-symbols-outlined text-[14px]">
+                    menu_book
+                  </span>{' '}
+                  {ui.theory}
+                </button>
               </div>
 
               {/* Left Content */}
-              <div className="flex-1 overflow-y-auto custom-scrollbar p-5">
+              <div
+                className={cx(
+                  'flex-1 overflow-y-auto custom-scrollbar',
+                  leftTab === 'theory' ? 'p-0' : 'p-5'
+                )}
+              >
                 {leftTab === 'description' && (
                   <div className="animate-fade-in flex flex-col h-full">
                     <h2 className="font-['Lexend'] text-xl font-bold mb-4">
@@ -3790,6 +3813,15 @@ function Practice() {
                       ))}
                     </div>
                   </div>
+                )}
+
+                {leftTab === 'theory' && (
+                  <TheoryViewer
+                    topic={
+                      selectedCatalogItem?.topic ?? currentPractice.concept
+                    }
+                    isVi={isVi}
+                  />
                 )}
               </div>
             </Panel>
