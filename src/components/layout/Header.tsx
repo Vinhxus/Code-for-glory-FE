@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import QuickSettings from '../QuickSettings';
 import { useNavigate } from 'react-router-dom';
 import { useSettingsStore } from '../../store/settings';
+import { useSideNavStore } from '../SideNavMove';
 import './Header.css';
 
 export default function Header() {
@@ -11,6 +12,7 @@ export default function Header() {
   const theme = useSettingsStore((s) => s.theme); //[cite: 7]
   const toggleLanguage = useSettingsStore((s) => s.toggleLanguage); //[cite: 7]
   const toggleTheme = useSettingsStore((s) => s.toggleTheme); //[cite: 7]
+  const isSideNavExpanded = useSideNavStore((s) => s.isExpanded);
   const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false);
 
   const isDark = theme === 'dark'; //[cite: 7]
@@ -40,7 +42,10 @@ export default function Header() {
   };
 
   return (
-    <header className="header">
+    <header
+      className="header"
+      style={isSideNavExpanded ? { left: 200 } : undefined}
+    >
       {/* LOGO GỐC BÊN TRÁI */}
       <NavLink
         to="/"
