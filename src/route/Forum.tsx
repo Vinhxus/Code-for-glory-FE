@@ -1,6 +1,15 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import SideNav from '../components/SideNav';
 import { useSettingsStore } from '../store/settings';
+import UserProfileModal from '../components/UserProfileModal';
+import FriendsSidebar from '../components/FriendsSidebar';
+import {
+  getPosts,
+  createPost,
+  getDirectMessages,
+  sendDirectMessage,
+} from '../services/forumApi';
+import type { ForumPost, DirectMessage } from '../services/forumApi';
 
 type Channel = {
   id: string;
@@ -11,17 +20,6 @@ type Channel = {
   presence: number;
   unread: number;
   pinned: number;
-};
-
-type ChatMessage = {
-  id: string;
-  author: string;
-  role?: 'mentor' | 'builder' | 'member' | 'you';
-  time: string;
-  body: string;
-  accent: string;
-  replies?: number;
-  reactions?: Array<{ emoji: string; count: number }>;
 };
 
 function cx(...classes: Array<string | false | null | undefined>) {
@@ -133,7 +131,8 @@ export default function Forum() {
               name: 'show-your-work',
               group: 'community',
               badge: 'Build',
-              topic: 'Khoe mini project, landing page, challenge và milestone mới.',
+              topic:
+                'Khoe mini project, landing page, challenge và milestone mới.',
               presence: 58,
               unread: 9,
               pinned: 1,
@@ -142,7 +141,8 @@ export default function Forum() {
               id: 'general-chat',
               name: 'general-chat',
               group: 'community',
-              topic: 'Trò chuyện linh tinh, chia sẻ tài nguyên và rủ nhau học nhóm.',
+              topic:
+                'Trò chuyện linh tinh, chia sẻ tài nguyên và rủ nhau học nhóm.',
               presence: 91,
               unread: 1,
               pinned: 2,
@@ -154,7 +154,8 @@ export default function Forum() {
               name: 'getting-started',
               group: 'learning',
               badge: 'Starter',
-              topic: 'First questions about HTML, CSS, JS, and how to learn web dev.',
+              topic:
+                'First questions about HTML, CSS, JS, and how to learn web dev.',
               presence: 124,
               unread: 6,
               pinned: 2,
@@ -163,7 +164,8 @@ export default function Forum() {
               id: 'html-css-help',
               name: 'html-css-help',
               group: 'learning',
-              topic: 'Markup, layout, responsive behavior, and day-to-day UI fixes.',
+              topic:
+                'Markup, layout, responsive behavior, and day-to-day UI fixes.',
               presence: 86,
               unread: 2,
               pinned: 4,
@@ -172,7 +174,8 @@ export default function Forum() {
               id: 'js-basics',
               name: 'js-basics',
               group: 'learning',
-              topic: 'Variables, functions, async flows, array methods, and debugging.',
+              topic:
+                'Variables, functions, async flows, array methods, and debugging.',
               presence: 73,
               unread: 0,
               pinned: 3,
@@ -182,7 +185,8 @@ export default function Forum() {
               name: 'show-your-work',
               group: 'community',
               badge: 'Build',
-              topic: 'Share mini projects, landing pages, challenge wins, and milestones.',
+              topic:
+                'Share mini projects, landing pages, challenge wins, and milestones.',
               presence: 58,
               unread: 9,
               pinned: 1,
@@ -191,7 +195,8 @@ export default function Forum() {
               id: 'general-chat',
               name: 'general-chat',
               group: 'community',
-              topic: 'Casual conversation, resources, and finding people to study with.',
+              topic:
+                'Casual conversation, resources, and finding people to study with.',
               presence: 91,
               unread: 1,
               pinned: 2,
@@ -199,284 +204,388 @@ export default function Forum() {
           ],
     [isVi]
   );
-
-  const initialMessages = useMemo<Record<string, ChatMessage[]>>(
-    () =>
-      isVi
-        ? {
-            'getting-started': [
-              {
-                id: 'gs-1',
-                author: 'NewbieDev',
-                role: 'member',
-                time: 'Hôm nay 10:42',
-                body:
-                  'Mình mới học HTML được hai hôm. Có cách nào để biết khi nào nên dùng `section`, khi nào nên dùng `div` không mọi người?',
-                accent: 'from-[#ff7e5f] to-[#fbbf24]',
-                replies: 4,
-                reactions: [
-                  { emoji: '👍', count: 7 },
-                  { emoji: '🔥', count: 2 },
-                ],
-              },
-              {
-                id: 'gs-2',
-                author: 'Mentor_Alex',
-                role: 'mentor',
-                time: 'Hôm nay 10:45',
-                body:
-                  'Rule ngắn gọn: nếu block đó có ý nghĩa nội dung riêng và có thể đặt tiêu đề thì ưu tiên `section`; còn `div` chỉ nên là wrapper trung tính. Nếu bạn muốn, mình có thể chỉ luôn cách nhìn semantic cho một landing page nhỏ.',
-                accent: 'from-[#4ade80] to-[#22c55e]',
-                replies: 3,
-                reactions: [
-                  { emoji: '✅', count: 12 },
-                  { emoji: '💡', count: 5 },
-                ],
-              },
-              {
-                id: 'gs-3',
-                author: 'UI_Beans',
-                role: 'builder',
-                time: 'Hôm nay 10:47',
-                body:
-                  'Mình thường tự hỏi: nếu ngày mai bỏ hết CSS đi, block này còn có nghĩa gì với người đọc hay screen reader không? Nếu có thì nên semantic.',
-                accent: 'from-[#a78bfa] to-[#8b5cf6]',
-                reactions: [{ emoji: '👏', count: 6 }],
-              },
-            ],
-            'html-css-help': [
-              {
-                id: 'hc-1',
-                author: 'PixelMie',
-                role: 'builder',
-                time: 'Hôm nay 11:03',
-                body:
-                  'Có ai gặp lỗi card bị vỡ layout khi title dài quá không? Mình đang phân vân giữa `minmax`, `line-clamp` và `overflow-wrap`.',
-                accent: 'from-[#38bdf8] to-[#3b82f6]',
-                replies: 8,
-                reactions: [{ emoji: '🧩', count: 4 }],
-              },
-              {
-                id: 'hc-2',
-                author: 'CSS_Garden',
-                role: 'mentor',
-                time: 'Hôm nay 11:06',
-                body:
-                  'Nếu card grid thì mình ưu tiên `minmax()` cho cột, còn text dài thì thêm `overflow-wrap: anywhere;`. `line-clamp` chỉ xử lý phần hiển thị thôi.',
-                accent: 'from-[#4ade80] to-[#14b8a6]',
-                reactions: [{ emoji: '✅', count: 9 }],
-              },
-            ],
-            'js-basics': [
-              {
-                id: 'js-1',
-                author: 'LanCode',
-                role: 'member',
-                time: 'Hôm nay 09:18',
-                body:
-                  'Mình hay bị rối giữa `map`, `filter`, `find`. Có mn nào có mẹo nhớ nhanh không?',
-                accent: 'from-[#fb7185] to-[#f43f5e]',
-                replies: 5,
-              },
-              {
-                id: 'js-2',
-                author: 'CoachMinh',
-                role: 'mentor',
-                time: 'Hôm nay 09:21',
-                body:
-                  '`map` biến đổi toàn bộ mảng, `filter` giữ lại vài phần tử, `find` lấy đúng một phần tử đầu tiên. Cứ nhớ câu này là đủ dùng 80% tình huống rồi.',
-                accent: 'from-[#4ade80] to-[#22c55e]',
-                reactions: [{ emoji: '📝', count: 11 }],
-              },
-            ],
-            'show-your-work': [
-              {
-                id: 'sw-1',
-                author: 'AnTran',
-                role: 'builder',
-                time: 'Hôm nay 08:56',
-                body:
-                  'Mình vừa xong landing page đầu tiên bằng HTML/CSS thuần. Phần hero còn hơi cứng, ai rảnh xem giúp mình hierarchy với spacing được không?',
-                accent: 'from-[#f59e0b] to-[#ef4444]',
-                replies: 12,
-                reactions: [{ emoji: '🚀', count: 15 }],
-              },
-            ],
-            'general-chat': [
-              {
-                id: 'gc-1',
-                author: 'StudyBuddy',
-                role: 'member',
-                time: 'Hôm nay 12:10',
-                body:
-                  'Tối nay có ai muốn mở phòng pair study 45 phút không? Mình đang học Flexbox với semantic HTML.',
-                accent: 'from-[#60a5fa] to-[#2563eb]',
-                replies: 9,
-                reactions: [{ emoji: '🙌', count: 8 }],
-              },
-            ],
-          }
-        : {
-            'getting-started': [
-              {
-                id: 'gs-1',
-                author: 'NewbieDev',
-                role: 'member',
-                time: 'Today 10:42',
-                body:
-                  'I just started learning HTML. How do you decide when to use `section` versus `div` in a real page?',
-                accent: 'from-[#ff7e5f] to-[#fbbf24]',
-                replies: 4,
-                reactions: [
-                  { emoji: '👍', count: 7 },
-                  { emoji: '🔥', count: 2 },
-                ],
-              },
-              {
-                id: 'gs-2',
-                author: 'Mentor_Alex',
-                role: 'mentor',
-                time: 'Today 10:45',
-                body:
-                  'Short rule: if the block carries standalone meaning and could reasonably have its own heading, prefer `section`; otherwise use `div` as a neutral wrapper. I can break it down with a landing-page example if you want.',
-                accent: 'from-[#4ade80] to-[#22c55e]',
-                replies: 3,
-                reactions: [
-                  { emoji: '✅', count: 12 },
-                  { emoji: '💡', count: 5 },
-                ],
-              },
-              {
-                id: 'gs-3',
-                author: 'UI_Beans',
-                role: 'builder',
-                time: 'Today 10:47',
-                body:
-                  'I usually ask myself: if all CSS disappeared, would this block still communicate meaning to a reader or screen reader? If yes, it should probably be semantic.',
-                accent: 'from-[#a78bfa] to-[#8b5cf6]',
-                reactions: [{ emoji: '👏', count: 6 }],
-              },
-            ],
-            'html-css-help': [
-              {
-                id: 'hc-1',
-                author: 'PixelMie',
-                role: 'builder',
-                time: 'Today 11:03',
-                body:
-                  'Does anyone else fight card layouts when the title gets too long? I am debating between `minmax`, `line-clamp`, and `overflow-wrap`.',
-                accent: 'from-[#38bdf8] to-[#3b82f6]',
-                replies: 8,
-                reactions: [{ emoji: '🧩', count: 4 }],
-              },
-              {
-                id: 'hc-2',
-                author: 'CSS_Garden',
-                role: 'mentor',
-                time: 'Today 11:06',
-                body:
-                  'For grid cards I would start with `minmax()` for the columns, then add `overflow-wrap: anywhere;` for long text. `line-clamp` only controls the visible slice.',
-                accent: 'from-[#4ade80] to-[#14b8a6]',
-                reactions: [{ emoji: '✅', count: 9 }],
-              },
-            ],
-            'js-basics': [
-              {
-                id: 'js-1',
-                author: 'LanCode',
-                role: 'member',
-                time: 'Today 09:18',
-                body:
-                  'I keep mixing up `map`, `filter`, and `find`. Does anyone have a quick way to remember them?',
-                accent: 'from-[#fb7185] to-[#f43f5e]',
-                replies: 5,
-              },
-              {
-                id: 'js-2',
-                author: 'CoachMinh',
-                role: 'mentor',
-                time: 'Today 09:21',
-                body:
-                  '`map` transforms every item, `filter` keeps some items, and `find` returns the first matching item. That one sentence covers most day-to-day cases.',
-                accent: 'from-[#4ade80] to-[#22c55e]',
-                reactions: [{ emoji: '📝', count: 11 }],
-              },
-            ],
-            'show-your-work': [
-              {
-                id: 'sw-1',
-                author: 'AnTran',
-                role: 'builder',
-                time: 'Today 08:56',
-                body:
-                  'I just finished my first HTML/CSS landing page. The hero still feels stiff. If anyone has time, I would love feedback on the hierarchy and spacing.',
-                accent: 'from-[#f59e0b] to-[#ef4444]',
-                replies: 12,
-                reactions: [{ emoji: '🚀', count: 15 }],
-              },
-            ],
-            'general-chat': [
-              {
-                id: 'gc-1',
-                author: 'StudyBuddy',
-                role: 'member',
-                time: 'Today 12:10',
-                body:
-                  'Anyone interested in a 45-minute pair-study room tonight? I am reviewing Flexbox and semantic HTML.',
-                accent: 'from-[#60a5fa] to-[#2563eb]',
-                replies: 9,
-                reactions: [{ emoji: '🙌', count: 8 }],
-              },
-            ],
-          },
-    [isVi]
-  );
-
-  const members = useMemo(
-    () =>
-      isVi
-        ? [
-            { name: 'Mentor_Alex', role: content.mentor, status: 'typing' },
-            { name: 'NewbieDev', role: content.member, status: 'online' },
-            { name: 'UI_Beans', role: content.builder, status: 'online' },
-            { name: 'LanCode', role: content.member, status: 'idle' },
-            { name: 'StudyBuddy', role: content.member, status: 'online' },
-          ]
-        : [
-            { name: 'Mentor_Alex', role: content.mentor, status: 'typing' },
-            { name: 'NewbieDev', role: content.member, status: 'online' },
-            { name: 'UI_Beans', role: content.builder, status: 'online' },
-            { name: 'LanCode', role: content.member, status: 'idle' },
-            { name: 'StudyBuddy', role: content.member, status: 'online' },
-          ],
-    [content, isVi]
-  );
-
   const [activeChannelId, setActiveChannelId] = useState('getting-started');
   const [draft, setDraft] = useState('');
-  const [messagesByChannel, setMessagesByChannel] =
-    useState<Record<string, ChatMessage[]>>(initialMessages);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [emojiCategory, setEmojiCategory] = useState<
+    'smileys' | 'people' | 'nature' | 'food' | 'activity' | 'symbols'
+  >('smileys');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const activeChannel = channels.find((channel) => channel.id === activeChannelId) ?? channels[0];
-  const activeMessages = messagesByChannel[activeChannelId] ?? [];
+  const EMOJI_CATEGORIES = {
+    smileys: {
+      icon: '😊',
+      label: 'Smileys',
+      emojis: [
+        '😀',
+        '😃',
+        '😄',
+        '😁',
+        '😆',
+        '😅',
+        '🤣',
+        '😂',
+        '🙂',
+        '😊',
+        '😇',
+        '🥰',
+        '😍',
+        '😘',
+        '😗',
+        '😙',
+        '😚',
+        '😋',
+        '😛',
+        '😜',
+        '🤪',
+        '😝',
+        '🤑',
+        '🤗',
+        '🤭',
+        '🤫',
+        '🤔',
+        '🤐',
+        '🤨',
+        '😐',
+        '😑',
+        '😶',
+        '😏',
+        '😒',
+        '🙄',
+        '😬',
+        '🤥',
+        '😌',
+        '😔',
+      ],
+    },
+    people: {
+      icon: '👋',
+      label: 'People',
+      emojis: [
+        '👋',
+        '🤚',
+        '✋',
+        '🖖',
+        '👌',
+        '🤌',
+        '✌️',
+        '🤞',
+        '🤟',
+        '🤘',
+        '🤙',
+        '👈',
+        '👉',
+        '👆',
+        '🖕',
+        '👇',
+        '☝️',
+        '👍',
+        '👎',
+        '✊',
+        '👊',
+        '🤛',
+        '🤜',
+        '👏',
+        '🙌',
+        '👐',
+        '🤲',
+        '🤝',
+        '🙏',
+        '✍️',
+        '💅',
+        '🤳',
+        '💪',
+        '🦾',
+        '🦿',
+        '🦵',
+        '🦶',
+        '👂',
+        '🦻',
+      ],
+    },
+    nature: {
+      icon: '🌿',
+      label: 'Nature',
+      emojis: [
+        '🐶',
+        '🐱',
+        '🐭',
+        '🐹',
+        '🐰',
+        '🦊',
+        '🐻',
+        '🐼',
+        '🐨',
+        '🐯',
+        '🦁',
+        '🐮',
+        '🐷',
+        '🐸',
+        '🐵',
+        '🐔',
+        '🐧',
+        '🐦',
+        '🦆',
+        '🦅',
+        '🦉',
+        '🦇',
+        '🐝',
+        '🦋',
+        '🌸',
+        '🌺',
+        '🌻',
+        '🌼',
+        '🌷',
+        '🍀',
+        '🌱',
+        '🌿',
+        '🍃',
+        '🌲',
+        '🌳',
+        '🌴',
+        '☘️',
+        '🌾',
+        '💐',
+      ],
+    },
+    food: {
+      icon: '🍕',
+      label: 'Food',
+      emojis: [
+        '🍎',
+        '🍊',
+        '🍋',
+        '🍇',
+        '🍓',
+        '🫐',
+        '🍈',
+        '🍒',
+        '🍑',
+        '🥭',
+        '🍍',
+        '🥥',
+        '🥝',
+        '🍅',
+        '🍆',
+        '🥑',
+        '🥦',
+        '🌽',
+        '🌶️',
+        '🍄',
+        '🧅',
+        '🧄',
+        '🥔',
+        '🍠',
+        '🫘',
+        '🌰',
+        '🍞',
+        '🥐',
+        '🥖',
+        '🫓',
+        '🥨',
+        '🥯',
+        '🧀',
+        '🍳',
+        '🍕',
+        '🌭',
+        '🥪',
+        '🌮',
+        '🌯',
+      ],
+    },
+    activity: {
+      icon: '⚽',
+      label: 'Activity',
+      emojis: [
+        '⚽',
+        '🏀',
+        '🏈',
+        '⚾',
+        '🥎',
+        '🏐',
+        '🏉',
+        '🥏',
+        '🎾',
+        '🏸',
+        '🏒',
+        '🥍',
+        '🏏',
+        '🪃',
+        '🥅',
+        '⛳',
+        '🪁',
+        '🎿',
+        '🛷',
+        '🥌',
+        '🎯',
+        '🪀',
+        '🪆',
+        '🎱',
+        '🔮',
+        '🧿',
+        '🎮',
+        '🕹️',
+        '🎲',
+        '🧩',
+        '🧸',
+        '🪅',
+        '🎭',
+        '🎨',
+        '🖼️',
+        '🎰',
+        '🚂',
+        '🛳️',
+        '✈️',
+      ],
+    },
+    symbols: {
+      icon: '💡',
+      label: 'Symbols',
+      emojis: [
+        '❤️',
+        '🧡',
+        '💛',
+        '💚',
+        '💙',
+        '💜',
+        '🖤',
+        '🤍',
+        '🤎',
+        '💔',
+        '❣️',
+        '💕',
+        '💞',
+        '💓',
+        '💗',
+        '💖',
+        '💘',
+        '💝',
+        '💟',
+        '☮️',
+        '✝️',
+        '🔥',
+        '💥',
+        '✨',
+        '⭐',
+        '🌟',
+        '💫',
+        '🎉',
+        '🎊',
+        '🏆',
+        '🥇',
+        '🎁',
+        '🎈',
+        '💡',
+        '🔑',
+        '🗝️',
+        '🔒',
+        '🔓',
+        '💰',
+      ],
+    },
+  };
+
+  const insertEmoji = (emoji: string) => {
+    const input = inputRef.current;
+    if (input) {
+      const start = input.selectionStart ?? draft.length;
+      const end = input.selectionEnd ?? draft.length;
+      const next = draft.slice(0, start) + emoji + draft.slice(end);
+      setDraft(next);
+      setTimeout(() => {
+        input.focus();
+        input.setSelectionRange(start + emoji.length, start + emoji.length);
+      }, 0);
+    } else {
+      setDraft((prev) => prev + emoji);
+    }
+  };
+
+  const insertMention = () => {
+    const input = inputRef.current;
+    if (input) {
+      const start = input.selectionStart ?? draft.length;
+      const next = draft.slice(0, start) + '@' + draft.slice(start);
+      setDraft(next);
+      setTimeout(() => {
+        input.focus();
+        input.setSelectionRange(start + 1, start + 1);
+      }, 0);
+    }
+  };
+
+  const wrapText = (prefix: string, suffix = prefix) => {
+    const input = inputRef.current;
+    if (!input) return;
+    const start = input.selectionStart ?? 0;
+    const end = input.selectionEnd ?? 0;
+    const selected = draft.slice(start, end) || 'text';
+    const next =
+      draft.slice(0, start) + prefix + selected + suffix + draft.slice(end);
+    setDraft(next);
+    setTimeout(() => {
+      input.focus();
+      input.setSelectionRange(
+        start + prefix.length,
+        start + prefix.length + selected.length
+      );
+    }, 0);
+  };
+
+  const [realPosts, setRealPosts] = useState<ForumPost[]>([]);
+  const [directMessages, setDirectMessages] = useState<DirectMessage[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [activeDmUser, setActiveDmUser] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const activeChannel = activeChannelId.startsWith('dm-')
+    ? {
+        id: activeChannelId,
+        name: activeDmUser?.name || 'Direct Message',
+        group: 'community' as const,
+        topic: 'Private conversation',
+        presence: 1,
+        unread: 0,
+        pinned: 0,
+        badge: 'DM',
+      }
+    : (channels.find((channel) => channel.id === activeChannelId) ??
+      channels[0]);
+
+  useEffect(() => {
+    if (activeChannelId.startsWith('dm-')) {
+      const targetUserId = activeChannelId.replace('dm-', '');
+      getDirectMessages(targetUserId)
+        .then(setDirectMessages)
+        .catch(console.error);
+    } else {
+      getPosts(activeChannelId).then(setRealPosts).catch(console.error);
+    }
+  }, [activeChannelId]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [realPosts, directMessages, activeChannelId]);
 
   const sendMessage = () => {
     const value = draft.trim();
     if (!value) return;
 
-    const nextMessage: ChatMessage = {
-      id: `${activeChannelId}-${Date.now()}`,
-      author: content.you,
-      role: 'you',
-      time: isVi ? 'Vừa xong' : 'Just now',
-      body: value,
-      accent: 'from-[#ff7e5f] to-[#fb7185]',
-    };
+    if (activeChannelId.startsWith('dm-')) {
+      const targetUserId = activeChannelId.replace('dm-', '');
+      sendDirectMessage(targetUserId, value)
+        .then((newMsg) => setDirectMessages((prev) => [...prev, newMsg]))
+        .catch(console.error);
+    } else {
+      createPost(activeChannelId, value)
+        .then((newPost) => setRealPosts((prev) => [newPost, ...prev]))
+        .catch(console.error);
+    }
 
-    setMessagesByChannel((prev) => ({
-      ...prev,
-      [activeChannelId]: [...(prev[activeChannelId] ?? []), nextMessage],
-    }));
     setDraft('');
   };
 
@@ -496,7 +605,9 @@ export default function Forum() {
             <p className="text-[11px] uppercase tracking-[0.22em] text-[color:var(--cg-text-muted)]">
               {content.workspace}
             </p>
-            <h1 className="mt-2 text-2xl font-bold">{content.chatFeelsAlive}</h1>
+            <h1 className="mt-2 text-2xl font-bold">
+              {content.chatFeelsAlive}
+            </h1>
             <p className="mt-2 text-sm leading-6 text-[color:var(--cg-text-muted)]">
               {content.workspaceDesc}
             </p>
@@ -536,8 +647,12 @@ export default function Forum() {
                         >
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex min-w-0 items-center gap-2">
-                              <span className="text-[color:var(--cg-text-muted)]">#</span>
-                              <span className="truncate font-semibold">{channel.name}</span>
+                              <span className="text-[color:var(--cg-text-muted)]">
+                                #
+                              </span>
+                              <span className="truncate font-semibold">
+                                {channel.name}
+                              </span>
                               {channel.badge ? (
                                 <span className="rounded-full border border-[#a78bfa]/30 bg-[#a78bfa]/12 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#c4b5fd]">
                                   {channel.badge}
@@ -554,8 +669,12 @@ export default function Forum() {
                             {channel.topic}
                           </p>
                           <div className="mt-3 flex items-center gap-3 text-[11px] text-[color:var(--cg-text-muted)]">
-                            <span>{channel.presence} {content.onlineNow}</span>
-                            <span>{channel.pinned} {content.pinned}</span>
+                            <span>
+                              {channel.presence} {content.onlineNow}
+                            </span>
+                            <span>
+                              {channel.pinned} {content.pinned}
+                            </span>
                           </div>
                         </button>
                       );
@@ -572,7 +691,9 @@ export default function Forum() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-[color:var(--cg-text-muted)]">#</span>
-                  <h2 className="truncate text-xl font-bold">{activeChannel.name}</h2>
+                  <h2 className="truncate text-xl font-bold">
+                    {activeChannel.name}
+                  </h2>
                   {activeChannel.badge ? (
                     <span className="rounded-full border border-[#4ade80]/30 bg-[#4ade80]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#4ade80]">
                       {activeChannel.badge}
@@ -612,18 +733,21 @@ export default function Forum() {
                       {content.quickActions}
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {[content.actionAsk, content.actionReview, content.actionPair, content.actionShare].map(
-                        (action) => (
-                          <button
-                            key={action}
-                            type="button"
-                            onClick={() => setDraft(action)}
-                            className="rounded-full border border-[color:var(--cg-border)] bg-[color:var(--cg-bg)] px-3 py-1.5 text-xs font-medium text-[color:var(--cg-text-muted)] hover:text-[color:var(--cg-text)]"
-                          >
-                            {action}
-                          </button>
-                        )
-                      )}
+                      {[
+                        content.actionAsk,
+                        content.actionReview,
+                        content.actionPair,
+                        content.actionShare,
+                      ].map((action) => (
+                        <button
+                          key={action}
+                          type="button"
+                          onClick={() => setDraft(action)}
+                          className="rounded-full border border-[color:var(--cg-border)] bg-[color:var(--cg-bg)] px-3 py-1.5 text-xs font-medium text-[color:var(--cg-text-muted)] hover:text-[color:var(--cg-text)]"
+                        >
+                          {action}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -631,97 +755,331 @@ export default function Forum() {
 
               <div className="flex-1 overflow-y-auto px-4 py-5 md:px-6">
                 <div className="mx-auto max-w-4xl space-y-6">
-                  {activeMessages.map((message) => (
-                    <article key={message.id} className="flex gap-4">
-                      <div
-                        className={cx(
-                          'h-11 w-11 flex-shrink-0 rounded-2xl bg-gradient-to-br shadow-lg',
-                          message.accent
-                        )}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-semibold">{message.author}</span>
-                          {message.role ? (
-                            <span
-                              className={cx(
-                                'rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]',
-                                message.role === 'mentor'
-                                  ? 'bg-[#4ade80]/10 text-[#4ade80]'
-                                  : message.role === 'builder'
-                                    ? 'bg-[#a78bfa]/12 text-[#c4b5fd]'
-                                    : message.role === 'you'
-                                      ? 'bg-[#ff7e5f]/12 text-[#ffb49e]'
+                  {(activeChannelId.startsWith('dm-')
+                    ? directMessages
+                    : [...realPosts].reverse()
+                  ).length === 0 ? (
+                    <div className="text-center py-10 text-[color:var(--cg-text-muted)] italic">
+                      {isVi
+                        ? 'Chưa có tin nhắn nào. Hãy bắt đầu trò chuyện!'
+                        : 'No messages yet. Start the conversation!'}
+                    </div>
+                  ) : (
+                    (activeChannelId.startsWith('dm-')
+                      ? directMessages
+                      : [...realPosts].reverse()
+                    ).map((message) => {
+                      // Map the common properties
+                      const isDm = activeChannelId.startsWith('dm-');
+                      const msgDm = isDm ? (message as DirectMessage) : null;
+                      const msgPost = !isDm ? (message as ForumPost) : null;
+
+                      const authorUser = isDm
+                        ? msgDm!.senderId
+                        : msgPost!.author;
+                      const id = isDm ? msgDm!._id : msgPost!._id;
+                      const body = isDm ? msgDm!.body : msgPost!.body;
+                      const time = new Date(
+                        isDm ? msgDm!.createdAt : msgPost!.createdAt
+                      ).toLocaleTimeString();
+                      const avatar =
+                        authorUser?.avatarUrl ||
+                        `https://api.dicebear.com/7.x/avataaars/svg?seed=${authorUser?.username || 'unknown'}`;
+                      const username = authorUser?.username || 'Unknown';
+                      const role = authorUser?.role || 'member';
+                      const authorId = authorUser?._id;
+
+                      return (
+                        <article key={id} className="flex gap-4">
+                          <img
+                            src={avatar}
+                            alt={username}
+                            className="h-11 w-11 flex-shrink-0 rounded-2xl object-cover shadow-lg border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)]"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <button
+                                onClick={() => setSelectedUserId(authorId)}
+                                className="font-semibold hover:underline"
+                              >
+                                {username}
+                              </button>
+                              <span
+                                className={cx(
+                                  'rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]',
+                                  role === 'mentor'
+                                    ? 'bg-[#4ade80]/10 text-[#4ade80]'
+                                    : role === 'builder'
+                                      ? 'bg-[#a78bfa]/12 text-[#c4b5fd]'
                                       : 'bg-[color:var(--cg-container-a30)] text-[color:var(--cg-text-muted)]'
-                              )}
-                            >
-                              {message.role === 'mentor'
-                                ? content.mentor
-                                : message.role === 'builder'
-                                  ? content.builder
-                                  : message.role === 'you'
-                                    ? content.you
-                                    : content.member}
-                            </span>
-                          ) : null}
-                          <span className="text-xs text-[color:var(--cg-text-muted)]">
-                            {message.time}
-                          </span>
-                        </div>
+                                )}
+                              >
+                                {role}
+                              </span>
+                              <span className="text-xs text-[color:var(--cg-text-muted)]">
+                                {time}
+                              </span>
+                            </div>
 
-                        <div className="mt-2 rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] p-4">
-                          <p className="whitespace-pre-wrap text-sm leading-7 text-[color:var(--cg-text)]">
-                            {message.body}
-                          </p>
-                        </div>
-
-                        <div className="mt-3 flex flex-wrap items-center gap-2">
-                          {message.reactions?.map((reaction) => (
-                            <span
-                              key={`${message.id}-${reaction.emoji}`}
-                              className="rounded-full border border-[color:var(--cg-border)] bg-[color:var(--cg-bg)] px-2.5 py-1 text-xs text-[color:var(--cg-text-muted)]"
-                            >
-                              {reaction.emoji} {reaction.count}
-                            </span>
-                          ))}
-                          {typeof message.replies === 'number' ? (
-                            <button
-                              type="button"
-                              className="rounded-full border border-[color:var(--cg-border)] bg-[color:var(--cg-bg)] px-2.5 py-1 text-xs text-[color:var(--cg-text-muted)] hover:text-[color:var(--cg-text)]"
-                            >
-                              {message.replies}{' '}
-                              {isVi ? 'phản hồi trong thread' : 'thread replies'}
-                            </button>
-                          ) : null}
-                        </div>
-                      </div>
-                    </article>
-                  ))}
+                            <div className="mt-2 rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] p-4">
+                              <p className="whitespace-pre-wrap text-sm leading-7 text-[color:var(--cg-text)]">
+                                {body}
+                              </p>
+                            </div>
+                          </div>
+                        </article>
+                      );
+                    })
+                  )}
+                  <div ref={messagesEndRef} />
                 </div>
               </div>
 
               <div className="border-t border-[color:var(--cg-border)] bg-[color:var(--cg-bg)] px-4 py-4 md:px-6 shrink-0">
                 <div className="mx-auto max-w-4xl">
-                  <div className="rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] p-3">
-                    <div className="flex items-center gap-2 border-b border-[color:var(--cg-border)] pb-3">
-                      {['add', 'attach_file', 'tag_faces', 'alternate_email'].map((icon) => (
-                        <button
-                          key={icon}
-                          type="button"
-                          className="rounded-xl p-2 text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)] hover:text-[color:var(--cg-text)]"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">
-                            {icon}
-                          </span>
-                        </button>
-                      ))}
+                  <div className="relative rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] p-3">
+                    {/* ── Emoji Picker Panel ─────────────────────────────────── */}
+                    {showEmojiPicker && (
+                      <div className="absolute bottom-full left-0 mb-2 z-50 w-[340px] rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-bg)] shadow-2xl overflow-hidden">
+                        {/* Category Tabs */}
+                        <div className="flex items-center border-b border-[color:var(--cg-border)] px-2 pt-2 gap-1">
+                          {(
+                            Object.entries(EMOJI_CATEGORIES) as [
+                              keyof typeof EMOJI_CATEGORIES,
+                              { icon: string; label: string; emojis: string[] },
+                            ][]
+                          ).map(([key, cat]) => (
+                            <button
+                              key={key}
+                              onClick={() => setEmojiCategory(key)}
+                              title={cat.label}
+                              className={cx(
+                                'flex-1 rounded-t-xl py-1.5 text-base transition-colors',
+                                emojiCategory === key
+                                  ? 'bg-[color:var(--cg-container-a30)] text-[color:var(--cg-text)]'
+                                  : 'text-[color:var(--cg-text-muted)] hover:text-[color:var(--cg-text)]'
+                              )}
+                            >
+                              {cat.icon}
+                            </button>
+                          ))}
+                          <button
+                            onClick={() => setShowEmojiPicker(false)}
+                            className="ml-auto p-1.5 text-[color:var(--cg-text-muted)] hover:text-[color:var(--cg-text)]"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">
+                              close
+                            </span>
+                          </button>
+                        </div>
+                        {/* Emoji Grid */}
+                        <div className="grid grid-cols-8 gap-0.5 p-2 h-[180px] overflow-y-auto">
+                          {EMOJI_CATEGORIES[emojiCategory].emojis.map(
+                            (emoji) => (
+                              <button
+                                key={emoji}
+                                onClick={() => {
+                                  insertEmoji(emoji);
+                                  setShowEmojiPicker(false);
+                                }}
+                                className="flex items-center justify-center rounded-lg p-1.5 text-lg hover:bg-[color:var(--cg-container-a30)] transition-colors"
+                              >
+                                {emoji}
+                              </button>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* ── Toolbar Row ─────────────────────────────────────────── */}
+                    <div className="flex items-center gap-1 border-b border-[color:var(--cg-border)] pb-3">
+                      {/* Attach File */}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        className="hidden"
+                        onChange={() => {
+                          /* TODO: upload */
+                        }}
+                      />
+                      <button
+                        type="button"
+                        title={isVi ? 'Đính kèm file' : 'Attach file'}
+                        onClick={() => fileInputRef.current?.click()}
+                        className="group relative rounded-xl p-2 text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)] hover:text-[#4ade80] transition-all"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          attach_file
+                        </span>
+                        <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[color:var(--cg-bg)] border border-[color:var(--cg-border)] px-2 py-0.5 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                          {isVi ? 'Đính kèm' : 'Attach'}
+                        </span>
+                      </button>
+
+                      {/* Image / Screenshot */}
+                      <button
+                        type="button"
+                        title={isVi ? 'Thêm ảnh' : 'Add image'}
+                        onClick={() => {
+                          const i = document.createElement('input');
+                          i.type = 'file';
+                          i.accept = 'image/*';
+                          i.click();
+                        }}
+                        className="group relative rounded-xl p-2 text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)] hover:text-[#38bdf8] transition-all"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          image
+                        </span>
+                        <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[color:var(--cg-bg)] border border-[color:var(--cg-border)] px-2 py-0.5 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                          {isVi ? 'Ảnh' : 'Image'}
+                        </span>
+                      </button>
+
+                      {/* Emoji Picker Toggle */}
+                      <button
+                        type="button"
+                        title="Emoji"
+                        onClick={() => setShowEmojiPicker((v) => !v)}
+                        className={cx(
+                          'group relative rounded-xl p-2 transition-all',
+                          showEmojiPicker
+                            ? 'bg-[#f59e0b]/15 text-[#f59e0b]'
+                            : 'text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)] hover:text-[#f59e0b]'
+                        )}
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          mood
+                        </span>
+                        <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[color:var(--cg-bg)] border border-[color:var(--cg-border)] px-2 py-0.5 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                          Emoji
+                        </span>
+                      </button>
+
+                      {/* GIF */}
+                      <button
+                        type="button"
+                        title="GIF"
+                        onClick={() => setDraft((p) => p + '[GIF] ')}
+                        className="group relative rounded-xl p-2 text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)] hover:text-[#a78bfa] transition-all"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          gif
+                        </span>
+                        <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[color:var(--cg-bg)] border border-[color:var(--cg-border)] px-2 py-0.5 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                          GIF
+                        </span>
+                      </button>
+
+                      {/* Mention */}
+                      <button
+                        type="button"
+                        title={isVi ? 'Nhắc tên ai đó' : 'Mention someone'}
+                        onClick={insertMention}
+                        className="group relative rounded-xl p-2 text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)] hover:text-[#fb7185] transition-all"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          alternate_email
+                        </span>
+                        <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[color:var(--cg-bg)] border border-[color:var(--cg-border)] px-2 py-0.5 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                          {isVi ? 'Nhắc tên' : 'Mention'}
+                        </span>
+                      </button>
+
+                      {/* Divider */}
+                      <div className="mx-1 h-5 w-px bg-[color:var(--cg-border)]" />
+
+                      {/* Bold */}
+                      <button
+                        type="button"
+                        title={isVi ? 'In đậm' : 'Bold'}
+                        onClick={() => wrapText('**')}
+                        className="group relative rounded-xl p-2 text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)] hover:text-[color:var(--cg-text)] transition-all font-bold text-sm"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          format_bold
+                        </span>
+                        <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[color:var(--cg-bg)] border border-[color:var(--cg-border)] px-2 py-0.5 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                          {isVi ? 'Đậm' : 'Bold'}
+                        </span>
+                      </button>
+
+                      {/* Italic */}
+                      <button
+                        type="button"
+                        title={isVi ? 'In nghiêng' : 'Italic'}
+                        onClick={() => wrapText('_')}
+                        className="group relative rounded-xl p-2 text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)] hover:text-[color:var(--cg-text)] transition-all text-sm italic"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          format_italic
+                        </span>
+                        <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[color:var(--cg-bg)] border border-[color:var(--cg-border)] px-2 py-0.5 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                          {isVi ? 'Nghiêng' : 'Italic'}
+                        </span>
+                      </button>
+
+                      {/* Inline Code */}
+                      <button
+                        type="button"
+                        title={isVi ? 'Code nội dòng' : 'Inline code'}
+                        onClick={() => wrapText('`')}
+                        className="group relative rounded-xl p-2 text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)] hover:text-[#4ade80] transition-all font-mono text-sm"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          code
+                        </span>
+                        <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[color:var(--cg-bg)] border border-[color:var(--cg-border)] px-2 py-0.5 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                          {isVi ? 'Code' : 'Code'}
+                        </span>
+                      </button>
+
+                      {/* Code Block */}
+                      <button
+                        type="button"
+                        title={isVi ? 'Khối code' : 'Code block'}
+                        onClick={() => wrapText('```\n', '\n```')}
+                        className="group relative rounded-xl p-2 text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)] hover:text-[#a78bfa] transition-all"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          data_object
+                        </span>
+                        <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[color:var(--cg-bg)] border border-[color:var(--cg-border)] px-2 py-0.5 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                          {isVi ? 'Khối code' : 'Code block'}
+                        </span>
+                      </button>
+
+                      {/* Divider */}
+                      <div className="mx-1 h-5 w-px bg-[color:var(--cg-border)]" />
+
+                      {/* Link */}
+                      <button
+                        type="button"
+                        title={isVi ? 'Chèn link' : 'Insert link'}
+                        onClick={() => wrapText('[', '](url)')}
+                        className="group relative rounded-xl p-2 text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)] hover:text-[#38bdf8] transition-all"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          link
+                        </span>
+                        <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[color:var(--cg-bg)] border border-[color:var(--cg-border)] px-2 py-0.5 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                          {isVi ? 'Link' : 'Link'}
+                        </span>
+                      </button>
                     </div>
 
+                    {/* ── Message Input Row ──────────────────────────────────── */}
                     <div className="flex items-center gap-3 pt-3">
                       <input
+                        ref={inputRef}
                         type="text"
                         value={draft}
-                        onChange={(event) => setDraft(event.target.value)}
+                        onChange={(event) => {
+                          setDraft(event.target.value);
+                          if (showEmojiPicker) setShowEmojiPicker(false);
+                        }}
                         onKeyDown={onComposerKeyDown}
                         placeholder={`${content.placeholderPrefix} #${activeChannel.name}...`}
                         className="flex-1 bg-transparent px-1 py-3 text-sm text-[color:var(--cg-text)] placeholder:text-[color:var(--cg-text-muted)] focus:outline-none"
@@ -729,15 +1087,20 @@ export default function Forum() {
                       <button
                         type="button"
                         onClick={sendMessage}
-                        className="inline-flex items-center gap-2 rounded-xl bg-[#4ade80] px-4 py-3 text-sm font-semibold text-[#0f0b3c] transition-opacity hover:opacity-85"
+                        disabled={!draft.trim()}
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-[#4ade80] px-4 py-2.5 text-sm font-semibold text-[#0f0b3c] transition-all hover:opacity-85 disabled:opacity-40 disabled:cursor-not-allowed"
                       >
-                        <span className="material-symbols-outlined text-[18px]">send</span>
+                        <span className="material-symbols-outlined text-[18px]">
+                          send
+                        </span>
                         {isVi ? 'Gửi' : 'Send'}
                       </button>
                     </div>
                   </div>
-                  <p className="mt-2 text-xs text-[color:var(--cg-text-muted)]">
-                    {content.enterHint}
+                  <p className="mt-2 text-[11px] text-[color:var(--cg-text-muted)]">
+                    {isVi
+                      ? 'Enter để gửi · Shift+Enter xuống dòng · ** đậm · _ nghiêng · ` code'
+                      : 'Enter to send · Shift+Enter for newline · **bold** · _italic_ · `code`'}
                   </p>
                 </div>
               </div>
@@ -748,62 +1111,43 @@ export default function Forum() {
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--cg-text-muted)]">
                   {content.members}
                 </p>
-                <h3 className="mt-2 text-lg font-bold">{content.memberTitle}</h3>
+                <h3 className="mt-2 text-lg font-bold">
+                  {content.memberTitle}
+                </h3>
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 <div className="rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--cg-text-muted)]">
                     {content.activeNow}
                   </p>
-                  <p className="mt-2 text-2xl font-bold">{activeChannel.presence}</p>
+                  <p className="mt-2 text-2xl font-bold">
+                    {activeChannel.presence}
+                  </p>
                   <p className="text-sm text-[color:var(--cg-text-muted)]">
                     {content.onlineNow} trong `#{activeChannel.name}`
                   </p>
                 </div>
 
-                {members.map((member) => (
-                  <div
-                    key={member.name}
-                    className="rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-4 py-3"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="truncate font-semibold">{member.name}</p>
-                        <p className="text-xs text-[color:var(--cg-text-muted)]">
-                          {member.role}
-                        </p>
-                      </div>
-                      <span
-                        className={cx(
-                          'h-2.5 w-2.5 rounded-full',
-                          member.status === 'typing'
-                            ? 'bg-[#f59e0b]'
-                            : member.status === 'idle'
-                              ? 'bg-[#a78bfa]'
-                              : 'bg-[#4ade80]'
-                        )}
-                      />
-                    </div>
-                    <p className="mt-2 text-xs text-[color:var(--cg-text-muted)]">
-                      {member.status === 'typing'
-                        ? isVi
-                          ? 'Đang nhập tin nhắn'
-                          : 'Typing right now'
-                        : member.status === 'idle'
-                          ? isVi
-                            ? 'Đang xem lại thread'
-                            : 'Reviewing threads'
-                          : isVi
-                            ? 'Sẵn sàng trả lời'
-                            : 'Ready to jump in'}
-                    </p>
-                  </div>
-                ))}
+                <div className="pt-4 mt-4">
+                  <FriendsSidebar
+                    onViewProfile={(userId) => setSelectedUserId(userId)}
+                    onSelectFriend={(id, name) => {
+                      setActiveChannelId(`dm-${id}`);
+                      setActiveDmUser({ id, name });
+                    }}
+                  />
+                </div>
               </div>
             </aside>
           </div>
         </main>
       </div>
+      {selectedUserId && selectedUserId !== 'fake' && (
+        <UserProfileModal
+          userId={selectedUserId}
+          onClose={() => setSelectedUserId(null)}
+        />
+      )}
     </div>
   );
 }

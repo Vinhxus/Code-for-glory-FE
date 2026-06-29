@@ -1,0 +1,364 @@
+.recall-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: calc(100vh - 32px);
+  margin-left: 80px;
+  padding: 32px 16px;
+  gap: 22px;
+  overflow: hidden;
+}
+
+.recall-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.recall-header-icon {
+  font-size: 20px;
+  color: var(--cg-amber);
+}
+
+.recall-eyebrow {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin: 0;
+  color: var(--cg-text-muted);
+}
+
+.recall-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--cg-text-muted);
+}
+
+.recall-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.recall-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cg-border);
+  transition: all 0.25s ease;
+}
+
+.recall-dot-active {
+  width: 18px;
+  border-radius: 999px;
+  background: var(--cg-amber);
+}
+
+/* ── Blurred focus backdrop ── */
+.recall-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  background: radial-gradient(
+    circle at 50% 45%,
+    rgba(15, 11, 60, 0) 0%,
+    rgba(15, 11, 60, 0.45) 100%
+  );
+}
+
+.recall-header,
+.recall-progress,
+.flashcard-scene,
+.recall-controls,
+.recall-saved-count {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Flashcard ── */
+.flashcard-scene {
+  perspective: 2000px;
+  width: 660px;
+  max-width: 92vw;
+  height: 450px;
+}
+
+.flashcard {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+  outline-offset: 4px;
+  border-radius: 20px;
+}
+
+.flashcard:focus-visible {
+  outline: 2px solid var(--cg-amber);
+}
+
+.flashcard-flipped {
+  transform: rotateY(180deg);
+}
+
+.flashcard-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 26px;
+  padding: 36px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--cg-border);
+  background: var(--cg-container-a22);
+  box-shadow: 0 28px 72px rgba(0, 0, 0, 0.32);
+}
+
+.flashcard-front {
+  border-color: rgba(255, 126, 95, 0.35);
+  background: linear-gradient(
+    160deg,
+    var(--cg-container-a22) 0%,
+    var(--cg-coral-a18) 130%
+  );
+}
+
+.flashcard-back {
+  transform: rotateY(180deg);
+  border-color: rgba(74, 222, 128, 0.35);
+  background: linear-gradient(
+    160deg,
+    var(--cg-container-a22) 0%,
+    var(--cg-green-a14) 130%
+  );
+}
+
+.flashcard-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.tag-chip {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.tag-chip-coral {
+  background: var(--cg-coral-a18);
+  color: var(--cg-coral);
+  border: 1px solid rgba(255, 126, 95, 0.3);
+}
+
+.tag-chip-amber {
+  background: var(--cg-amber-a14);
+  color: var(--cg-amber);
+  border: 1px solid rgba(255, 165, 0, 0.3);
+}
+
+.tag-chip-green {
+  background: var(--cg-green-a14);
+  color: var(--cg-green);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+}
+
+.tag-chip-purple {
+  background: rgba(167, 139, 250, 0.12);
+  color: #a78bfa;
+  border: 1px solid rgba(167, 139, 250, 0.3);
+}
+
+.save-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--cg-border);
+  background: transparent;
+  color: var(--cg-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background 0.2s ease,
+    transform 0.1s ease;
+}
+
+.save-btn .material-symbols-outlined {
+  font-size: 16px;
+}
+
+.save-btn:hover {
+  border-color: var(--cg-amber);
+  color: var(--cg-amber);
+}
+
+.save-btn:active {
+  transform: scale(0.9);
+}
+
+.save-btn-active {
+  border-color: var(--cg-amber);
+  color: var(--cg-amber);
+  background: var(--cg-amber-a14);
+}
+
+.flashcard-icon-wrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: var(--cg-coral-a18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  flex-shrink: 0;
+}
+
+.flashcard-icon-wrap .material-symbols-outlined {
+  font-size: 28px;
+  color: var(--cg-coral);
+}
+
+.flashcard-title {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0 0 6px 0;
+  color: var(--cg-text);
+}
+
+.flashcard-context {
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+  margin: 0 0 16px 0;
+  color: var(--cg-text-muted);
+}
+
+.flashcard-prompt {
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0;
+  flex: 1;
+  color: var(--cg-text);
+}
+
+.flashcard-hint {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  margin: 16px 0 0 0;
+  color: var(--cg-text-muted);
+  opacity: 0.7;
+}
+
+.flashcard-fix-label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 0 0 10px 0;
+  color: var(--cg-green);
+}
+
+.flashcard-fix {
+  font-size: 16px;
+  line-height: 1.7;
+  margin: 0;
+  flex: 1;
+  color: var(--cg-text);
+}
+
+/* ── Controls ── */
+.recall-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ctrl-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--cg-border);
+  background: var(--cg-container-a22);
+  color: var(--cg-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.ctrl-btn:hover {
+  border-color: var(--cg-amber);
+  color: var(--cg-amber);
+  transform: translateY(-2px);
+}
+
+.ctrl-btn:active {
+  transform: scale(0.92);
+}
+
+.ctrl-btn-flip {
+  width: 52px;
+  height: 52px;
+  background: var(--cg-amber);
+  border-color: var(--cg-amber);
+  color: #0f0b3c;
+}
+
+.ctrl-btn-flip:hover {
+  color: #0f0b3c;
+  opacity: 0.9;
+  transform: translateY(-2px) rotate(180deg);
+}
+
+.recall-saved-count {
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  margin: 0;
+  color: var(--cg-text-muted);
+}
+
+@media (max-width: 640px) {
+  .recall-wrapper {
+    margin-left: 0;
+    padding: 24px 12px;
+  }
+
+  .flashcard-scene {
+    height: 480px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flashcard {
+    transition: none;
+  }
+
+  .ctrl-btn-flip:hover {
+    transform: none;
+  }
+}

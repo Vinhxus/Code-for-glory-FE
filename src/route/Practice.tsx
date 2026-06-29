@@ -17,6 +17,7 @@ import {
   type SubmissionStatus,
 } from '../services/practiceApi';
 import { useSettingsStore } from '../store/settings';
+import { TheoryViewer } from './TheoryViewer';
 
 const cx = (...classes: Array<string | false | null | undefined>) =>
   classes.filter(Boolean).join(' ');
@@ -239,7 +240,15 @@ function buildJudgeTemplates(
       isVi ? 'Landmark semantics' : 'Semantic landmarks',
       isVi ? 'Dùng thẻ có nghĩa cho layout' : 'Use semantic layout tags',
       '`main`, `header`, `section`, `article`, `footer`, `nav`, hoặc `aside`',
-      [/<main\b/i, /<header\b/i, /<section\b/i, /<article\b/i, /<footer\b/i, /<nav\b/i, /<aside\b/i],
+      [
+        /<main\b/i,
+        /<header\b/i,
+        /<section\b/i,
+        /<article\b/i,
+        /<footer\b/i,
+        /<nav\b/i,
+        /<aside\b/i,
+      ],
       isVi
         ? 'Đã dùng landmark/semantic tag.'
         : 'Semantic landmark tags are present.',
@@ -293,7 +302,9 @@ function buildJudgeTemplates(
         isVi ? 'Giữ sidebar bám theo scroll' : 'Keep the sidebar sticky',
         '`position: sticky`',
         [/position\s*:\s*sticky/i],
-        isVi ? 'Sidebar đã được cấu hình sticky.' : 'Sticky sidebar is configured.',
+        isVi
+          ? 'Sidebar đã được cấu hình sticky.'
+          : 'Sticky sidebar is configured.',
         isVi
           ? 'Thiếu `position: sticky` cho sidebar.'
           : 'Missing `position: sticky` for the sidebar.'
@@ -316,7 +327,12 @@ function buildJudgeTemplates(
         isVi ? 'Layering menu' : 'Menu layering',
         isVi ? 'Quản lý lớp hiển thị menu' : 'Manage menu stacking',
         '`position: fixed`, `absolute`, `z-index`, hoặc `transform`',
-        [/position\s*:\s*fixed/i, /position\s*:\s*absolute/i, /\bz-index\s*:/i, /\btransform\s*:/i],
+        [
+          /position\s*:\s*fixed/i,
+          /position\s*:\s*absolute/i,
+          /\bz-index\s*:/i,
+          /\btransform\s*:/i,
+        ],
         isVi ? 'Đã có xử lý layering.' : 'Layering strategy is present.',
         isVi
           ? 'Thiếu xử lý positioning/layering cho menu.'
@@ -340,10 +356,19 @@ function buildJudgeTemplates(
     addAny(
       'a11y-feedback',
       isVi ? 'Phản hồi lỗi' : 'Accessible feedback',
-      isVi ? 'Thông báo lỗi/trạng thái rõ ràng' : 'Expose errors or status updates',
+      isVi
+        ? 'Thông báo lỗi/trạng thái rõ ràng'
+        : 'Expose errors or status updates',
       '`aria-invalid`, `aria-describedby`, `aria-live`, hoặc `role="alert"`',
-      [/aria-invalid=/i, /aria-describedby=/i, /aria-live=/i, /role=["']alert["']/i],
-      isVi ? 'Đã có cơ chế phản hồi truy cập.' : 'Accessible feedback is present.',
+      [
+        /aria-invalid=/i,
+        /aria-describedby=/i,
+        /aria-live=/i,
+        /role=["']alert["']/i,
+      ],
+      isVi
+        ? 'Đã có cơ chế phản hồi truy cập.'
+        : 'Accessible feedback is present.',
       isVi
         ? 'Thiếu trạng thái lỗi hoặc live region.'
         : 'Missing error state or live region semantics.'
@@ -353,8 +378,16 @@ function buildJudgeTemplates(
       isVi ? 'Keyboard support' : 'Keyboard support',
       isVi ? 'Hỗ trợ thao tác bàn phím' : 'Support keyboard interaction',
       '`tabindex`, xử lý `Escape`, `role="dialog"` hoặc `aria-modal`',
-      [/\btabindex=/i, /escape/i, /keydown/i, /role=["']dialog["']/i, /aria-modal=/i],
-      isVi ? 'Đã có tín hiệu hỗ trợ bàn phím.' : 'Keyboard support is represented.',
+      [
+        /\btabindex=/i,
+        /escape/i,
+        /keydown/i,
+        /role=["']dialog["']/i,
+        /aria-modal=/i,
+      ],
+      isVi
+        ? 'Đã có tín hiệu hỗ trợ bàn phím.'
+        : 'Keyboard support is represented.',
       isVi
         ? 'Thiếu keyboard handling hoặc dialog semantics.'
         : 'Missing keyboard handling or dialog semantics.'
@@ -368,7 +401,9 @@ function buildJudgeTemplates(
       isVi ? 'Quản lý state rõ ràng' : 'Model a clear source of truth',
       '`useState`, `useReducer`, hoặc state object nhất quán',
       [/\buseState\b/i, /\buseReducer\b/i, /set[A-Z][A-Za-z0-9_]*/],
-      isVi ? 'Đã có state management cơ bản.' : 'State management primitives are present.',
+      isVi
+        ? 'Đã có state management cơ bản.'
+        : 'State management primitives are present.',
       isVi
         ? 'Thiếu state primitive rõ ràng.'
         : 'Missing a clear state primitive.'
@@ -379,7 +414,9 @@ function buildJudgeTemplates(
       isVi ? 'Đồng bộ side effect hợp lý' : 'Coordinate side effects',
       '`useEffect`, callback handler, hoặc derived computation',
       [/\buseEffect\b/i, /\buseMemo\b/i, /handle[A-Z][A-Za-z0-9_]*/],
-      isVi ? 'Đã có effect/handler chính.' : 'Core effects or handlers are present.',
+      isVi
+        ? 'Đã có effect/handler chính.'
+        : 'Core effects or handlers are present.',
       isVi
         ? 'Nên thêm effect hoặc handler cho luồng state.'
         : 'Add an effect or handler for the state flow.'
@@ -388,7 +425,9 @@ function buildJudgeTemplates(
       addAll(
         'react-reducer',
         isVi ? 'Reducer flow' : 'Reducer flow',
-        isVi ? 'Dùng reducer cho cập nhật phức tạp' : 'Use a reducer for complex updates',
+        isVi
+          ? 'Dùng reducer cho cập nhật phức tạp'
+          : 'Use a reducer for complex updates',
         '`useReducer` và nhánh action',
         [/\buseReducer\b/i, /\bswitch\b/i],
         isVi ? 'Đã có reducer/action flow.' : 'Reducer flow is implemented.',
@@ -416,10 +455,14 @@ function buildJudgeTemplates(
       addAny(
         'js-array-chain',
         isVi ? 'Array pipeline' : 'Array pipeline',
-        isVi ? 'Xử lý danh sách bằng pipeline' : 'Transform lists with a pipeline',
+        isVi
+          ? 'Xử lý danh sách bằng pipeline'
+          : 'Transform lists with a pipeline',
         '`map`, `filter`, hoặc `reduce`',
         [/\.\s*map\s*\(/i, /\.\s*filter\s*\(/i, /\.\s*reduce\s*\(/i],
-        isVi ? 'Đã có pipeline biến đổi mảng.' : 'Array transformation pipeline found.',
+        isVi
+          ? 'Đã có pipeline biến đổi mảng.'
+          : 'Array transformation pipeline found.',
         isVi
           ? 'Nên dùng `map`, `filter`, hoặc `reduce`.'
           : 'Use `map`, `filter`, or `reduce`.'
@@ -432,9 +475,7 @@ function buildJudgeTemplates(
         'Toán tử `?.`',
         [/\?\./],
         isVi ? 'Đã dùng optional chaining.' : 'Optional chaining is present.',
-        isVi
-          ? 'Thiếu toán tử `?.`.'
-          : 'Missing the `?.` operator.'
+        isVi ? 'Thiếu toán tử `?.`.' : 'Missing the `?.` operator.'
       );
     } else if (title.includes('event loop')) {
       addAny(
@@ -442,7 +483,12 @@ function buildJudgeTemplates(
         isVi ? 'Async primitives' : 'Async primitives',
         isVi ? 'Mô tả thứ tự tác vụ' : 'Represent async ordering',
         '`Promise`, `setTimeout`, `queueMicrotask`, hoặc `await`',
-        [/\bPromise\b/i, /\bsetTimeout\b/i, /\bqueueMicrotask\b/i, /\bawait\b/i],
+        [
+          /\bPromise\b/i,
+          /\bsetTimeout\b/i,
+          /\bqueueMicrotask\b/i,
+          /\bawait\b/i,
+        ],
         isVi ? 'Đã có primitive bất đồng bộ.' : 'Async primitives are present.',
         isVi
           ? 'Thiếu primitive bất đồng bộ để mô tả event loop.'
@@ -469,7 +515,9 @@ function buildJudgeTemplates(
       isVi ? 'Hạn chế kiểu mơ hồ' : 'Avoid vague runtime contracts',
       'Khai báo kiểu trả về hoặc union state',
       [/:\s*Promise<[^>]+>/i, /:\s*[A-Z][A-Za-z0-9_<>, ]+/i, /\|\s*\{/],
-      isVi ? 'Contract trả về đã rõ hơn.' : 'Return or state contract is clearer.',
+      isVi
+        ? 'Contract trả về đã rõ hơn.'
+        : 'Return or state contract is clearer.',
       isVi
         ? 'Nên khai báo kiểu trả về hoặc state union.'
         : 'Add a return type or state union.'
@@ -494,7 +542,9 @@ function buildJudgeTemplates(
       isVi ? 'Tách hành động cập nhật' : 'Separate update actions',
       'Action hoặc function cập nhật chuyên biệt',
       [/add[A-Z]/, /remove[A-Z]/, /update[A-Z]/, /set[A-Z]/],
-      isVi ? 'Đã tách được hành động cập nhật.' : 'Update actions are separated.',
+      isVi
+        ? 'Đã tách được hành động cập nhật.'
+        : 'Update actions are separated.',
       isVi
         ? 'Nên tách actions để state dễ đoán hơn.'
         : 'Split state updates into dedicated actions.'
@@ -520,7 +570,9 @@ function buildJudgeTemplates(
       '`expect(...)`',
       [/\bexpect\s*\(/i],
       isVi ? 'Đã có assertion.' : 'Assertions are present.',
-      isVi ? 'Thiếu assertion `expect(...)`.' : 'Missing `expect(...)` assertions.'
+      isVi
+        ? 'Thiếu assertion `expect(...)`.'
+        : 'Missing `expect(...)` assertions.'
     );
     addAny(
       'test-user-flow',
@@ -528,7 +580,9 @@ function buildJudgeTemplates(
       isVi ? 'Bao phủ tương tác chính' : 'Cover the main interaction',
       '`render`, `screen`, `userEvent`, hoặc `fireEvent`',
       [/\brender\s*\(/i, /\bscreen\./i, /\buserEvent\./i, /\bfireEvent\./i],
-      isVi ? 'Đã có tín hiệu kiểm thử tương tác.' : 'Interaction coverage is present.',
+      isVi
+        ? 'Đã có tín hiệu kiểm thử tương tác.'
+        : 'Interaction coverage is present.',
       isVi
         ? 'Nên thêm render/user event cho luồng chính.'
         : 'Add render or user-event coverage for the main flow.'
@@ -541,7 +595,13 @@ function buildJudgeTemplates(
       isVi ? 'Tối ưu render' : 'Render optimization',
       isVi ? 'Giảm tính toán dư thừa' : 'Reduce redundant work',
       '`useMemo`, `memo`, `useCallback`, `lazy`, hoặc `Suspense`',
-      [/\buseMemo\b/i, /\bmemo\b/i, /\buseCallback\b/i, /\blazy\s*\(/i, /\bSuspense\b/i],
+      [
+        /\buseMemo\b/i,
+        /\bmemo\b/i,
+        /\buseCallback\b/i,
+        /\blazy\s*\(/i,
+        /\bSuspense\b/i,
+      ],
       isVi ? 'Đã có primitive tối ưu.' : 'Optimization primitives are present.',
       isVi
         ? 'Thiếu primitive tối ưu như `useMemo` hoặc `lazy`.'
@@ -553,7 +613,9 @@ function buildJudgeTemplates(
       isVi ? 'Ưu tiên tài nguyên quan trọng' : 'Prioritize important resources',
       '`loading="lazy"`, `fetchpriority`, hoặc dynamic import',
       [/loading=["']lazy["']/i, /fetchpriority=/i, /\bimport\s*\(/i],
-      isVi ? 'Đã có chiến lược tải tài nguyên.' : 'A loading strategy is present.',
+      isVi
+        ? 'Đã có chiến lược tải tài nguyên.'
+        : 'A loading strategy is present.',
       isVi
         ? 'Nên thêm lazy loading hoặc ưu tiên tải.'
         : 'Add lazy loading or a resource priority strategy.'
@@ -568,7 +630,9 @@ function buildJudgeTemplates(
       '`values`, `form`, `fields`, hoặc `useState`',
       [/\bvalues\b/i, /\bform\b/i, /\bfields\b/i, /\buseState\b/i],
       isVi ? 'Đã có state cho form.' : 'Form state is modeled.',
-      isVi ? 'Thiếu state/quy ước dữ liệu form.' : 'Missing form state modeling.'
+      isVi
+        ? 'Thiếu state/quy ước dữ liệu form.'
+        : 'Missing form state modeling.'
     );
     addAny(
       'form-validation',
@@ -611,10 +675,14 @@ function buildJudgeTemplates(
     addAny(
       'http-response-shape',
       isVi ? 'Response shape' : 'Response shape',
-      isVi ? 'Giữ contract phản hồi rõ ràng' : 'Keep the response contract clear',
+      isVi
+        ? 'Giữ contract phản hồi rõ ràng'
+        : 'Keep the response contract clear',
       '`status`, `body`, `headers`, hoặc JSON payload',
       [/\bstatus\b/i, /\bbody\b/i, /\bheaders\b/i, /\bjson\b/i],
-      isVi ? 'Contract phản hồi đã rõ hơn.' : 'The response contract is clearer.',
+      isVi
+        ? 'Contract phản hồi đã rõ hơn.'
+        : 'The response contract is clearer.',
       isVi
         ? 'Thiếu trường `status`, `body`, `headers` hoặc payload rõ ràng.'
         : 'Missing `status`, `body`, `headers`, or a clear payload.'
@@ -638,7 +706,9 @@ function buildJudgeTemplates(
         isVi ? 'Ngăn request trùng lặp' : 'Prevent duplicate processing',
         '`Idempotency-Key`, cache key, hoặc replay guard',
         [/idempotency/i, /idempotency-key/i, /\bduplicate\b/i, /\breplay\b/i],
-        isVi ? 'Đã có idempotency handling.' : 'Idempotency handling is present.',
+        isVi
+          ? 'Đã có idempotency handling.'
+          : 'Idempotency handling is present.',
         isVi
           ? 'Thiếu cơ chế chống request trùng lặp.'
           : 'Missing duplicate-request protection.'
@@ -650,7 +720,9 @@ function buildJudgeTemplates(
         isVi ? 'Đọc header Accept' : 'Read the Accept header',
         '`Accept`, `Content-Type`, hoặc branch JSON/CSV',
         [/\baccept\b/i, /content-type/i, /\bcsv\b/i, /\bjson\b/i],
-        isVi ? 'Đã có xử lý format phản hồi.' : 'Response format branching is present.',
+        isVi
+          ? 'Đã có xử lý format phản hồi.'
+          : 'Response format branching is present.',
         isVi
           ? 'Thiếu xử lý `Accept`/`Content-Type`.'
           : 'Missing `Accept` or `Content-Type` handling.'
@@ -674,7 +746,9 @@ function buildJudgeTemplates(
       isVi ? 'Trả payload nhất quán' : 'Return a consistent payload',
       '`data`, `error`, `cursor`, `items`, hoặc `results`',
       [/\bdata\b/i, /\berror\b/i, /\bcursor\b/i, /\bitems\b/i, /\bresults\b/i],
-      isVi ? 'API contract đã rõ ràng hơn.' : 'API contract fields are present.',
+      isVi
+        ? 'API contract đã rõ ràng hơn.'
+        : 'API contract fields are present.',
       isVi
         ? 'Thiếu field contract như `data`, `error`, `cursor`...'
         : 'Missing contract fields like `data`, `error`, or `cursor`.'
@@ -696,10 +770,21 @@ function buildJudgeTemplates(
     addAny(
       'auth-boundaries',
       isVi ? 'Auth boundary' : 'Auth boundary',
-      isVi ? 'Phân biệt auth và authorization' : 'Separate auth and authorization',
+      isVi
+        ? 'Phân biệt auth và authorization'
+        : 'Separate auth and authorization',
       '`role`, `permission`, `scope`, `refresh`, `revoke`, hoặc `expires`',
-      [/\brole\b/i, /\bpermission\b/i, /\bscope\b/i, /\brefresh\b/i, /\brevoke\b/i, /\bexpire/i],
-      isVi ? 'Ranh giới quyền đã được thể hiện.' : 'Authorization boundaries are represented.',
+      [
+        /\brole\b/i,
+        /\bpermission\b/i,
+        /\bscope\b/i,
+        /\brefresh\b/i,
+        /\brevoke\b/i,
+        /\bexpire/i,
+      ],
+      isVi
+        ? 'Ranh giới quyền đã được thể hiện.'
+        : 'Authorization boundaries are represented.',
       isVi
         ? 'Thiếu role/permission hoặc vòng đời token.'
         : 'Missing role/permission or token lifecycle handling.'
@@ -722,8 +807,16 @@ function buildJudgeTemplates(
         isVi ? 'Aggregation / join' : 'Aggregation / join',
         isVi ? 'Tổng hợp hoặc kết nối dữ liệu' : 'Aggregate or join data',
         '`JOIN`, `GROUP BY`, `SUM`, `COUNT`, hoặc `AVG`',
-        [/\bjoin\b/i, /\bgroup\s+by\b/i, /\bsum\s*\(/i, /\bcount\s*\(/i, /\bavg\s*\(/i],
-        isVi ? 'Đã có thao tác tổng hợp/kết nối.' : 'Aggregation or joins are present.',
+        [
+          /\bjoin\b/i,
+          /\bgroup\s+by\b/i,
+          /\bsum\s*\(/i,
+          /\bcount\s*\(/i,
+          /\bavg\s*\(/i,
+        ],
+        isVi
+          ? 'Đã có thao tác tổng hợp/kết nối.'
+          : 'Aggregation or joins are present.',
         isVi
           ? 'Thiếu `JOIN`, `GROUP BY` hoặc hàm tổng hợp.'
           : 'Missing `JOIN`, `GROUP BY`, or aggregate functions.'
@@ -734,8 +827,16 @@ function buildJudgeTemplates(
         isVi ? 'DB optimization' : 'DB optimization',
         isVi ? 'Tránh truy vấn dư thừa' : 'Avoid redundant queries',
         '`join`, `include`, `populate`, `batch`, hoặc eager load',
-        [/\bjoin\b/i, /\binclude\b/i, /\bpopulate\b/i, /\bbatch\b/i, /\beager\b/i],
-        isVi ? 'Đã có hướng tối ưu truy vấn.' : 'Query optimization hints are present.',
+        [
+          /\bjoin\b/i,
+          /\binclude\b/i,
+          /\bpopulate\b/i,
+          /\bbatch\b/i,
+          /\beager\b/i,
+        ],
+        isVi
+          ? 'Đã có hướng tối ưu truy vấn.'
+          : 'Query optimization hints are present.',
         isVi
           ? 'Thiếu tín hiệu tối ưu truy vấn/N+1.'
           : 'Missing query optimization or N+1 mitigation.'
@@ -746,7 +847,9 @@ function buildJudgeTemplates(
         isVi ? 'Giữ tính nhất quán dữ liệu' : 'Protect data consistency',
         '`transaction`, `commit`, `rollback`, hoặc lock',
         [/\btransaction\b/i, /\bcommit\b/i, /\brollback\b/i, /\block\b/i],
-        isVi ? 'Đã có cơ chế giữ nhất quán.' : 'Consistency mechanisms are present.',
+        isVi
+          ? 'Đã có cơ chế giữ nhất quán.'
+          : 'Consistency mechanisms are present.',
         isVi
           ? 'Thiếu transaction/rollback/lock.'
           : 'Missing transaction, rollback, or lock handling.'
@@ -758,7 +861,9 @@ function buildJudgeTemplates(
     addAny(
       'cache-key',
       isVi ? 'Cache strategy' : 'Cache strategy',
-      isVi ? 'Xác định cache key hoặc read path' : 'Define a cache key or read path',
+      isVi
+        ? 'Xác định cache key hoặc read path'
+        : 'Define a cache key or read path',
       '`cache`, `redis`, `key`, hoặc `get/set`',
       [/\bcache\b/i, /\bredis\b/i, /\bkey\b/i, /\bget\b/i, /\bset\b/i],
       isVi ? 'Đã có chiến lược cache cơ bản.' : 'A cache strategy is present.',
@@ -785,7 +890,13 @@ function buildJudgeTemplates(
       isVi ? 'Security guard' : 'Security guard',
       isVi ? 'Thêm lớp bảo vệ đầu vào' : 'Add a protection layer',
       '`rateLimit`, `throttle`, `sanitize`, `escape`, hoặc `validate`',
-      [/\brateLimit\b/i, /\bthrottle\b/i, /\bsanitize\b/i, /\bescape\b/i, /\bvalidate\b/i],
+      [
+        /\brateLimit\b/i,
+        /\bthrottle\b/i,
+        /\bsanitize\b/i,
+        /\bescape\b/i,
+        /\bvalidate\b/i,
+      ],
       isVi ? 'Đã có lớp bảo vệ cơ bản.' : 'A security guard is present.',
       isVi
         ? 'Thiếu rate-limit hoặc sanitization/validation.'
@@ -796,8 +907,16 @@ function buildJudgeTemplates(
       isVi ? 'Secret hygiene' : 'Secret hygiene',
       isVi ? 'Giữ secrets/config an toàn' : 'Handle secrets safely',
       '`process.env`, `secret`, `rotation`, `audit`, hoặc expiration',
-      [/\bprocess\.env\b/i, /\bsecret\b/i, /\brotation\b/i, /\baudit\b/i, /\bexpire/i],
-      isVi ? 'Đã có dấu hiệu quản lý secrets.' : 'Secret management hints are present.',
+      [
+        /\bprocess\.env\b/i,
+        /\bsecret\b/i,
+        /\brotation\b/i,
+        /\baudit\b/i,
+        /\bexpire/i,
+      ],
+      isVi
+        ? 'Đã có dấu hiệu quản lý secrets.'
+        : 'Secret management hints are present.',
       isVi
         ? 'Thiếu xử lý secrets hoặc audit/expiration.'
         : 'Missing secret handling or audit/expiration logic.'
@@ -808,10 +927,21 @@ function buildJudgeTemplates(
     addAny(
       'node-stream-or-lifecycle',
       isVi ? 'Runtime primitive' : 'Runtime primitive',
-      isVi ? 'Dùng primitive runtime phù hợp' : 'Use the right runtime primitive',
+      isVi
+        ? 'Dùng primitive runtime phù hợp'
+        : 'Use the right runtime primitive',
       '`stream`, `pipeline`, `SIGTERM`, `close`, `dispose`, hoặc cleanup',
-      [/\bstream\b/i, /\bpipeline\b/i, /\bSIGTERM\b/i, /\bclose\b/i, /\bdispose\b/i, /\bcleanup\b/i],
-      isVi ? 'Đã có primitive runtime phù hợp.' : 'Runtime primitives are present.',
+      [
+        /\bstream\b/i,
+        /\bpipeline\b/i,
+        /\bSIGTERM\b/i,
+        /\bclose\b/i,
+        /\bdispose\b/i,
+        /\bcleanup\b/i,
+      ],
+      isVi
+        ? 'Đã có primitive runtime phù hợp.'
+        : 'Runtime primitives are present.',
       isVi
         ? 'Thiếu stream/lifecycle cleanup.'
         : 'Missing streaming or lifecycle cleanup logic.'
@@ -821,7 +951,13 @@ function buildJudgeTemplates(
       isVi ? 'Ổn định tiến trình' : 'Process stability',
       isVi ? 'Bảo vệ tiến trình dài hạn' : 'Protect long-running processes',
       '`try/catch`, listener cleanup, hoặc drain/shutdown flow',
-      [/\btry\b/i, /\bcatch\b/i, /\bremoveListener\b/i, /\bshutdown\b/i, /\bdrain\b/i],
+      [
+        /\btry\b/i,
+        /\bcatch\b/i,
+        /\bremoveListener\b/i,
+        /\bshutdown\b/i,
+        /\bdrain\b/i,
+      ],
       isVi ? 'Đã có xử lý ổn định tiến trình.' : 'Stability logic is present.',
       isVi
         ? 'Thiếu cleanup/listener drain hoặc shutdown flow.'
@@ -835,8 +971,16 @@ function buildJudgeTemplates(
       isVi ? 'Structured logs' : 'Structured logs',
       isVi ? 'Gắn log có cấu trúc' : 'Add structured logging',
       '`logger`, `traceId`, `requestId`, `span`, hoặc context',
-      [/\blogger\b/i, /\btraceId\b/i, /\brequestId\b/i, /\bspan\b/i, /\bcontext\b/i],
-      isVi ? 'Đã có log/trace context.' : 'Logging or trace context is present.',
+      [
+        /\blogger\b/i,
+        /\btraceId\b/i,
+        /\brequestId\b/i,
+        /\bspan\b/i,
+        /\bcontext\b/i,
+      ],
+      isVi
+        ? 'Đã có log/trace context.'
+        : 'Logging or trace context is present.',
       isVi
         ? 'Thiếu logger hoặc trace/request id.'
         : 'Missing logger or trace/request identifiers.'
@@ -846,8 +990,16 @@ function buildJudgeTemplates(
       isVi ? 'Alert / metrics' : 'Alerts / metrics',
       isVi ? 'Theo dõi chỉ số hoặc alert' : 'Track metrics or alerts',
       '`metric`, `counter`, `histogram`, `alert`, hoặc `slo`',
-      [/\bmetric\b/i, /\bcounter\b/i, /\bhistogram\b/i, /\balert\b/i, /\bslo\b/i],
-      isVi ? 'Đã có tín hiệu observability phụ trợ.' : 'Supporting observability signals are present.',
+      [
+        /\bmetric\b/i,
+        /\bcounter\b/i,
+        /\bhistogram\b/i,
+        /\balert\b/i,
+        /\bslo\b/i,
+      ],
+      isVi
+        ? 'Đã có tín hiệu observability phụ trợ.'
+        : 'Supporting observability signals are present.',
       isVi
         ? 'Thiếu metric/counter/alert.'
         : 'Missing metrics, counters, or alerting logic.'
@@ -869,7 +1021,9 @@ function buildJudgeTemplates(
     addAny(
       'mq-reliability',
       isVi ? 'Reliability guard' : 'Reliability guard',
-      isVi ? 'Bảo vệ khỏi duplicate/poison message' : 'Protect against duplicate or poison messages',
+      isVi
+        ? 'Bảo vệ khỏi duplicate/poison message'
+        : 'Protect against duplicate or poison messages',
       '`dlq`, `idempotent`, `outbox`, `dedupe`, hoặc `replay`',
       [/\bdlq\b/i, /\bidempot/i, /\boutbox\b/i, /\bdedupe\b/i, /\breplay\b/i],
       isVi ? 'Đã có cơ chế reliability.' : 'Reliability handling is present.',
@@ -885,8 +1039,17 @@ function buildJudgeTemplates(
       isVi ? 'Concurrency primitive' : 'Concurrency primitive',
       isVi ? 'Dùng primitive xử lý cạnh tranh' : 'Use a concurrency primitive',
       '`async`, `await`, `queue`, `lock`, `mutex`, hoặc worker',
-      [/\basync\b/i, /\bawait\b/i, /\bqueue\b/i, /\block\b/i, /\bmutex\b/i, /\bworker\b/i],
-      isVi ? 'Đã có primitive đồng thời.' : 'Concurrency primitives are present.',
+      [
+        /\basync\b/i,
+        /\bawait\b/i,
+        /\bqueue\b/i,
+        /\block\b/i,
+        /\bmutex\b/i,
+        /\bworker\b/i,
+      ],
+      isVi
+        ? 'Đã có primitive đồng thời.'
+        : 'Concurrency primitives are present.',
       isVi
         ? 'Thiếu async/queue/lock/worker.'
         : 'Missing async, queue, lock, or worker handling.'
@@ -894,10 +1057,21 @@ function buildJudgeTemplates(
     addAny(
       'concurrency-safety',
       isVi ? 'No overlap' : 'No-overlap safety',
-      isVi ? 'Ngăn job trùng / race condition' : 'Prevent overlap or race conditions',
+      isVi
+        ? 'Ngăn job trùng / race condition'
+        : 'Prevent overlap or race conditions',
       '`retry`, `backoff`, `transaction`, `dedupe`, `cron`, hoặc `schedule`',
-      [/\bretry\b/i, /\bbackoff\b/i, /\btransaction\b/i, /\bdedupe\b/i, /\bcron\b/i, /\bschedule\b/i],
-      isVi ? 'Đã có cơ chế an toàn đồng thời.' : 'Concurrency safety signals are present.',
+      [
+        /\bretry\b/i,
+        /\bbackoff\b/i,
+        /\btransaction\b/i,
+        /\bdedupe\b/i,
+        /\bcron\b/i,
+        /\bschedule\b/i,
+      ],
+      isVi
+        ? 'Đã có cơ chế an toàn đồng thời.'
+        : 'Concurrency safety signals are present.',
       isVi
         ? 'Thiếu retry/backoff/transaction hoặc lịch không chồng.'
         : 'Missing retry, backoff, transaction, or no-overlap scheduling.'
@@ -912,7 +1086,14 @@ function buildJudgeTemplates(
       isVi
         ? 'Có ít nhất một primitive thể hiện lời giải'
         : 'Include at least one clear solution primitive',
-      [/\bfunction\b/i, /\bclass\b/i, /\basync\b/i, /=>/, /<main\b/i, /display\s*:/i],
+      [
+        /\bfunction\b/i,
+        /\bclass\b/i,
+        /\basync\b/i,
+        /=>/,
+        /<main\b/i,
+        /display\s*:/i,
+      ],
       isVi ? 'Đã có khung lời giải.' : 'A solution skeleton is present.',
       isVi ? 'Code vẫn còn quá trống.' : 'The solution is still too empty.'
     );
@@ -927,7 +1108,9 @@ function buildJudgeTemplates(
         ? 'Có comment, helper, hoặc phân tách logic'
         : 'Use comments, helpers, or structured blocks',
       [/\/\//, /#/, /\/\*/, /\breturn\b/i, /\bconst\b/i, /\blet\b/i],
-      isVi ? 'Cấu trúc lời giải khá rõ.' : 'The solution structure is readable.',
+      isVi
+        ? 'Cấu trúc lời giải khá rõ.'
+        : 'The solution structure is readable.',
       isVi
         ? 'Nên chia nhỏ logic hoặc thêm comment/hàm phụ.'
         : 'Break the logic into clearer blocks or helpers.'
@@ -2254,6 +2437,7 @@ function Practice() {
         allProblems: 'Tất cả bài',
         description: 'Mô tả',
         solutions: 'Lời giải',
+        theory: 'Lý Thuyết',
         accepted: 'Đã nhận',
         rate: 'Tỷ lệ',
         task: 'Yêu cầu',
@@ -2293,7 +2477,8 @@ function Practice() {
         startPracticing: 'Start practicing',
         curatedPractice: 'CURATED PRACTICE',
         tracks: 'FRONTEND + BACKEND',
-        hubTitle: 'Browse problems by topic before entering the code workspace.',
+        hubTitle:
+          'Browse problems by topic before entering the code workspace.',
         hubSubtitle:
           'The practice page behaves like a proper problem hub with curated lists, topic chips, and clearer filtering.',
         openFirst: 'Open first challenge',
@@ -2331,6 +2516,7 @@ function Practice() {
         allProblems: 'All problems',
         description: 'Description',
         solutions: 'Solutions',
+        theory: 'Theory',
         accepted: 'Accepted',
         rate: 'Rate',
         task: 'The Task',
@@ -2366,9 +2552,9 @@ function Practice() {
       };
 
   // UI States
-  const [leftTab, setLeftTab] = useState<'description' | 'solutions'>(
-    'description'
-  );
+  const [leftTab, setLeftTab] = useState<
+    'description' | 'solutions' | 'theory'
+  >('description');
   const [consoleTab, setConsoleTab] = useState<
     'testcase' | 'testresult' | 'submissions'
   >('testcase');
@@ -2403,8 +2589,45 @@ function Practice() {
   const [lastRunResult, setLastRunResult] = useState<JudgeRunState | null>(
     null
   );
-  const [submissionHistory, setSubmissionHistory] =
-    useState<SubmissionRecord[]>([]);
+  const [submissionHistory, setSubmissionHistory] = useState<
+    SubmissionRecord[]
+  >([]);
+
+  // Toast and responsiveness
+  const [toast, setToast] = useState<{
+    message: string;
+    type: 'success' | 'error' | 'info';
+  } | null>(null);
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showToast = useCallback(
+    (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+      setToast({ message, type });
+      toastTimeoutRef.current = setTimeout(() => {
+        setToast(null);
+      }, 5000);
+    },
+    []
+  );
+
+  const [isTooSmall, setIsTooSmall] = useState(false);
+
+  useEffect(() => {
+    const checkSize = () => {
+      setIsTooSmall(window.innerWidth < 1024);
+    };
+    checkSize();
+    window.addEventListener('resize', checkSize);
+    return () => {
+      window.removeEventListener('resize', checkSize);
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+    };
+  }, []);
   const getStarterCode = useCallback(
     (lang: PracticeLanguage) =>
       selectedCatalogItem
@@ -2621,10 +2844,11 @@ function Practice() {
       setConsoleTab('testresult');
     } catch (error) {
       console.error('Lỗi chạy test:', error);
-      alert(
+      showToast(
         isVi
           ? 'Không gọi được API backend để chạy test. Kiểm tra BE rồi thử lại.'
-          : 'Unable to reach the backend API to run tests. Please check the backend and try again.'
+          : 'Unable to reach the backend API to run tests. Please check the backend and try again.',
+        'error'
       );
     } finally {
       setIsRunning(false);
@@ -2664,10 +2888,11 @@ function Practice() {
           setIsCooldown(true);
           setCooldownTime(30);
         }
-        alert(
+        showToast(
           isVi
             ? `Bài chưa pass hết tiêu chí (${runResult.passedCount}/${runResult.total}). Xem lại mục Test Result hoặc Submissions nhé.`
-            : `The solution did not pass all checks (${runResult.passedCount}/${runResult.total}). Review Test Result or Submissions.`
+            : `The solution did not pass all checks (${runResult.passedCount}/${runResult.total}). Review Test Result or Submissions.`,
+          'error'
         );
         return;
       }
@@ -2677,24 +2902,33 @@ function Practice() {
       setCooldownTime(0);
       setIsLocked(false);
 
-      if (nodeId) {
-        await updateNodeProgress(nodeId, {
-          status: 'completed',
-          quizScore: 10,
-        });
-      }
-
-      alert(
+      // Show success toast immediately — accepted regardless of progress sync
+      showToast(
         isVi
           ? `🎉 Submit thành công cho bài ${currentPractice.title}.`
-          : `🎉 Submission accepted for ${currentPractice.title}.`
+          : `🎉 Submission accepted for ${currentPractice.title}.`,
+        'success'
       );
+
+      // Sync learning-path progress separately — don't let failures block the UX
+      if (nodeId) {
+        try {
+          await updateNodeProgress(nodeId, {
+            status: 'completed',
+            quizScore: 10,
+          });
+        } catch (progressError) {
+          // Non-critical: practice submission already recorded; just log quietly
+          console.warn('Could not sync learning-path progress:', progressError);
+        }
+      }
     } catch (error) {
-      console.error('Lỗi cập nhật tiến độ:', error);
-      alert(
+      console.error('Lỗi submit:', error);
+      showToast(
         isVi
-          ? 'Có lỗi xảy ra khi lưu tiến độ. Vui lòng thử lại!'
-          : 'Something went wrong while saving progress. Please try again.'
+          ? 'Có lỗi xảy ra khi nộp bài. Vui lòng thử lại!'
+          : 'Something went wrong while submitting. Please try again.',
+        'error'
       );
     } finally {
       setIsSubmitting(false);
@@ -2868,7 +3102,8 @@ function Practice() {
                   </p>
                 </div>
                 <div className="rounded-2xl border border-[color:var(--cg-border)] bg-[#0A0726]/40 px-4 py-3 text-xs font-semibold text-[color:var(--cg-text-muted)]">
-                  {filteredPractices.length}/{PRACTICE_CATALOG.length} {ui.visibleProblems}
+                  {filteredPractices.length}/{PRACTICE_CATALOG.length}{' '}
+                  {ui.visibleProblems}
                 </div>
               </div>
 
@@ -2959,7 +3194,9 @@ function Practice() {
                     <div className="text-2xl font-bold text-sky-300">
                       {backendCount}
                     </div>
-                    <div className="text-[11px] text-sky-100/70">{ui.problems}</div>
+                    <div className="text-[11px] text-sky-100/70">
+                      {ui.problems}
+                    </div>
                   </div>
                 </div>
                 <div className="mt-5 flex flex-wrap gap-2">
@@ -3143,8 +3380,99 @@ function Practice() {
     );
   }
 
+  if (isTooSmall && !isHubView) {
+    return (
+      <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#0F0B3C] text-center p-6 select-none">
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'radial-gradient(circle at 50% 50%,rgba(255,126,95,0.15),transparent 65%)',
+            }}
+          />
+        </div>
+
+        <div className="relative z-10 max-w-md flex flex-col items-center">
+          <div className="relative mb-6">
+            <div className="absolute inset-0 rounded-full bg-[#ff7e5f]/20 blur-xl animate-pulse-glow" />
+            <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-[#ff7e5f]/30 bg-[#ff7e5f]/10">
+              <span className="material-symbols-outlined text-3xl text-[#ff7e5f] animate-status-pulse">
+                desktop_windows
+              </span>
+            </div>
+          </div>
+
+          <h2 className="font-['Lexend'] text-xl font-bold tracking-tight text-white">
+            {isVi
+              ? 'Không Hỗ Trợ Kích Thước Màn Hình Này'
+              : 'Unsupported Screen Size'}
+          </h2>
+
+          <p className="mt-3 text-xs leading-relaxed text-[color:var(--cg-text-muted)]">
+            {isVi
+              ? 'Để đảm bảo trải nghiệm học tập và viết code tốt nhất, giao diện Workspace yêu cầu màn hình máy tính có độ rộng tối thiểu 1024px. Vui lòng phóng to trình duyệt hoặc sử dụng thiết bị có màn hình lớn hơn.'
+              : 'To ensure the best learning and coding experience, the Workspace requires a desktop screen with a minimum width of 1024px. Please expand your browser window or use a larger device.'}
+          </p>
+
+          <div className="mt-6 flex flex-wrap gap-3 justify-center">
+            <button
+              onClick={() => handleBackToHub()}
+              className="rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-4 py-2 text-xs font-semibold text-[color:var(--cg-text)] hover:bg-[color:var(--cg-container-a22)] transition cursor-pointer"
+            >
+              {isVi ? 'Quay lại Hub' : 'Go back to Hub'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)] selection:bg-[color:var(--cg-coral-a18)] select-none overflow-hidden flex flex-col">
+    <div className="h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)] selection:bg-[color:var(--cg-coral-a18)] overflow-hidden flex flex-col">
+      {/* Toast notifications */}
+      {toast && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[999] animate-bounce-in max-w-md w-full px-4">
+          <div
+            className={cx(
+              'glass-card p-4 flex items-start gap-3 shadow-[0_20px_50px_rgba(0,0,0,0.4)] border',
+              toast.type === 'success'
+                ? 'border-emerald-500/30 bg-emerald-950/60'
+                : toast.type === 'error'
+                  ? 'border-rose-500/30 bg-rose-950/60'
+                  : 'border-blue-500/30 bg-blue-950/60'
+            )}
+          >
+            <span
+              className={cx(
+                'material-symbols-outlined text-[20px] shrink-0 mt-0.5',
+                toast.type === 'success'
+                  ? 'text-emerald-400'
+                  : toast.type === 'error'
+                    ? 'text-rose-400'
+                    : 'text-blue-400'
+              )}
+            >
+              {toast.type === 'success'
+                ? 'check_circle'
+                : toast.type === 'error'
+                  ? 'error'
+                  : 'info'}
+            </span>
+            <div className="flex-1 text-xs font-semibold leading-relaxed text-[color:var(--cg-text)]">
+              {toast.message}
+            </div>
+            <button
+              onClick={() => setToast(null)}
+              className="text-[color:var(--cg-text-muted)] hover:text-[color:var(--cg-text)] transition-colors"
+            >
+              <span className="material-symbols-outlined text-[16px]">
+                close
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <div
           className="absolute inset-0"
@@ -3253,10 +3581,30 @@ function Practice() {
                   </span>{' '}
                   {ui.solutions}
                 </button>
+                <div className="w-px h-4 bg-[color:var(--cg-border)] mx-1" />
+                <button
+                  onClick={() => setLeftTab('theory')}
+                  className={cx(
+                    'flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors border-b-2',
+                    leftTab === 'theory'
+                      ? 'text-[#FF7E5F] border-[#FF7E5F]'
+                      : 'text-[color:var(--cg-text-muted)] border-transparent hover:text-[color:var(--cg-text)]'
+                  )}
+                >
+                  <span className="material-symbols-outlined text-[14px]">
+                    menu_book
+                  </span>{' '}
+                  {ui.theory}
+                </button>
               </div>
 
               {/* Left Content */}
-              <div className="flex-1 overflow-y-auto custom-scrollbar p-5">
+              <div
+                className={cx(
+                  'flex-1 overflow-y-auto custom-scrollbar',
+                  leftTab === 'theory' ? 'p-0' : 'p-5'
+                )}
+              >
                 {leftTab === 'description' && (
                   <div className="animate-fade-in flex flex-col h-full">
                     <h2 className="font-['Lexend'] text-xl font-bold mb-4">
@@ -3275,10 +3623,12 @@ function Practice() {
                         {selectedCatalogItem?.difficulty || 'Easy'}
                       </span>
                       <span className="px-2 py-0.5 rounded text-[10px] font-bold text-[color:var(--cg-text-muted)] bg-[color:var(--cg-container-a16)] border border-[color:var(--cg-border)]">
-                        {selectedCatalogItem?.solvedCount || '38.3M'} {ui.accepted}
+                        {selectedCatalogItem?.solvedCount || '38.3M'}{' '}
+                        {ui.accepted}
                       </span>
                       <span className="px-2 py-0.5 rounded text-[10px] font-bold text-[color:var(--cg-text-muted)] bg-[color:var(--cg-container-a16)] border border-[color:var(--cg-border)]">
-                        {selectedCatalogItem?.acceptanceRate || '57.6%'} {ui.rate}
+                        {selectedCatalogItem?.acceptanceRate || '57.6%'}{' '}
+                        {ui.rate}
                       </span>
                       {selectedCatalogItem?.track && (
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold text-sky-300 bg-sky-500/10 border border-sky-400/20">
@@ -3463,6 +3813,15 @@ function Practice() {
                       ))}
                     </div>
                   </div>
+                )}
+
+                {leftTab === 'theory' && (
+                  <TheoryViewer
+                    topic={
+                      selectedCatalogItem?.topic ?? currentPractice.concept
+                    }
+                    isVi={isVi}
+                  />
                 )}
               </div>
             </Panel>
@@ -3743,8 +4102,8 @@ function Practice() {
                       </div>
                     )}
 
-                    {consoleTab === 'testresult' && (
-                      activeRunResult ? (
+                    {consoleTab === 'testresult' &&
+                      (activeRunResult ? (
                         <div className="animate-fade-in p-4 text-sm">
                           <div className="grid gap-3 md:grid-cols-3">
                             <div className="rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] p-4">
@@ -3789,7 +4148,8 @@ function Practice() {
                             <p className="mt-2 text-xs text-[color:var(--cg-text-muted)]">
                               {isVi ? 'Đã pass' : 'Passed'}{' '}
                               <span className="font-semibold text-[color:var(--cg-text)]">
-                                {activeRunResult.passedCount}/{activeRunResult.total}
+                                {activeRunResult.passedCount}/
+                                {activeRunResult.total}
                               </span>{' '}
                               {isVi ? 'tiêu chí.' : 'checks.'}
                             </p>
@@ -3835,8 +4195,7 @@ function Practice() {
                             {ui.runToSee}
                           </p>
                         </div>
-                      )
-                    )}
+                      ))}
 
                     {consoleTab === 'submissions' && (
                       <div className="animate-fade-in text-xs w-full">
@@ -3938,7 +4297,11 @@ function Practice() {
                             : 'border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] hover:bg-[color:var(--cg-container-a22)]'
                         )}
                       >
-                        {isRunning ? (isVi ? 'ĐANG CHẠY...' : 'RUNNING...') : ui.run}
+                        {isRunning
+                          ? isVi
+                            ? 'ĐANG CHẠY...'
+                            : 'RUNNING...'
+                          : ui.run}
                       </button>
                       <button
                         type="button"

@@ -239,14 +239,6 @@ export default function EditProfile() {
           </button>
           <span className="edit-topbar-title">Edit Profile</span>
         </div>
-        <div className="edit-topbar-actions">
-          <button className="btn-cancel" onClick={() => navigate(-1)}>
-            Cancel
-          </button>
-          <button className="btn-save" onClick={handleSave}>
-            Save changes
-          </button>
-        </div>
       </div>
 
       <div className="edit-card">
@@ -447,14 +439,7 @@ export default function EditProfile() {
       </div>
 
       {/* ─── Bottom save shortcut ─── */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          gap: '10px',
-          paddingBottom: '12px',
-        }}
-      >
+      <div className="edit-bottom-actions">
         <button className="btn-cancel" onClick={() => navigate(-1)}>
           Cancel
         </button>

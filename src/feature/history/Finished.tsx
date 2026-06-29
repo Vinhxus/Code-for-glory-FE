@@ -1,12 +1,12 @@
-import { useState, useEffect, useCallback, type FC } from 'react';
+import { useState, useEffect, type FC } from 'react';
 import './Finished.css';
-export interface Lesson {
-  id: number;
-  title: string;
-  status: 'MASTERED' | 'IN_PROGRESS' | 'SAVED';
-  completedAt: string;
-  score: number;
-  icon: string;
+import HButton from '../../components/history/HButton';
+import {
+  getFinishedLessons,
+  type FinishedLesson,
+} from '../../services/historyApi';
+
+export interface Lesson extends FinishedLesson {
   isLatest?: boolean;
   isNew?: boolean;
 }
@@ -21,63 +21,14 @@ interface LessonCardProps {
   index: number;
 }
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-const MOCK_COMPLETED: Lesson[] = [
-  {
-    id: 1,
-    title: 'Quantum Algorithm Efficiency',
-    status: 'MASTERED',
-    completedAt: 'Oct 24, 2024',
-    score: 98,
-    icon: '⚛',
-    isLatest: true,
-  },
-  {
-    id: 2,
-    title: 'Neural Firewall Architectures',
-    status: 'MASTERED',
-    completedAt: 'Oct 21, 2024',
-    score: 85,
-    icon: '🛡',
-    isLatest: false,
-  },
-  {
-    id: 3,
-    title: 'Swarm Intelligence Protocols',
-    status: 'MASTERED',
-    completedAt: 'Oct 10, 2024',
-    score: 88,
-    icon: '🔬',
-    isLatest: false,
-  },
-  {
-    id: 4,
-    title: 'Recursive Thought Encryption',
-    status: 'MASTERED',
-    completedAt: 'Oct 05, 2024',
-    score: 82,
-    icon: '🔐',
-    isLatest: false,
-  },
-  {
-    id: 5,
-    title: 'Neural Nexus Convergence',
-    status: 'MASTERED',
-    completedAt: 'Sep 30, 2024',
-    score: 91,
-    icon: '🧠',
-    isLatest: false,
-  },
-];
-
-// ─── Fetch data từ API ────────────────────────────────────────────────────────
-async function fetchCompletedLessons(): Promise<Lesson[]> {
-  // Thay bằng endpoint thật:
-  // const res = await fetch("/api/lessons/completed");
-  // return res.json();
-  return new Promise((resolve) =>
-    setTimeout(() => resolve(MOCK_COMPLETED), 600)
-  );
+async function fetchCompletedLessons(): Promise<{
+  chronicles: Lesson[];
+  charts: { volumeData: number[]; avgSolvingTime: number[] };
+  insight: { speedImprovement: number; accuracyRate: number };
+}> {
+  const res = await fetch('/api/history/finished');
+  if (!res.ok) throw new Error('Network response was not ok');
+  return res.json();
 }
 
 // ─── Hook nhận card mới từ BE ─────────────────────────────────────────────────
@@ -103,7 +54,7 @@ function useRealtimeLessons(onNewLesson: (lesson: Lesson) => void): void {
     // ── DEMO: Giả lập BE push card sau 5 giây ────────────────────────────────
     const timer = setTimeout(() => {
       onNewLesson({
-        id: Date.now(),
+        id: Date.now().toString(),
         title: 'Distributed Neural Networks',
         status: 'MASTERED',
         completedAt: new Date().toLocaleDateString('en-US', {
@@ -177,11 +128,11 @@ const LessonCard: FC<LessonCardProps> = ({ lesson, index }) => {
         <span className="lesson-score-unit">/100</span>
       </div>
 
-      <button
+      <HButton
         className={`btn-review ${isLatest ? 'btn-review--latest' : 'btn-review--default'}`}
       >
         Review
-      </button>
+      </HButton>
     </div>
   );
 };
@@ -189,23 +140,47 @@ const LessonCard: FC<LessonCardProps> = ({ lesson, index }) => {
 // Main Component
 const Finished: FC = () => {
   const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [chartData, setChartData] = useState<{
+    volumeData: number[];
+    avgSolvingTime: number[];
+  }>({
+    volumeData: [],
+    avgSolvingTime: [],
+  });
+  const [insight, setInsight] = useState({
+    speedImprovement: 0,
+    accuracyRate: 0,
+  });
   const [loading, setLoading] = useState<boolean>(true);
 
-  const onNewLesson = useCallback((lesson: Lesson) => {
-    setLessons((prev) => {
-      const updated = prev.map((l) => ({ ...l, isLatest: false }));
-      return [{ ...lesson, isLatest: true }, ...updated];
-    });
-  }, []);
-
   useEffect(() => {
-    fetchCompletedLessons().then((data) => {
-      setLessons(data);
-      setLoading(false);
-    });
+    let active = true;
+    getFinishedLessons()
+      .then((data) => {
+        if (active) setLessons(data);
+      })
+      .catch((err) => {
+        console.error('Failed to load finished lessons', err);
+        if (active) setLessons([]);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+    fetchCompletedLessons()
+      .then((data) => {
+        setLessons(data.chronicles);
+        setChartData(data.charts);
+        setInsight(data.insight);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
   }, []);
-
-  useRealtimeLessons(onNewLesson);
 
   return (
     <div className="archives-root">
@@ -242,9 +217,7 @@ const Finished: FC = () => {
         <div className="charts-row">
           <div className="chart-col">
             <p className="chart-col-label">Lessons Volume</p>
-            <BarChart
-              data={[2, 3, 4, 3, 5, lessons.length, lessons.length + 1]}
-            />
+            <BarChart data={chartData.volumeData} />
             <div className="bar-chart__labels">
               {['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'Now'].map((l) => (
                 <span key={l}>{l}</span>
@@ -254,7 +227,7 @@ const Finished: FC = () => {
 
           <div className="chart-col">
             <p className="chart-col-label">Avg Solving Time</p>
-            <BarChart data={[45, 38, 52, 31, 28, 35, 29]} color="#6366a0" />
+            <BarChart data={chartData.avgSolvingTime} color="#6366a0" />
             <div className="bar-chart__labels">
               {['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'Now'].map((l) => (
                 <span key={l}>{l}</span>
@@ -266,8 +239,8 @@ const Finished: FC = () => {
         <div className="insight-box">
           <span>💡</span>
           <span>
-            Insight: Your solving speed has improved by 24% over the last cycle
-            while maintaining a 91% accuracy rate.
+            improved by {insight.speedImprovement}% ... maintaining a{' '}
+            {insight.accuracyRate}% accuracy rate.
           </span>
         </div>
       </section>

@@ -22,12 +22,31 @@
   font-size: large;
   font-family: 'Lexend', sans-serif;
   color: orange;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.header-desktop-layout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  margin-left: 40px;
 }
 
 .header-nav {
   display: flex;
   align-items: center;
   gap: 20px;
+}
+
+.header-nav-link {
+  color: #e2e8f0;
+  text-decoration: none;
+  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.2s;
 }
 
 .header-nav-link.active {
@@ -38,7 +57,7 @@
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 12px;
 }
 
 .header-icon-btn {
@@ -50,10 +69,8 @@
   height: 36px;
   border-radius: 8px;
   border: none;
-}
-
-.header-icon-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: #ffffff;
 }
 
 .header-profile-btn {
@@ -61,4 +78,146 @@
   align-items: center;
   gap: 4px;
   cursor: pointer;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+}
+
+.header-hamburger-toggle {
+  display: none;
+}
+
+/* ==========================================================================
+   GIAO DIỆN FIX GÓC TRÊN BÊN PHẢI TRÊN MOBILE (<= 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .header {
+    left: 0;
+    padding: 0 16px;
+  }
+
+  .header-desktop-layout {
+    display: none;
+  }
+
+  .header-hamburger-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffcc66;
+    color: #0c0a1c;
+    border: none;
+    width: 42px;
+    height: 36px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  /* LỚP NỀN MỜ VẪN BAO PHỦ TOÀN BỘ MÀN HÌNH */
+  .mobile-full-blur-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(12, 10, 28, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 99999;
+
+    /* Đổi căn chỉnh: Đẩy khối nội dung lên góc TRÊN (flex-start) và bên PHẢI (flex-end) */
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+
+    /* Tạo khoảng cách lề từ góc trên cùng bên phải xuống cho đẹp */
+    padding: 64px 16px 20px 20px;
+    animation: fadeInOverlay 0.2s ease-in-out;
+  }
+
+  /* CONTAINER CHỨA MENU RƠI GÓC PHẢI */
+  .mobile-clean-menu-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 24px; /* Thu nhỏ gap một xíu vì giờ đã tăng lên 6 dòng */
+    width: auto;
+    min-width: 220px;
+  }
+
+  /* TEXT VÀ ICON MÀU XANH NGỌC CHUẨN ĐẸP */
+  .mobile-clean-item {
+    background: none;
+    border: none;
+    color: var(--cg-green, #4ade80);
+    font-size: 20px;
+    font-weight: 500;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    cursor: pointer;
+    width: 100%;
+    font-family: sans-serif;
+    user-select: none;
+  }
+
+  .mobile-clean-item span.material-symbols-outlined {
+    font-size: 24px;
+  }
+
+  /* Khung chữ EN / VI */
+  .mobile-lang-badge {
+    font-size: 14px;
+    background: rgba(74, 222, 128, 0.15);
+    border: 1px solid var(--cg-green, #4ade80);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: bold;
+  }
+
+  /* --- THIẾT KẾ NÚT CÔNG TẮC ON / OFF CHO DARKMODE --- */
+  .mobile-switch-toggle {
+    width: 46px;
+    height: 24px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(74, 222, 128, 0.3);
+    border-radius: 99px;
+    padding: 2px;
+    position: relative;
+    transition: background-color 0.2s ease;
+  }
+
+  /* Cục handle tròn trượt qua lại bên trong */
+  .switch-handle {
+    width: 18px;
+    height: 18px;
+    background-color: #e2e8f0;
+    border-radius: 50%;
+    position: absolute;
+    left: 3px;
+    top: 2px;
+    transition: left 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Khi trạng thái là DarkMode (Switch ON) */
+  .switch-on {
+    background-color: var(--cg-green, #4ade80);
+  }
+
+  .switch-on .switch-handle {
+    left: 23px; /* Đẩy cục tròn sang bên phải */
+    background-color: #0c0a1c; /* Đổi màu cục tròn cho tương phản đẹp */
+  }
+}
+
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

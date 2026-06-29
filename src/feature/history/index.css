@@ -1,20 +1,163 @@
+.tab-wrapper {
+  background: var(--cg-container-a22);
+  border: 1px solid var(--cg-border);
+}
+
+.header-bar {
+  position: relative;
+}
+
 .tab-container-root {
   margin-top: 36px;
   min-height: 100vh;
   color: var(--cg-text);
 }
 
-.tab-wrapper {
-  background: var(--cg-container-a22);
-  border: 1px solid var(--cg-border);
+/* Thanh đầu trang của trang History (Chỉ dùng cho Mobile ở JSX, nhưng giữ CSS gốc) */
+.history-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.tab-button.inactive {
-  color: var(--cg-text-muted);
+@media (min-width: 768px) {
+  .history-header-bar {
+    display: none !important;
+  }
 }
 
-.tab-button.active {
-  background: var(--cg-amber);
-  color: #0f0b3c;
-  font-weight: 700;
+.hamburger-menu-btn {
+  background: transparent;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hamburger-menu-btn svg {
+  width: 36px;
+  height: 36px;
+}
+
+/* Base style cho các tab item bên trong menu */
+.history-tabs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.history-tab-item {
+  background: none;
+  border: none;
+  color: #e2e8f0;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 5px 0;
+}
+
+.history-tab-item:hover,
+.history-tab-item.active {
+  color: #ff9900;
+  font-weight: bold;
+}
+
+.recall-btn-custom {
+  color: #4ade80 !important;
+  bottom: 10px;
+  right: 20px; /* Hoặc left: 20px tùy ý bạn */
+}
+
+.history-tab-content {
+  padding: 20px;
+}
+
+/* Vị trí tuyệt đối cho nút Back trên Desktop để không lệch layout */
+.back-button-his {
+  position: absolute;
+  left: 86px;
+  z-index: 10;
+  margin-top: 6px;
+}
+
+/* ========================================================================= */
+/* CẤU HÌNH RESPONSIVE TRÊN MOBILE (< 768px)                                 */
+/* ========================================================================= */
+@media (max-width: 768px) {
+  .tab-container-root {
+    margin-left: 0;
+  }
+
+  .hamburger-menu-btn {
+    position: fixed; /* Biến nút thành cố định trên màn hình di động */
+    bottom: 90px; /* Khoảng cách từ đỉnh màn hình xuống (bạn có thể chỉnh lại số này cho vừa mắt) */
+    right: 20px; /* Khoảng cách từ mép phải màn hình vào */
+    z-index: 90; /* Đảm bảo số này đủ to để luôn nổi lên trên nội dung khi cuộn */
+
+    /* Mẹo nhỏ: Thêm chút nền mờ phía sau nút để khi cuộn qua vùng chữ không bị rối mắt */
+    background: rgba(9, 8, 20, 0.7);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .history-page-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #f59e0b; /* Màu chữ vàng cam */
+  }
+
+  /* Biến menu thành một overlay toàn màn hình có hiệu ứng mờ */
+  .history-menu-container {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    padding: 20px;
+    display: none; /* Tailwind quản lý ẩn hiện qua class hidden, nhưng class .open dưới đây sẽ ghi đè */
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 9, 20, 0.55);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  /* Kích hoạt hiển thị khi menu được mở */
+  .history-menu-container.open {
+    display: flex !important; /* Dùng !important để chắc chắn ghi đè lớp ẩn của Tailwind trên mobile */
+  }
+
+  /* Bỏ khung hộp xanh trên mobile, chỉ hiển thị list chữ giữa màn hình */
+  .history-box-blue {
+    background-color: transparent;
+    max-width: 100%;
+    width: 100%;
+    padding: 0;
+    border-radius: 0;
+  }
+
+  .history-box-title {
+    display: none;
+  }
+
+  .history-tabs-list {
+    align-items: center;
+    gap: 28px;
+  }
+
+  .history-tab-item,
+  .recall-btn-custom {
+    font-size: 22px;
+    color: #5eead4 !important; /* Màu xanh ngọc */
+  }
+
+  .history-tab-item.active {
+    color: #ff9900 !important; /* Highlight tab đang chọn */
+  }
 }

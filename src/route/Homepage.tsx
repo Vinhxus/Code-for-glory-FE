@@ -67,7 +67,7 @@ function Homepage() {
   );
 
   return (
-    <div className="min-h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)] selection:bg-[color:var(--cg-coral-a18)] select-none overflow-x-hidden">
+    <div className="min-h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)] selection:bg-[color:var(--cg-coral-a18)] select-none overflow-x-hidden py-4">
       {/* Background */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <div
@@ -92,7 +92,6 @@ function Homepage() {
       <Header />
 
       <div className="relative z-10 md:pl-[96px]">
-        {/* Header */}
         <main className="max-w-7xl mx-auto px-8 py-12 space-y-10">
           {/* Hero */}
           <section className="grid grid-cols-1 items-center gap-12 md:grid-cols-2">

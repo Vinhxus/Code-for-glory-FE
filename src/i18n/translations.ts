@@ -12,6 +12,8 @@ export type I18nKey =
   | 'nav.battle'
   | 'nav.practice'
   | 'nav.history'
+  | 'nav.shop'
+  | 'nav.enforcement'
   // homepage
   | 'home.nav.quests'
   | 'home.nav.leaderboard'
@@ -102,6 +104,8 @@ export const translations: Record<I18nKey, { en: string; vi: string }> = {
   'nav.battle': { en: 'Battle', vi: 'Đấu' },
   'nav.practice': { en: 'Practice', vi: 'Luyện tập' },
   'nav.history': { en: 'History', vi: 'Lịch sử' },
+  'nav.shop': { en: 'Shop', vi: 'Cửa hàng' },
+  'nav.enforcement': { en: 'Enforcement', vi: 'Giám sát hệ thống' },
 
   'home.nav.quests': { en: 'Quests', vi: 'Nhiệm vụ' },
   'home.nav.leaderboard': { en: 'Leaderboard', vi: 'Bảng xếp hạng' },

@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from './useAuth';
-import { registerApi } from './authService';
 import StarBackground from '../../components/layout/starBackground';
 import Logo from '../../components/layout/logo';
 import './registerPage.css';
@@ -18,15 +17,36 @@ export default function RegisterPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
+  const { register } = useAuth(); // Lấy hàm register từ useAuth
+  const EMPTY_FORM = {
     username: '',
     email: '',
     password: '',
     confirmPassword: '',
-  });
+  };
+  const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState<FieldError>({});
   const [successMsg, setSuccessMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Đảm bảo form luôn trống khi vào trang, kể cả khi browser phục hồi
+  // trang từ back-forward cache (bfcache) sau khi bấm nút Back/Forward.
+  useEffect(() => {
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        setForm(EMPTY_FORM);
+        setErrors({});
+        setSuccessMsg('');
+      }
+    };
+
+    window.addEventListener('pageshow', handlePageShow);
+
+    // Dọn dẹp listener khi component unmount nhé bạn
+    return () => {
+      window.removeEventListener('pageshow', handlePageShow);
+    };
+  }, []); // Mảng dependency rỗng để chỉ lắng nghe sự kiện khi vào trang
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -38,16 +58,24 @@ export default function RegisterPage() {
   const validate = (): boolean => {
     const newErrors: FieldError = {};
 
-    const hasLetter = /[a-zA-Z]/.test(form.password);
-    const hasNumber = /[0-9]/.test(form.password);
-    if (!hasLetter || !hasNumber) {
-      newErrors.password =
-        'Password must contain at least 1 number and 1 letter';
+    if (form.username.length < 3) {
+      newErrors.username = 'Username must be at least 3 characters';
+    }
+
+    if (form.password.length < 8) {
+      // Khớp với @MinLength(8) của Backend
+      newErrors.password = 'Password must be at least 8 characters';
+    } else {
+      const hasLetter = /[a-zA-Z]/.test(form.password);
+      const hasNumber = /[0-9]/.test(form.password);
+      if (!hasLetter || !hasNumber) {
+        newErrors.password =
+          'Password must contain at least 1 number and 1 letter';
+      }
     }
 
     if (form.password !== form.confirmPassword) {
-      newErrors.confirmPassword =
-        'Confirm password must be similar to password';
+      newErrors.confirmPassword = 'Confirm password must match';
     }
 
     setErrors(newErrors);
@@ -63,27 +91,20 @@ export default function RegisterPage() {
 
     setIsLoading(true);
     try {
-      await registerApi({
-        name: form.username,
+      await register({
+        username: form.username,
         email: form.email,
         password: form.password,
+        confirmPassword: form.confirmPassword,
       });
 
-      setForm({ username: '', email: '', password: '', confirmPassword: '' });
-      setSuccessMsg('Create account successful, please sign in');
-      setTimeout(() => navigate('/login'), 1000);
+      setForm(EMPTY_FORM);
+      setSuccessMsg('Success! Navigate to login...');
+
+      setTimeout(() => navigate('/'), 1200);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to register';
-      const lower = message.toLowerCase();
-
-      if (lower.includes('email')) {
-        setErrors({ email: 'Email has already existed!' });
-      } else if (lower.includes('username') || lower.includes('name')) {
-        setErrors({ username: 'Username has already existed!' });
-      } else {
-        console.error('Register error from BE:', message);
-        setErrors({ general: message });
-      }
+      setErrors({ general: message });
     } finally {
       setIsLoading(false);
     }
@@ -103,7 +124,7 @@ export default function RegisterPage() {
 
           {errors.general && <p className="auth-error">{errors.general}</p>}
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} autoComplete="off">
             <label className="auth-label">Username:</label>
             <input
               name="username"
@@ -111,6 +132,7 @@ export default function RegisterPage() {
               placeholder="username"
               value={form.username}
               onChange={handleChange}
+              autoComplete="off"
               required
             />
             {errors.username && <p className="auth-error">{errors.username}</p>}
@@ -123,6 +145,7 @@ export default function RegisterPage() {
               placeholder="Email"
               value={form.email}
               onChange={handleChange}
+              autoComplete="off"
               required
             />
 
@@ -134,6 +157,7 @@ export default function RegisterPage() {
               placeholder="must contain at least 1 number and 1 letter"
               value={form.password}
               onChange={handleChange}
+              autoComplete="new-password"
               required
             />
             {errors.password && <p className="auth-error">{errors.password}</p>}
@@ -146,6 +170,7 @@ export default function RegisterPage() {
               placeholder="Confirm password"
               value={form.confirmPassword}
               onChange={handleChange}
+              autoComplete="new-password"
               required
             />
             {errors.confirmPassword && (
@@ -154,15 +179,8 @@ export default function RegisterPage() {
 
             {successMsg && (
               <p
-                className="auth-success"
-                style={{
-                  color: '#00e676',
-                  textAlign: 'center',
-                  fontSize: '1rem',
-                  fontWeight: '600',
-                  marginTop: '12px',
-                  marginBottom: '0',
-                }}
+                className="auth-success-text"
+                style={{ marginTop: '12px', color: '#10b981' }}
               >
                 {successMsg}
               </p>
@@ -179,7 +197,9 @@ export default function RegisterPage() {
           </form>
         </div>
 
-        <Logo />
+        <div className="auth-logo-section">
+          <Logo />
+        </div>
       </div>
     </div>
   );
