@@ -344,7 +344,7 @@ export default function Survey() {
                 Tell us how you want to study and how strict we should be.
               </p>
 
-              <span className="sv-label">Hours per day (1–24)</span>
+              <span className="sv-label">Hours per day (1-24)</span>
               <input
                 className="sv-input"
                 type="number"

@@ -5,7 +5,7 @@ import type {
   LearningPathNodeDto,
   ProgressDto,
 } from '../services/learningPathApi';
-import type { StartingStage } from '../utils/learningPathUtils';
+import type { StartingStage } from './learningPathUtils';
 
 export type RoadmapKey = 'frontend' | 'backend';
 type NodeVariant = 'recommended' | 'alternative' | 'optional';
@@ -309,22 +309,38 @@ function MainNode({
     if (isPreUnlocked) {
       return (
         <div className="flex items-center gap-1 rounded-full bg-[#4ade80]/15 px-1.5 py-0.5 text-[9px] font-bold tracking-wider text-[#4ade80]/80">
-          <span className="material-symbols-outlined text-[10px]">lock_open</span>
+          <span className="material-symbols-outlined text-[10px]">
+            lock_open
+          </span>
           UNLOCKED
         </div>
       );
     }
     if (status === 'completed') {
-      return <span className="material-symbols-outlined text-[14px]">check_circle</span>;
+      return (
+        <span className="material-symbols-outlined text-[14px]">
+          check_circle
+        </span>
+      );
     }
     if (status === 'skipped') {
-      return <span className="text-[10px] uppercase font-bold tracking-wider">Skipped</span>;
+      return (
+        <span className="text-[10px] uppercase font-bold tracking-wider">
+          Skipped
+        </span>
+      );
     }
     if (status === 'current') {
-      return <span className="badge-purple text-[9px] py-0 px-1.5 h-4">IN PROGRESS</span>;
+      return (
+        <span className="badge-purple text-[9px] py-0 px-1.5 h-4">
+          IN PROGRESS
+        </span>
+      );
     }
     if (status === 'locked') {
-      return <span className="material-symbols-outlined text-[14px]">lock</span>;
+      return (
+        <span className="material-symbols-outlined text-[14px]">lock</span>
+      );
     }
     return null;
   };
@@ -350,7 +366,9 @@ function MainNode({
       {/* Deadline: hidden for pre-unlocked, completed, skipped */}
       {!isPreUnlocked && status !== 'skipped' && status !== 'completed' && (
         <div className="mt-2 text-[10px] font-medium opacity-70 flex items-center gap-1 border-t border-white/10 pt-2">
-          <span className="material-symbols-outlined text-[12px]">calendar_today</span>
+          <span className="material-symbols-outlined text-[12px]">
+            calendar_today
+          </span>
           <span className="roadmap-deadline-label" /> {deadline}
         </div>
       )}
@@ -436,7 +454,9 @@ function StepRow({
         {/* Milestone Gate Badge — hidden on pre-unlocked nodes */}
         {isMilestoneGate && !isPreUnlocked && (
           <div className="absolute left-8 top-1/2 -translate-y-1/2 flex items-center gap-2 px-3 py-1.5 bg-[#fbbf24]/10 border border-[#fbbf24]/40 rounded-lg text-[#fbbf24] shadow-[0_0_15px_rgba(251,191,36,0.2)] animate-pulse z-10">
-            <span className="material-symbols-outlined text-[16px]">swords</span>
+            <span className="material-symbols-outlined text-[16px]">
+              swords
+            </span>
             <span className="text-[10px] font-bold uppercase tracking-wider">
               Gate Challenge
             </span>
@@ -507,13 +527,17 @@ function StageHeader({
 
       {isPreUnlocked && (
         <div className="flex items-center gap-1.5 rounded-full border border-[#4ade80]/30 bg-[#4ade80]/10 px-3 py-1 text-[10px] font-semibold text-[#4ade80]">
-          <span className="material-symbols-outlined text-[12px]">lock_open</span>
+          <span className="material-symbols-outlined text-[12px]">
+            lock_open
+          </span>
           Pre-unlocked via assessment
         </div>
       )}
       {isStarting && (
         <div className="flex items-center gap-1.5 rounded-full border border-[#3b82f6]/40 bg-[#3b82f6]/10 px-3 py-1 text-[10px] font-semibold text-[#60a5fa]">
-          <span className="material-symbols-outlined text-[12px]">play_arrow</span>
+          <span className="material-symbols-outlined text-[12px]">
+            play_arrow
+          </span>
           Your starting point
         </div>
       )}
@@ -567,14 +591,14 @@ function RoadmapViewer({
           title: node.title,
           rightCols: node.type
             ? [
-              [
-                {
-                  id: `${node._id}-type`,
-                  label: node.type,
-                  variant: 'recommended' as const,
-                },
-              ],
-            ]
+                [
+                  {
+                    id: `${node._id}-type`,
+                    label: node.type,
+                    variant: 'recommended' as const,
+                  },
+                ],
+              ]
             : undefined,
         }));
     }
@@ -601,9 +625,13 @@ function RoadmapViewer({
   const handleNodeClick = (status: NodeStatus, step: MainStep) => {
     if (status === 'locked') return;
     if (status === 'current')
-      navigate('/practice', { state: { nodeId: step.id, nodeTitle: step.title } });
+      navigate('/practice', {
+        state: { nodeId: step.id, nodeTitle: step.title },
+      });
     if (status === 'completed' || status === 'skipped')
-      navigate('/history', { state: { nodeId: step.id, nodeTitle: step.title } });
+      navigate('/history', {
+        state: { nodeId: step.id, nodeTitle: step.title },
+      });
   };
 
   /**
@@ -680,7 +708,10 @@ function RoadmapViewer({
         <div className="flex flex-col items-center min-w-[640px]">
           {items.map((step, i) => {
             const globalIndex = globalOffset + i;
-            const { status, isPreUnlocked } = deriveNodeState(globalIndex, step);
+            const { status, isPreUnlocked } = deriveNodeState(
+              globalIndex,
+              step
+            );
             const deadline = calculateDeadline(globalIndex + 1);
             const isMilestoneGate = (i + 1) % 10 === 0;
 
@@ -690,7 +721,9 @@ function RoadmapViewer({
                 onMouseEnter={() => setHoveredStep(step.id)}
                 className={cx(
                   'transition-opacity duration-200',
-                  hoveredStep && hoveredStep !== step.id ? 'opacity-50' : 'opacity-100'
+                  hoveredStep && hoveredStep !== step.id
+                    ? 'opacity-50'
+                    : 'opacity-100'
                 )}
               >
                 <StepRow
@@ -759,7 +792,9 @@ function RoadmapViewer({
                 : 'border-amber-400/40 bg-amber-400/10 text-amber-300 shadow-[0_0_24px_rgba(251,191,36,0.15)]'
             )}
           >
-            {isFE ? `🧩 ${t('roadmap.frontend')}` : `⚙️ ${t('roadmap.backend')}`}
+            {isFE
+              ? `🧩 ${t('roadmap.frontend')}`
+              : `⚙️ ${t('roadmap.backend')}`}
           </div>
         </div>
 
@@ -767,7 +802,10 @@ function RoadmapViewer({
         <div className="flex justify-center mb-0">
           <div
             className="w-0.5"
-            style={{ height: 20, background: 'linear-gradient(to bottom, transparent, #4ade80)' }}
+            style={{
+              height: 20,
+              background: 'linear-gradient(to bottom, transparent, #4ade80)',
+            }}
           />
         </div>
 
