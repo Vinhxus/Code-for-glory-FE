@@ -193,7 +193,14 @@ function loadInitialState(): SurveyState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return fallback;
-    return { ...fallback, ...JSON.parse(raw) };
+    const saved = JSON.parse(raw) as Partial<SurveyState>;
+    return {
+      ...fallback,
+      ...saved,
+      // Always reset the test so user retakes it fresh every session
+      testScore: 0,
+      testCompleted: false,
+    };
   } catch {
     return fallback;
   }
@@ -512,17 +519,28 @@ export default function Survey() {
                 )}
 
                 {form.testCompleted && (
-                  <div className="flex items-center gap-4 text-[#4ade80] animate-bounce-in">
-                    <span className="material-symbols-outlined text-3xl">
-                      check_circle
-                    </span>
-                    <div>
-                      <div className="font-bold">Test Completed!</div>
-                      <div className="text-sm text-[color:var(--cg-text-muted)]">
-                        Score: {form.testScore}/5. Evaluated Level:{' '}
-                        <span className="text-white">{userLevel}</span>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4 text-[#4ade80] animate-bounce-in">
+                      <span className="material-symbols-outlined text-3xl">
+                        check_circle
+                      </span>
+                      <div>
+                        <div className="font-bold">Test Completed!</div>
+                        <div className="text-sm text-[color:var(--cg-text-muted)]">
+                          Score: {form.testScore}/5. Evaluated Level:{' '}
+                          <span className="text-white font-bold">
+                            {userLevel}
+                          </span>
+                        </div>
                       </div>
                     </div>
+                    {/* Retake button */}
+                    <button
+                      onClick={startTest}
+                      className="flex items-center gap-1.5 rounded-xl border border-[color:var(--cg-border)] bg-transparent px-4 py-2 text-xs font-medium text-[color:var(--cg-text-muted)] transition hover:border-[rgba(255,126,95,0.35)] hover:text-[#ff7e5f]"
+                    >
+                      ↺ Retake test
+                    </button>
                   </div>
                 )}
               </div>
@@ -620,9 +638,7 @@ export default function Survey() {
                     {form.selfAssessment === 'junior' ? 'Junior' : 'Beginner'}{' '}
                     {form.careerPath?.toUpperCase()}
                   </strong>{' '}
-                  ({userLevel} level),{' '}
-                  {/* keep Vietnamese phrasing for the rest to preserve original sentence flow */}
-                  sẵn sàng học{' '}
+                  ({userLevel} level), sẵn sàng học{' '}
                   <strong className="text-[#ff7e5f]">
                     {form.hoursPerDay}h
                   </strong>{' '}

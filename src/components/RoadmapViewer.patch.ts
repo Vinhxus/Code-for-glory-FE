@@ -30,7 +30,6 @@
 //   preUnlockedStages:   StartingStage[];         // stages auto-completed before user starts
 // };
 
-
 // ─────────────────────────────────────────────────────────────────
 // 2.  MAP EACH NODE TO A STAGE
 // ─────────────────────────────────────────────────────────────────
@@ -50,7 +49,7 @@
 // If you use mock data with explicit stage labels, use those instead.
 // Adjust the numbers below to match your actual roadmap structure.
 
-import type { StartingStage } from '../utils/learningPathUtils';
+import type { StartingStage } from './learningPathUtils';
 import type { LearningPathNodeDto } from '../services/learningPathApi';
 
 export function nodeToStage(node: LearningPathNodeDto): StartingStage {
@@ -60,22 +59,20 @@ export function nodeToStage(node: LearningPathNodeDto): StartingStage {
   return 'advanced';
 }
 
-
 // ─────────────────────────────────────────────────────────────────
 // 3.  STAGE ORDER (for comparison)
 // ─────────────────────────────────────────────────────────────────
 
 const STAGE_ORDER: Record<StartingStage, number> = {
-  beginner:     0,
+  beginner: 0,
   intermediate: 1,
-  advanced:     2,
+  advanced: 2,
 };
 
 /** True if stageA comes before stageB in the learning sequence. */
 export function isStageBefore(a: StartingStage, b: StartingStage) {
   return STAGE_ORDER[a] < STAGE_ORDER[b];
 }
-
 
 // ─────────────────────────────────────────────────────────────────
 // 4.  NODE STATUS DERIVATION
@@ -85,16 +82,16 @@ export function isStageBefore(a: StartingStage, b: StartingStage) {
 // with this function. Call it per node when building the rendered list.
 
 type NodeRenderStatus =
-  | 'pre-unlocked'   // belongs to a stage the user already "passed" during onboarding
-  | 'active'         // belongs to the user's starting stage (first unlocked)
-  | 'locked'         // belongs to a stage beyond the starting stage
-  | 'completed';     // user has actual backend/local progress marking it done
+  | 'pre-unlocked' // belongs to a stage the user already "passed" during onboarding
+  | 'active' // belongs to the user's starting stage (first unlocked)
+  | 'locked' // belongs to a stage beyond the starting stage
+  | 'completed'; // user has actual backend/local progress marking it done
 
 export function deriveNodeStatus(
   node: LearningPathNodeDto,
   startingStage: StartingStage,
   preUnlockedStages: StartingStage[],
-  backendStatus?: string          // from ProgressDto.status
+  backendStatus?: string // from ProgressDto.status
 ): NodeRenderStatus {
   // 1. Real backend progress always wins
   if (backendStatus === 'completed') return 'completed';
@@ -113,7 +110,6 @@ export function deriveNodeStatus(
   // 5. Fallback (shouldn't happen if data is consistent)
   return 'active';
 }
-
 
 // ─────────────────────────────────────────────────────────────────
 // 5.  RENDER CHANGES  (describe in pseudo-JSX)
@@ -153,7 +149,6 @@ export function deriveNodeStatus(
 //     badge    = <span style={{color:'#4ade80'}}>✓ Completed</span>;
 //   }
 
-
 // ─────────────────────────────────────────────────────────────────
 // 6.  STAGE SECTION HEADERS  (how to render stage separators)
 // ─────────────────────────────────────────────────────────────────
@@ -178,7 +173,6 @@ export function deriveNodeStatus(
 //     </div>
 //   )}
 
-
 // ─────────────────────────────────────────────────────────────────
 // 7.  MOCK DATA  (if backend not available)
 // ─────────────────────────────────────────────────────────────────
@@ -194,4 +188,4 @@ export function deriveNodeStatus(
 // Then in nodeToStage() above, read node.stage directly instead of
 // inferring from milestoneOrder ranges.
 
-export {};   // make TypeScript treat this as a module
+export {}; // make TypeScript treat this as a module

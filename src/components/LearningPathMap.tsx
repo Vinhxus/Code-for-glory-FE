@@ -31,23 +31,23 @@ const TABS: {
   color: string;
   glow: string;
 }[] = [
-    {
-      key: 'frontend',
-      label: 'Frontend',
-      icon: '🧩',
-      sub: 'UI · Web · React',
-      color: '#ff7e5f',
-      glow: 'rgba(255,126,95,0.3)',
-    },
-    {
-      key: 'backend',
-      label: 'Backend',
-      icon: '⚙️',
-      sub: 'API · DB · Auth',
-      color: '#fbbf24',
-      glow: 'rgba(251,191,36,0.3)',
-    },
-  ];
+  {
+    key: 'frontend',
+    label: 'Frontend',
+    icon: '🧩',
+    sub: 'UI · Web · React',
+    color: '#ff7e5f',
+    glow: 'rgba(255,126,95,0.3)',
+  },
+  {
+    key: 'backend',
+    label: 'Backend',
+    icon: '⚙️',
+    sub: 'API · DB · Auth',
+    color: '#fbbf24',
+    glow: 'rgba(251,191,36,0.3)',
+  },
+];
 
 const STATS: {
   labelKey: I18nKey;
@@ -55,25 +55,25 @@ const STATS: {
   icon: string;
   color: string;
 }[] = [
-    {
-      labelKey: 'roadmap.topics',
-      value: '30',
-      icon: 'library_books',
-      color: '#ff7e5f',
-    },
-    {
-      labelKey: 'roadmap.completed',
-      value: '0',
-      icon: 'check_circle',
-      color: '#4ade80',
-    },
-    {
-      labelKey: 'roadmap.inProgress',
-      value: '1',
-      icon: 'pending',
-      color: '#fbbf24',
-    },
-  ];
+  {
+    labelKey: 'roadmap.topics',
+    value: '30',
+    icon: 'library_books',
+    color: '#ff7e5f',
+  },
+  {
+    labelKey: 'roadmap.completed',
+    value: '0',
+    icon: 'check_circle',
+    color: '#4ade80',
+  },
+  {
+    labelKey: 'roadmap.inProgress',
+    value: '1',
+    icon: 'pending',
+    color: '#fbbf24',
+  },
+];
 
 // ─── Stage badge colours ──────────────────────────────────────────
 const STAGE_STYLE: Record<
@@ -238,8 +238,12 @@ function LearningPathMap() {
   const stageLabel = stageLabelText(startingStage, isVi ? 'vi' : 'en');
   const selectedLabel =
     selected === 'frontend'
-      ? isVi ? 'Frontend' : 'Frontend'
-      : isVi ? 'Backend' : 'Backend';
+      ? isVi
+        ? 'Frontend'
+        : 'Frontend'
+      : isVi
+        ? 'Backend'
+        : 'Backend';
 
   const headerTitle = isVi ? 'Lộ trình học' : 'Learning Path';
 
@@ -346,9 +350,9 @@ function LearningPathMap() {
                   style={
                     active
                       ? {
-                        background: `linear-gradient(135deg, ${tab.color}, ${tab.color}cc)`,
-                        boxShadow: `0 4px 20px ${tab.glow}`,
-                      }
+                          background: `linear-gradient(135deg, ${tab.color}, ${tab.color}cc)`,
+                          boxShadow: `0 4px 20px ${tab.glow}`,
+                        }
                       : {}
                   }
                 >
