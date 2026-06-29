@@ -15,7 +15,7 @@ const FIELDS: {
   badge?: string;
 }[] = [
   {
-    value: 'FE',
+    value: 'frontend',
     icon: '🖥️',
     title: 'Frontend',
     description:
@@ -23,7 +23,7 @@ const FIELDS: {
     tags: ['React', 'CSS Grid', 'Tailwind'],
   },
   {
-    value: 'BE',
+    value: 'backend',
     icon: '⚙️',
     title: 'Backend',
     description:

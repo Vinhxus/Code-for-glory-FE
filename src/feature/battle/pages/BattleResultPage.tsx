@@ -28,7 +28,7 @@ const BattleResultPage = () => {
         const data = await getBattleById(battleId);
         if (!isMounted) return;
 
-        if (data.status !== 'COMPLETED' && data.status !== 'ABANDONED') {
+        if (data.status !== 'finished' && data.status !== 'cancelled') {
           navigate(`${BATTLE_ROUTES.ARENA}/${battleId}`, { replace: true });
           return;
         }
@@ -77,9 +77,9 @@ const BattleResultPage = () => {
 
   const myRealId = user?.id ?? '';
 
-  const resultType: ResultType = battle.result?.isDraw
+  const resultType: ResultType = battle.isDraw
     ? 'draw'
-    : battle.result?.winnerId === myRealId
+    : battle.winnerId === myRealId
       ? 'victory'
       : 'defeat';
 
