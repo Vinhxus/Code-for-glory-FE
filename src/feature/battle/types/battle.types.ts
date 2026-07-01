@@ -1,10 +1,12 @@
-export type BattleField = 'FE' | 'BE';
-export type BattleMode = 'SPEED' | 'PERFORMANCE';
+// export type BattleField = 'FE' | 'BE';
+export type BattleField = 'frontend' | 'backend';
+export type BattleMode = 'speed' | 'performance';
 export type BattleStatus =
-  | 'WAITING'
-  | 'IN_PROGRESS'
-  | 'COMPLETED'
-  | 'ABANDONED';
+  | 'waiting'
+  | 'matched'
+  | 'in_progress'
+  | 'finished'
+  | 'cancelled';
 
 export interface BattlePlayer {
   userId: string;
@@ -29,15 +31,12 @@ export interface Battle {
   status: BattleStatus;
   players: BattlePlayer[];
   questions: BattleQuestion[];
-  timeLimit: number;
+  timeLimitSeconds: number;
   startTime?: string;
   expectedEndTime?: string;
   endTime?: string;
-  result?: {
-    winnerId?: string;
-    isDraw?: boolean;
-    finalScores: { userId: string; score: number }[];
-  };
+  winnerId?: string;
+  isDraw?: boolean;
 }
 
 export interface SubmitAnswerPayload {
