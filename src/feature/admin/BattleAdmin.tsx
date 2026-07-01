@@ -259,7 +259,7 @@ export default function BattleAdmin() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3 flex-1 max-w-md">
             <div className="relative flex-1">
-              <span className="material-symbols-outlined absolute left-3 top-1/4 -translate-y-1/2 text-white/40 text-sm">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/40 text-sm">
                 search
               </span>
               <input

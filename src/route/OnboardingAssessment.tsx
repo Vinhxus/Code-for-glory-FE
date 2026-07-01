@@ -75,28 +75,25 @@ function loadSurvey(): SurveyState | null {
   }
 }
 
-function loadInitialState(): AssessmentState {
-  const fallback: AssessmentState = {
+function freshState(): AssessmentState {
+  return {
     version: 'v1',
     updatedAt: new Date().toISOString(),
     maxDifficultyByTrack: {},
     answers: {},
     codeAnswers: {},
   };
+}
 
+function loadInitialState(): AssessmentState {
+  // Always start fresh — clear any previous session so the Quick Technical
+  // Test can be retaken every time the user opens this page.
   try {
-    const raw = localStorage.getItem(ASSESSMENT_STORAGE_KEY);
-    if (!raw) return fallback;
-    const parsed = JSON.parse(raw) as Partial<AssessmentState>;
-    return {
-      ...fallback,
-      ...parsed,
-      // Always refresh timestamps so users know this session is “live”
-      updatedAt: new Date().toISOString(),
-    };
+    localStorage.removeItem(ASSESSMENT_STORAGE_KEY);
   } catch {
-    return fallback;
+    // ignore
   }
+  return freshState();
 }
 
 const QUESTIONS: McqQuestion[] = [
@@ -1147,6 +1144,17 @@ function OnboardingAssessment() {
     navigate('/practice');
   }
 
+  function retakeAssessment() {
+    // Clear saved state and restart from scratch
+    try {
+      localStorage.removeItem(ASSESSMENT_STORAGE_KEY);
+    } catch {
+      // ignore
+    }
+    setState(freshState());
+    setStepIndex(0);
+  }
+
   const missionBrief = useMemo(() => {
     if (step === 'frontend') {
       return {
@@ -1597,6 +1605,13 @@ function OnboardingAssessment() {
                       onClick={() => navigate('/onboarding/summary')}
                     >
                       {t('assess.results.viewSummary')}
+                    </button>
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-2 rounded-xl border border-[rgba(255,126,95,0.35)] bg-[rgba(255,126,95,0.10)] px-5 py-3 text-xs font-semibold text-[color:var(--cg-coral)] backdrop-blur-md transition hover:bg-[rgba(255,126,95,0.18)]"
+                      onClick={retakeAssessment}
+                    >
+                      ↺ {language === 'vi' ? 'Làm lại' : 'Retake'}
                     </button>
                   </div>
                 </div>

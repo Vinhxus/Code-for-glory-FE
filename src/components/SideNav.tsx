@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useT } from '../i18n/useT';
 import type { I18nKey } from '../i18n/translations';
 import { useAuth } from '../feature/auth/useAuth';
+import { useSideNavStore } from './SideNavMove';
 
 type NavItem = {
   to: string;
@@ -83,6 +84,8 @@ function SideNav() {
   const t = useT();
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
+  const setExpanded = useSideNavStore((s) => s.setExpanded);
+  const isExpanded = useSideNavStore((s) => s.isExpanded);
 
   // ===== Responsive: phát hiện mobile =====
   const [isMobile, setIsMobile] = useState(
@@ -97,6 +100,12 @@ function SideNav() {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  useEffect(() => {
+    if (isMobile) {
+      setExpanded(false);
+    }
+  }, [isMobile, setExpanded]);
 
   // Lấy thông tin user hiện tại từ useAuth để check quyền
   const { user, logout } = useAuth();
@@ -202,21 +211,17 @@ function SideNav() {
         <aside
           className="fixed left-0 top-0 z-[60] flex h-full flex-col items-start border-r border-[color:var(--cg-border)] bg-[color:var(--cg-sidebar)] py-5"
           style={{
-            width: 72,
+            width: isExpanded ? 200 : 72,
             transition:
               'width 0.28s cubic-bezier(0.4,0,0.2,1), box-shadow 0.28s ease',
             overflow: 'hidden',
-            boxShadow: '0 0 40px rgba(0,0,0,0.3)',
+            boxShadow: isExpanded
+              ? '0 0 60px rgba(0,0,0,0.45), 4px 0 32px rgba(255,126,95,0.08)'
+              : '0 0 40px rgba(0,0,0,0.3)',
           }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.width = '200px';
-            (e.currentTarget as HTMLElement).style.boxShadow =
-              '0 0 60px rgba(0,0,0,0.45), 4px 0 32px rgba(255,126,95,0.08)';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.width = '72px';
-            (e.currentTarget as HTMLElement).style.boxShadow =
-              '0 0 40px rgba(0,0,0,0.3)';
+          onMouseEnter={() => setExpanded(true)}
+          onMouseLeave={() => {
+            setExpanded(false);
             setShowMenu(false);
           }}
         >
