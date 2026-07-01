@@ -18,49 +18,89 @@ import {
   type SkillLevel,
   type SkillTestRunResult,
 } from '../services/surveyApi';
+import { useSettingsStore, type AppLanguage } from '../store/settings';
 
-const FIELD_OPTIONS: { id: CareerField; title: string; sub: string }[] = [
-  { id: 'frontend', title: 'Frontend', sub: 'UI, React, browser, trải nghiệm người dùng' },
-  { id: 'backend', title: 'Backend', sub: 'API, database, auth, xử lý dữ liệu' },
-  { id: 'fullstack', title: 'Fullstack', sub: 'Kết hợp workflow frontend và backend' },
+type Bilingual = { vi: string; en: string };
+type BilingualOption<T extends string> = {
+  id: T;
+  title: Bilingual;
+  sub?: Bilingual;
+  detail?: Bilingual;
+};
+
+const FIELD_OPTIONS: BilingualOption<CareerField>[] = [
+  {
+    id: 'frontend',
+    title: { vi: 'Frontend', en: 'Frontend' },
+    sub: {
+      vi: 'UI, React, browser, trải nghiệm người dùng',
+      en: 'UI, React, browser, and user experience',
+    },
+  },
+  {
+    id: 'backend',
+    title: { vi: 'Backend', en: 'Backend' },
+    sub: {
+      vi: 'API, database, auth, xử lý dữ liệu',
+      en: 'API, database, auth, and data processing',
+    },
+  },
+  {
+    id: 'fullstack',
+    title: { vi: 'Fullstack', en: 'Fullstack' },
+    sub: {
+      vi: 'Kết hợp workflow frontend và backend',
+      en: 'A combined frontend and backend workflow',
+    },
+  },
 ];
 
-const GOAL_OPTIONS: { id: LearningGoal; title: string }[] = [
-  { id: 'get_job', title: 'Xin việc' },
-  { id: 'personal_project', title: 'Làm sản phẩm cá nhân' },
-  { id: 'competition', title: 'Thi đấu / contest' },
-  { id: 'explore_ai', title: 'Khám phá AI' },
+const GOAL_OPTIONS: BilingualOption<LearningGoal>[] = [
+  { id: 'get_job', title: { vi: 'Xin việc', en: 'Get a job' } },
+  {
+    id: 'personal_project',
+    title: { vi: 'Làm sản phẩm cá nhân', en: 'Build personal projects' },
+  },
+  { id: 'competition', title: { vi: 'Thi đấu / contest', en: 'Compete / contests' } },
+  { id: 'explore_ai', title: { vi: 'Khám phá AI', en: 'Explore AI' } },
 ];
 
-const LEVEL_OPTIONS: {
-  id: SkillLevel;
-  title: string;
-  sub: string;
-  detail: string;
-}[] = [
+const LEVEL_OPTIONS: BilingualOption<SkillLevel>[] = [
   {
     id: 'novice',
-    title: 'Novice',
-    sub: 'Mới bắt đầu',
-    detail: 'Bài test tập trung vào thao tác mảng, string và object cơ bản.',
+    title: { vi: 'Novice', en: 'Novice' },
+    sub: { vi: 'Mới bắt đầu', en: 'Just getting started' },
+    detail: {
+      vi: 'Bài test tập trung vào thao tác mảng, string và object cơ bản.',
+      en: 'The test focuses on basic array, string, and object manipulation.',
+    },
   },
   {
     id: 'apprentice',
-    title: 'Apprentice',
-    sub: 'Đã biết nền tảng',
-    detail: 'Bài test kiểm tra tư duy chuẩn hóa dữ liệu và xử lý input thực tế.',
+    title: { vi: 'Apprentice', en: 'Apprentice' },
+    sub: { vi: 'Đã biết nền tảng', en: 'Knows the foundations' },
+    detail: {
+      vi: 'Bài test kiểm tra tư duy chuẩn hóa dữ liệu và xử lý input thực tế.',
+      en: 'The test checks data normalization and practical input handling.',
+    },
   },
   {
     id: 'journeyman',
-    title: 'Journeyman',
-    sub: 'Code khá vững',
-    detail: 'Bài test yêu cầu tổng hợp dữ liệu và tổ chức logic rõ ràng.',
+    title: { vi: 'Journeyman', en: 'Journeyman' },
+    sub: { vi: 'Code khá vững', en: 'Comfortable with coding' },
+    detail: {
+      vi: 'Bài test yêu cầu tổng hợp dữ liệu và tổ chức logic rõ ràng.',
+      en: 'The test requires data aggregation and well-structured logic.',
+    },
   },
   {
     id: 'master',
-    title: 'Master',
-    sub: 'Kinh nghiệm tốt',
-    detail: 'Bài test mô phỏng các tình huống merge dữ liệu và xử lý nhiều quy tắc.',
+    title: { vi: 'Master', en: 'Master' },
+    sub: { vi: 'Kinh nghiệm tốt', en: 'Experienced' },
+    detail: {
+      vi: 'Bài test mô phỏng các tình huống merge dữ liệu và xử lý nhiều quy tắc.',
+      en: 'The test simulates data merge scenarios and multi-rule handling.',
+    },
   },
 ];
 
@@ -73,35 +113,441 @@ const LEVEL_CHALLENGE_COUNT: Record<SkillLevel, number> = {
 
 const TOTAL_STEPS = 4;
 
-const ENTRY_LEVEL_LABELS: Record<string, string> = {
-  root: 'Root',
-  intermediate: 'Intermediate',
-  advanced: 'Advanced',
+const ENTRY_LEVEL_LABELS: Record<AppLanguage, Record<string, string>> = {
+  vi: {
+    root: 'Root',
+    intermediate: 'Intermediate',
+    advanced: 'Advanced',
+  },
+  en: {
+    root: 'Root',
+    intermediate: 'Intermediate',
+    advanced: 'Advanced',
+  },
 };
 
-const TRACK_LABELS: Record<CareerField, string> = {
-  frontend: 'Frontend',
-  backend: 'Backend',
-  fullstack: 'Fullstack',
+const TRACK_LABELS: Record<AppLanguage, Record<CareerField, string>> = {
+  vi: {
+    frontend: 'Frontend',
+    backend: 'Backend',
+    fullstack: 'Fullstack',
+  },
+  en: {
+    frontend: 'Frontend',
+    backend: 'Backend',
+    fullstack: 'Fullstack',
+  },
 };
 
-const DIFFICULTY_LABELS: Record<string, string> = {
-  easy: 'Easy',
-  medium: 'Medium',
-  hard: 'Hard',
+const DIFFICULTY_LABELS: Record<AppLanguage, Record<string, string>> = {
+  vi: {
+    easy: 'Easy',
+    medium: 'Medium',
+    hard: 'Hard',
+  },
+  en: {
+    easy: 'Easy',
+    medium: 'Medium',
+    hard: 'Hard',
+  },
+};
+
+const STATUS_LABELS = {
+  vi: {
+    pass: 'Pass',
+    needsWork: 'Cần sửa',
+    draft: 'Draft',
+    samplePass: 'Sample pass',
+    failing: 'Đang lỗi',
+    passed: 'Passed',
+    failed: 'Failed',
+    noOutput: '(không có output)',
+    wrongAnswer: 'Wrong answer',
+    needsWorkBadge: 'Needs work',
+  },
+  en: {
+    pass: 'Pass',
+    needsWork: 'Needs work',
+    draft: 'Draft',
+    samplePass: 'Sample pass',
+    failing: 'Failing',
+    passed: 'Passed',
+    failed: 'Failed',
+    noOutput: '(no output)',
+    wrongAnswer: 'Wrong answer',
+    needsWorkBadge: 'Needs work',
+  },
+} satisfies Record<AppLanguage, Record<string, string>>;
+
+const SURVEY_COPY = {
+  vi: {
+    saveCareerPathError: 'Không thể lưu định hướng học tập',
+    loadSkillTestError: 'Không thể tải bộ bài test kỹ năng',
+    runSkillTestError: 'Không thể chạy sample test cho bài hiện tại',
+    gradeSurveyError: 'Không thể chấm bài survey',
+    saveDisciplineError: 'Không thể lưu thiết lập kỷ luật học',
+    finishSurveyError: 'Không thể hoàn tất survey',
+    step0Title: 'Chọn định hướng học tập',
+    step0Desc:
+      'Chọn track chính để hệ thống tạo bài survey coding phù hợp với nhu cầu của bạn.',
+    goalLabel: 'Mục tiêu chính của bạn là gì?',
+    cancel: 'Hủy',
+    saving: 'Đang lưu...',
+    continue: 'Tiếp tục',
+    step1Title: 'Đánh giá kỹ năng bằng code',
+    step1Desc:
+      'Chọn level tự đánh giá của bạn. Hệ thống sẽ tạo bộ bài survey coding theo đúng level và track bạn vừa chọn.',
+    challengeUnit: 'bài',
+    workspaceTitle: 'Survey coding workspace',
+    back: 'Quay lại',
+    preparing: 'Đang chuẩn bị...',
+    startCoding: 'Bắt đầu coding test',
+    resultTitle: 'Kết quả skill survey',
+    resultDesc: 'Điểm này được tính từ toàn bộ test case công khai và ẩn.',
+    entryLevel: 'Entry level',
+    problemLabel: 'Bài',
+    testCasePass: 'Test case pass',
+    redoTest: 'Làm lại phần test',
+    track: 'Track',
+    selectedLevel: 'Level chọn',
+    sampleProgress: 'Tiến độ sample',
+    challengeCount: 'Số challenge',
+    workspaceIntro:
+      'Mỗi bài đều dùng Monaco editor như phần Practice. Bạn có thể chạy sample test từng bài trước khi nộp toàn bộ lời giải.',
+    surveyProblemList: 'Danh sách bài survey',
+    description: 'Description',
+    testcases: 'Testcases',
+    minutes: 'phút',
+    implementationTitle: 'Yêu cầu triển khai',
+    implementationBody:
+      'Hoàn thiện hàm `solve()`. Ưu tiên lời giải rõ ràng, đúng với sample test và ổn định khi chấm hidden test.',
+    noteTitle: 'Lưu ý',
+    noteBody:
+      'Khi bấm `Chạy code`, hệ thống chỉ chạy sample test công khai. Khi bấm `Nộp tất cả lời giải`, backend sẽ chấm toàn bộ test case.',
+    noPublicSample: 'Bài này chưa có sample test công khai.',
+    monacoEditor: 'Monaco editor',
+    requiredFunction: 'Hàm bắt buộc',
+    resetStarter: 'Reset starter',
+    testcase: 'Testcase',
+    testResult: 'Test Result',
+    caseLabel: 'Trường hợp',
+    noPublicSampleForThis: 'Chưa có sample test công khai cho bài này.',
+    sampleTestPass: 'sample test pass',
+    input: 'Input',
+    expected: 'Expected',
+    actual: 'Actual',
+    error: 'Error',
+    runCurrentToSee: 'Chạy bài hiện tại để xem kết quả từng testcase.',
+    changeLevel: 'Đổi level',
+    running: 'Đang chạy...',
+    runCode: 'Chạy code',
+    grading: 'Đang chấm...',
+    submitAll: 'Nộp tất cả lời giải',
+    step2Title: 'Thiết lập nhịp học',
+    step2Desc:
+      'Chọn khung học mỗi ngày để roadmap và milestone phù hợp hơn với cường độ bạn muốn theo.',
+    dailyHours: 'Số giờ học mỗi ngày (1–24)',
+    focusWindow: 'Khung giờ tập trung',
+    milestoneLabel: 'Kiểu milestone bạn muốn',
+    disciplineLabel: 'Mức độ kỷ luật',
+    step3Title: 'Hoàn tất onboarding survey',
+    step3Desc:
+      'Hệ thống đã có đủ dữ liệu để khởi tạo lộ trình học cá nhân hóa cho bạn.',
+    finishing: 'Đang hoàn tất...',
+    startLearning: 'Bắt đầu học',
+    project: 'Project',
+    projectSub: 'Xây một sản phẩm nhỏ',
+    battle: 'Battle',
+    battleSub: 'Đấu bài và phản xạ nhanh',
+    light: 'Light',
+    lightSub: 'Nhắc nhở nhẹ và giữ nhịp học ổn định',
+    strict: 'Strict',
+    strictSub: 'Siết milestone chặt hơn khi làm chưa tốt',
+  },
+  en: {
+    saveCareerPathError: 'Could not save your learning direction',
+    loadSkillTestError: 'Could not load the skill test set',
+    runSkillTestError: 'Could not run sample tests for this problem',
+    gradeSurveyError: 'Could not grade the survey',
+    saveDisciplineError: 'Could not save your study discipline settings',
+    finishSurveyError: 'Could not complete the survey',
+    step0Title: 'Choose your learning direction',
+    step0Desc:
+      'Choose your main track so the system can generate survey coding tasks that match your goals.',
+    goalLabel: 'What is your main goal?',
+    cancel: 'Cancel',
+    saving: 'Saving...',
+    continue: 'Continue',
+    step1Title: 'Skill assessment by coding',
+    step1Desc:
+      'Pick your self-assessed level. The system will generate survey coding tasks based on that level and the track you selected.',
+    challengeUnit: 'tasks',
+    workspaceTitle: 'Survey coding workspace',
+    back: 'Back',
+    preparing: 'Preparing...',
+    startCoding: 'Start coding test',
+    resultTitle: 'Survey skill result',
+    resultDesc: 'This score is computed from both public and hidden test cases.',
+    entryLevel: 'Entry level',
+    problemLabel: 'Problem',
+    testCasePass: 'Test cases passed',
+    redoTest: 'Retake this test section',
+    track: 'Track',
+    selectedLevel: 'Selected level',
+    sampleProgress: 'Sample progress',
+    challengeCount: 'Challenge count',
+    workspaceIntro:
+      'Each problem uses a Monaco editor like the Practice page. You can run public sample tests before submitting all solutions.',
+    surveyProblemList: 'Survey problem list',
+    description: 'Description',
+    testcases: 'Testcases',
+    minutes: 'min',
+    implementationTitle: 'Implementation requirements',
+    implementationBody:
+      'Complete the `solve()` function. Prefer a clear solution that passes sample tests and remains stable on hidden grading.',
+    noteTitle: 'Note',
+    noteBody:
+      'When you click `Run code`, the system only executes the public sample tests. When you click `Submit all solutions`, the backend grades all test cases.',
+    noPublicSample: 'This problem does not have public sample tests yet.',
+    monacoEditor: 'Monaco editor',
+    requiredFunction: 'Required function',
+    resetStarter: 'Reset starter',
+    testcase: 'Testcase',
+    testResult: 'Test Result',
+    caseLabel: 'Case',
+    noPublicSampleForThis: 'No public sample tests are available for this problem.',
+    sampleTestPass: 'sample tests passed',
+    input: 'Input',
+    expected: 'Expected',
+    actual: 'Actual',
+    error: 'Error',
+    runCurrentToSee: 'Run the current problem to see per-testcase results.',
+    changeLevel: 'Change level',
+    running: 'Running...',
+    runCode: 'Run code',
+    grading: 'Grading...',
+    submitAll: 'Submit all solutions',
+    step2Title: 'Set your study rhythm',
+    step2Desc:
+      'Choose your daily study window so the roadmap and milestones match the pace you want to follow.',
+    dailyHours: 'Hours per day (1–24)',
+    focusWindow: 'Focus time window',
+    milestoneLabel: 'Preferred milestone type',
+    disciplineLabel: 'Discipline level',
+    step3Title: 'Finish onboarding survey',
+    step3Desc:
+      'The system now has enough information to create a personalized learning path for you.',
+    finishing: 'Finishing...',
+    startLearning: 'Start learning',
+    project: 'Project',
+    projectSub: 'Build a small product',
+    battle: 'Battle',
+    battleSub: 'Compete with coding reflex and speed',
+    light: 'Light',
+    lightSub: 'Gentle reminders and a steady learning pace',
+    strict: 'Strict',
+    strictSub: 'Tighter milestone enforcement when performance drops',
+  },
+} satisfies Record<AppLanguage, Record<string, string>>;
+
+const LOCALIZED_SURVEY_PROBLEMS: Record<
+  string,
+  {
+    title: Bilingual;
+    content: Bilingual;
+    explanations?: Record<number, Bilingual>;
+  }
+> = {
+  '66f000000000000000000101': {
+    title: { vi: 'Normalize Button Labels', en: 'Normalize Button Labels' },
+    content: {
+      vi: 'Viết `solve(labels)` nhận vào một mảng string và trả về một mảng mới.\n\nYêu cầu:\n- trim khoảng trắng đầu/cuối\n- bỏ phần tử rỗng sau khi trim\n- chuyển toàn bộ label sang lowercase\n- giữ nguyên thứ tự phần tử hợp lệ',
+      en: 'Write `solve(labels)` which receives an array of strings and returns a new array.\n\nRequirements:\n- trim leading and trailing spaces\n- remove empty items after trimming\n- convert each valid label to lowercase\n- keep the original order of valid items',
+    },
+    explanations: {
+      0: {
+        vi: 'Loại bỏ khoảng trắng và phần tử rỗng.',
+        en: 'Remove surrounding spaces and discard empty values.',
+      },
+    },
+  },
+  '66f000000000000000000102': {
+    title: { vi: 'Build Filter Summary', en: 'Build Filter Summary' },
+    content: {
+      vi: 'Viết `solve(filters)` nhận vào object filter và trả về object summary.\n\nInput ví dụ:\n`{ search: " react ", tags: ["ui", "", "hooks"], page: 3 }`\n\nOutput mong muốn:\n`{ query: "react", activeTagCount: 2, page: 3, hasActiveFilters: true }`\n\nQuy tắc:\n- `query` = chuỗi search sau khi trim\n- `activeTagCount` = số tag không rỗng\n- `page` = số page hợp lệ, mặc định 1 nếu thiếu hoặc <= 0\n- `hasActiveFilters` = true nếu có query hoặc có ít nhất 1 tag hợp lệ',
+      en: 'Write `solve(filters)` which receives a filter object and returns a summary object.\n\nExample input:\n`{ search: " react ", tags: ["ui", "", "hooks"], page: 3 }`\n\nExpected output:\n`{ query: "react", activeTagCount: 2, page: 3, hasActiveFilters: true }`\n\nRules:\n- `query` is the trimmed search string\n- `activeTagCount` is the number of non-empty tags\n- `page` must be a valid positive number, default to 1 when missing or <= 0\n- `hasActiveFilters` is true when there is a query or at least one valid tag',
+    },
+    explanations: {
+      0: {
+        vi: 'Có search, có 2 tag hợp lệ và page = 3.',
+        en: 'There is a query, 2 valid tags, and page = 3.',
+      },
+    },
+  },
+  '66f000000000000000000103': {
+    title: { vi: 'Compose Lesson Progress Snapshot', en: 'Compose Lesson Progress Snapshot' },
+    content: {
+      vi: 'Viết `solve(lessons)` nhận vào mảng lesson có dạng `{ id, status, durationMinutes }`.\n\nTrả về object `{ totalLessons, completedLessons, inProgressLessons, totalMinutes, completionRate }`.\n\nQuy tắc:\n- `completedLessons` = số lesson có `status === "completed"`\n- `inProgressLessons` = số lesson có `status === "in_progress"`\n- `totalMinutes` = tổng `durationMinutes` hợp lệ (> 0)\n- `completionRate` = làm tròn phần trăm hoàn thành từ 0 đến 100',
+      en: 'Write `solve(lessons)` which receives an array of lesson objects in the form `{ id, status, durationMinutes }`.\n\nReturn `{ totalLessons, completedLessons, inProgressLessons, totalMinutes, completionRate }`.\n\nRules:\n- `completedLessons` is the number of lessons with `status === "completed"`\n- `inProgressLessons` is the number of lessons with `status === "in_progress"`\n- `totalMinutes` is the sum of valid `durationMinutes` values (> 0)\n- `completionRate` is the rounded completion percentage from 0 to 100',
+    },
+    explanations: {
+      0: {
+        vi: 'Tính đủ số lượng lesson, tổng thời gian và phần trăm hoàn thành.',
+        en: 'Count the lessons, total time, and the completion percentage.',
+      },
+    },
+  },
+  '66f000000000000000000104': {
+    title: { vi: 'Merge Notification Feed', en: 'Merge Notification Feed' },
+    content: {
+      vi: 'Viết `solve(currentItems, incomingItems)` để merge hai mảng notification.\n\nMỗi item có dạng `{ id, createdAt, read }`.\n\nYêu cầu:\n- giữ item duy nhất theo `id`\n- nếu cùng `id`, ưu tiên item từ `incomingItems`\n- sort giảm dần theo `createdAt`\n- trả về object `{ items, unreadCount }`',
+      en: 'Write `solve(currentItems, incomingItems)` to merge two notification arrays.\n\nEach item has the form `{ id, createdAt, read }`.\n\nRequirements:\n- keep unique items by `id`\n- if the same `id` appears twice, prioritize the item from `incomingItems`\n- sort in descending order by `createdAt`\n- return `{ items, unreadCount }`',
+    },
+    explanations: {
+      0: {
+        vi: 'Item n2 từ incoming ghi đè item cũ và danh sách được sort giảm dần.',
+        en: 'Item n2 from the incoming list overrides the old one and the result is sorted descending.',
+      },
+    },
+  },
+  '66f000000000000000000201': {
+    title: { vi: 'Normalize Query Params', en: 'Normalize Query Params' },
+    content: {
+      vi: 'Viết `solve(query)` nhận vào object query params và trả về object chuẩn hóa.\n\nYêu cầu:\n- `page` và `limit` phải là số nguyên dương, mặc định `page = 1`, `limit = 20`\n- `search` là string đã trim\n- output: `{ page, limit, search }`',
+      en: 'Write `solve(query)` which receives a query params object and returns a normalized object.\n\nRequirements:\n- `page` and `limit` must be positive integers, defaulting to `page = 1`, `limit = 20`\n- `search` must be a trimmed string\n- output: `{ page, limit, search }`',
+    },
+    explanations: {
+      0: {
+        vi: 'Query hợp lệ được parse sang kiểu đúng.',
+        en: 'Valid query values are parsed into the correct types.',
+      },
+    },
+  },
+  '66f000000000000000000202': {
+    title: { vi: 'Build API Response Envelope', en: 'Build API Response Envelope' },
+    content: {
+      vi: 'Viết `solve(input)` nhận vào object `{ ok, data, error, traceId }` và trả về response envelope chuẩn.\n\nQuy tắc:\n- nếu `ok === true` => `{ status: 200, body: { data, error: null, traceId } }`\n- nếu `ok === false` => `{ status: 400, body: { data: null, error, traceId } }`\n- nếu thiếu `traceId` thì dùng `"generated-trace"`',
+      en: 'Write `solve(input)` which receives `{ ok, data, error, traceId }` and returns a standard response envelope.\n\nRules:\n- if `ok === true` => `{ status: 200, body: { data, error: null, traceId } }`\n- if `ok === false` => `{ status: 400, body: { data: null, error, traceId } }`\n- if `traceId` is missing, use `"generated-trace"`',
+    },
+    explanations: {
+      0: {
+        vi: 'Nhánh success giữ nguyên data và traceId.',
+        en: 'The success branch keeps both data and traceId unchanged.',
+      },
+    },
+  },
+  '66f000000000000000000203': {
+    title: { vi: 'Aggregate API Metrics', en: 'Aggregate API Metrics' },
+    content: {
+      vi: 'Viết `solve(requests)` nhận vào mảng request `{ path, durationMs, statusCode }`.\n\nTrả về object `{ totalRequests, averageDurationMs, errorCount, slowestPath }`.\n\nQuy tắc:\n- `averageDurationMs` = làm tròn số trung bình duration\n- `errorCount` = số request có `statusCode >= 400`\n- `slowestPath` = `path` của request có `durationMs` lớn nhất; nếu rỗng thì `""`',
+      en: 'Write `solve(requests)` which receives an array of requests in the form `{ path, durationMs, statusCode }`.\n\nReturn `{ totalRequests, averageDurationMs, errorCount, slowestPath }`.\n\nRules:\n- `averageDurationMs` must be the rounded average duration\n- `errorCount` is the number of requests with `statusCode >= 400`\n- `slowestPath` is the `path` of the request with the highest `durationMs`; if the array is empty, return `""`',
+    },
+    explanations: {
+      0: {
+        vi: 'Tính trung bình duration, số lỗi và endpoint chậm nhất.',
+        en: 'Compute the average duration, error count, and the slowest endpoint.',
+      },
+    },
+  },
+  '66f000000000000000000204': {
+    title: { vi: 'Group Job Retries', en: 'Group Job Retries' },
+    content: {
+      vi: 'Viết `solve(jobs)` nhận vào mảng job `{ id, queue, attempts, maxAttempts }`.\n\nTrả về object:\n- `ready`: danh sách `id` có thể retry tiếp (`attempts < maxAttempts`)\n- `deadLetter`: danh sách `id` đã vượt quota retry\n- `summaryByQueue`: object đếm tổng số job theo từng queue',
+      en: 'Write `solve(jobs)` which receives an array of jobs in the form `{ id, queue, attempts, maxAttempts }`.\n\nReturn:\n- `ready`: the list of `id`s that can still be retried (`attempts < maxAttempts`)\n- `deadLetter`: the list of `id`s that have exceeded the retry quota\n- `summaryByQueue`: an object that counts total jobs per queue',
+    },
+    explanations: {
+      0: {
+        vi: 'Phân loại retry và tổng hợp theo queue.',
+        en: 'Classify retry states and aggregate counts by queue.',
+      },
+    },
+  },
 };
 
 function errMsg(err: unknown, fallback: string): string {
   return err instanceof Error ? err.message : fallback;
 }
 
-function prettyEntryLevel(value: string | null): string | null {
+function prettyEntryLevel(value: string | null, language: AppLanguage): string | null {
   if (!value) return null;
-  return ENTRY_LEVEL_LABELS[value] ?? value;
+  return ENTRY_LEVEL_LABELS[language][value] ?? value;
+}
+
+function localize(label: Bilingual, language: AppLanguage) {
+  return language === 'vi' ? label.vi : label.en;
+}
+
+function translateSurveyError(
+  err: unknown,
+  fallback: string,
+  language: AppLanguage,
+) {
+  const message = errMsg(err, fallback);
+  const knownMessages: Record<string, Bilingual> = {
+    'No coding problems configured for this field yet': {
+      vi: 'Chưa có bài survey coding phù hợp cho lựa chọn này.',
+      en: 'No coding problems are configured for this selection yet.',
+    },
+    'Skill test has not been started': {
+      vi: 'Bạn chưa bắt đầu skill test.',
+      en: 'The skill test has not been started yet.',
+    },
+    'This coding problem has no runnable test cases': {
+      vi: 'Bài code này hiện chưa có test case để chạy.',
+      en: 'This coding problem does not have runnable test cases yet.',
+    },
+    'Career path not set': {
+      vi: 'Bạn chưa hoàn tất bước chọn định hướng.',
+      en: 'You have not completed the career path step yet.',
+    },
+    'Skill test not completed': {
+      vi: 'Bạn chưa hoàn tất phần skill test.',
+      en: 'You have not completed the skill test yet.',
+    },
+    'Discipline setup not completed': {
+      vi: 'Bạn chưa hoàn tất phần thiết lập kỷ luật học.',
+      en: 'You have not completed the discipline setup yet.',
+    },
+  };
+
+  for (const [pattern, localized] of Object.entries(knownMessages)) {
+    if (message.includes(pattern)) {
+      return language === 'vi' ? localized.vi : localized.en;
+    }
+  }
+
+  if (message.startsWith('Question ') && message.includes('is not part of this skill test')) {
+    return language === 'vi'
+      ? 'Bài hiện tại không thuộc bộ skill test đã được giao.'
+      : 'This problem is not part of the assigned skill test.';
+  }
+
+  return message;
+}
+
+function localizeProblem(problem: CodingProblem, language: AppLanguage): CodingProblem {
+  const override = LOCALIZED_SURVEY_PROBLEMS[problem._id];
+  if (!override) return problem;
+
+  return {
+    ...problem,
+    title: localize(override.title, language),
+    content: localize(override.content, language),
+    sampleTestCases: problem.sampleTestCases.map((testCase, index) => ({
+      ...testCase,
+      explanation: override.explanations?.[index]
+        ? localize(override.explanations[index], language)
+        : testCase.explanation,
+    })),
+  };
 }
 
 export default function Survey() {
   const navigate = useNavigate();
+  const language = useSettingsStore((state) => state.language);
+  const copy = SURVEY_COPY[language];
+  const statusText = STATUS_LABELS[language];
+  const isVi = language === 'vi';
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -135,9 +581,16 @@ export default function Survey() {
     useState<MilestoneTestPreference>('project');
   const [discipline, setDiscipline] = useState<DisciplineLevel>('light');
 
+  const localizedProblems = useMemo(
+    () => problems.map((problem) => localizeProblem(problem, language)),
+    [language, problems],
+  );
+
   const activeProblem = useMemo(
-    () => problems.find((problem) => problem._id === activeProblemId) ?? problems[0],
-    [activeProblemId, problems]
+    () =>
+      localizedProblems.find((problem) => problem._id === activeProblemId) ??
+      localizedProblems[0],
+    [activeProblemId, localizedProblems]
   );
 
   const activeRunResult = activeProblem ? runResults[activeProblem._id] : null;
@@ -163,7 +616,7 @@ export default function Survey() {
       });
       setStep(1);
     } catch (err) {
-      setError(errMsg(err, 'Không thể lưu định hướng học tập'));
+      setError(translateSurveyError(err, copy.saveCareerPathError, language));
     } finally {
       setLoading(false);
     }
@@ -192,7 +645,7 @@ export default function Survey() {
       setEntryLevel(null);
       setGradingDetails([]);
     } catch (err) {
-      setError(errMsg(err, 'Không thể tải bộ bài test kỹ năng'));
+      setError(translateSurveyError(err, copy.loadSkillTestError, language));
     } finally {
       setLoading(false);
     }
@@ -213,7 +666,7 @@ export default function Survey() {
       }));
       setConsoleTab('result');
     } catch (err) {
-      setError(errMsg(err, 'Không thể chạy sample test cho bài hiện tại'));
+      setError(translateSurveyError(err, copy.runSkillTestError, language));
     } finally {
       setRunningProblemId(null);
     }
@@ -246,7 +699,7 @@ export default function Survey() {
       setEntryLevel(draft.computedEntryLevel ?? null);
       setGradingDetails(draft.technicalTestAnswers ?? []);
     } catch (err) {
-      setError(errMsg(err, 'Không thể chấm bài survey'));
+      setError(translateSurveyError(err, copy.gradeSurveyError, language));
     } finally {
       setLoading(false);
     }
@@ -264,7 +717,7 @@ export default function Survey() {
       });
       setStep(3);
     } catch (err) {
-      setError(errMsg(err, 'Không thể lưu thiết lập kỷ luật học'));
+      setError(translateSurveyError(err, copy.saveDisciplineError, language));
     } finally {
       setLoading(false);
     }
@@ -277,7 +730,7 @@ export default function Survey() {
       await completeSurvey();
       navigate('/learning-path');
     } catch (err) {
-      setError(errMsg(err, 'Không thể hoàn tất survey'));
+      setError(translateSurveyError(err, copy.finishSurveyError, language));
     } finally {
       setLoading(false);
     }
@@ -298,18 +751,18 @@ export default function Survey() {
     const finalGrade = gradingDetails.find((item) => item.questionId === problemId);
     if (finalGrade) {
       return finalGrade.isCorrect
-        ? { label: 'Pass', tone: 'success' as const }
-        : { label: 'Cần sửa', tone: 'danger' as const };
+        ? { label: statusText.pass, tone: 'success' as const }
+        : { label: statusText.needsWork, tone: 'danger' as const };
     }
 
     const runResult = runResults[problemId];
     if (!runResult) {
-      return { label: 'Draft', tone: 'neutral' as const };
+      return { label: statusText.draft, tone: 'neutral' as const };
     }
 
     return runResult.status === 'Accepted'
-      ? { label: 'Sample pass', tone: 'success' as const }
-      : { label: 'Đang lỗi', tone: 'warning' as const };
+      ? { label: statusText.samplePass, tone: 'success' as const }
+      : { label: statusText.failing, tone: 'warning' as const };
   };
 
   return (
@@ -319,9 +772,8 @@ export default function Survey() {
           {Array.from({ length: TOTAL_STEPS }).map((_, index) => (
             <div
               key={index}
-              className={`sv-step-pill ${
-                index < step ? 'done' : index === step ? 'active' : ''
-              }`}
+              className={`sv-step-pill ${index < step ? 'done' : index === step ? 'active' : ''
+                }`}
             />
           ))}
         </div>
@@ -331,11 +783,8 @@ export default function Survey() {
 
           {step === 0 && (
             <>
-              <h1 className="sv-title">Chọn định hướng học tập</h1>
-              <p className="sv-desc">
-                Chọn track chính để hệ thống tạo bài survey coding phù hợp với nhu
-                cầu của bạn.
-              </p>
+              <h1 className="sv-title">{copy.step0Title}</h1>
+              <p className="sv-desc">{copy.step0Desc}</p>
 
               <div className="sv-options">
                 {FIELD_OPTIONS.map((option) => (
@@ -345,13 +794,17 @@ export default function Survey() {
                     onClick={() => setFieldFocus(option.id)}
                     type="button"
                   >
-                    <div className="sv-option-title">{option.title}</div>
-                    <div className="sv-option-sub">{option.sub}</div>
+                    <div className="sv-option-title">
+                      {localize(option.title, language)}
+                    </div>
+                    <div className="sv-option-sub">
+                      {option.sub ? localize(option.sub, language) : ''}
+                    </div>
                   </button>
                 ))}
               </div>
 
-              <span className="sv-label">Mục tiêu chính của bạn là gì?</span>
+              <span className="sv-label">{copy.goalLabel}</span>
               <div className="sv-options">
                 {GOAL_OPTIONS.map((option) => (
                   <button
@@ -360,7 +813,9 @@ export default function Survey() {
                     onClick={() => setGoal(option.id)}
                     type="button"
                   >
-                    <div className="sv-option-title">{option.title}</div>
+                    <div className="sv-option-title">
+                      {localize(option.title, language)}
+                    </div>
                   </button>
                 ))}
               </div>
@@ -371,7 +826,7 @@ export default function Survey() {
                   onClick={() => navigate('/')}
                   type="button"
                 >
-                  Hủy
+                  {copy.cancel}
                 </button>
                 <button
                   className="sv-btn sv-btn-primary"
@@ -379,7 +834,7 @@ export default function Survey() {
                   onClick={submitCareerPath}
                   type="button"
                 >
-                  {loading ? 'Đang lưu...' : 'Tiếp tục'}
+                  {loading ? copy.saving : copy.continue}
                 </button>
               </div>
             </>
@@ -387,42 +842,40 @@ export default function Survey() {
 
           {step === 1 && (
             <>
-              <h1 className="sv-title">Đánh giá kỹ năng bằng code</h1>
+              <h1 className="sv-title">{copy.step1Title}</h1>
               {problems.length === 0 ? (
                 <>
-                  <p className="sv-desc">
-                    Chọn level tự đánh giá của bạn. Hệ thống sẽ tạo bộ bài survey
-                    coding theo đúng level và track bạn vừa chọn.
-                  </p>
+                  <p className="sv-desc">{copy.step1Desc}</p>
 
                   <div className="sv-level-grid">
                     {LEVEL_OPTIONS.map((option) => (
                       <button
                         key={option.id}
-                        className={`sv-level-card ${
-                          selfLevel === option.id ? 'selected' : ''
-                        }`}
+                        className={`sv-level-card ${selfLevel === option.id ? 'selected' : ''
+                          }`}
                         onClick={() => setSelfLevel(option.id)}
                         type="button"
                       >
                         <div className="sv-level-top">
-                          <span className="sv-level-name">{option.title}</span>
+                          <span className="sv-level-name">
+                            {localize(option.title, language)}
+                          </span>
                           <span className="sv-level-count">
-                            {LEVEL_CHALLENGE_COUNT[option.id]} bài
+                            {LEVEL_CHALLENGE_COUNT[option.id]} {copy.challengeUnit}
                           </span>
                         </div>
-                        <div className="sv-level-sub">{option.sub}</div>
-                        <div className="sv-level-detail">{option.detail}</div>
+                        <div className="sv-level-sub">
+                          {option.sub ? localize(option.sub, language) : ''}
+                        </div>
+                        <div className="sv-level-detail">
+                          {option.detail ? localize(option.detail, language) : ''}
+                        </div>
                       </button>
                     ))}
                   </div>
 
                   <div className="sv-highlight">
-                    <div className="sv-highlight-title">Survey coding workspace</div>
-                    <div className="sv-highlight-text">
-                      Editor dùng Monaco giống phần Practice, có chạy sample test,
-                      xem kết quả từng case và chấm tổng toàn bộ bài.
-                    </div>
+                    <div className="sv-highlight-title">{copy.workspaceTitle}</div>
                   </div>
 
                   <div className="sv-actions">
@@ -431,7 +884,7 @@ export default function Survey() {
                       onClick={() => setStep(0)}
                       type="button"
                     >
-                      Quay lại
+                      {copy.back}
                     </button>
                     <button
                       className="sv-btn sv-btn-primary"
@@ -439,7 +892,7 @@ export default function Survey() {
                       onClick={loadSkillTest}
                       type="button"
                     >
-                      {loading ? 'Đang chuẩn bị...' : 'Bắt đầu coding test'}
+                      {loading ? copy.preparing : copy.startCoding}
                     </button>
                   </div>
                 </>
@@ -448,13 +901,11 @@ export default function Survey() {
                   <div className="sv-result-hero">
                     <div className="sv-result-score">{score}%</div>
                     <div className="sv-result-copy">
-                      <div className="sv-result-title">Kết quả skill survey</div>
-                      <div className="sv-result-sub">
-                        Điểm này được tính từ toàn bộ test case công khai và ẩn.
-                      </div>
-                      {prettyEntryLevel(entryLevel) && (
+                      <div className="sv-result-title">{copy.resultTitle}</div>
+                      <div className="sv-result-sub">{copy.resultDesc}</div>
+                      {prettyEntryLevel(entryLevel, language) && (
                         <div className="sv-entry-chip">
-                          Entry level: {prettyEntryLevel(entryLevel)}
+                          {copy.entryLevel}: {prettyEntryLevel(entryLevel, language)}
                         </div>
                       )}
                     </div>
@@ -469,23 +920,27 @@ export default function Survey() {
                         <div className="sv-grade-card" key={problem._id}>
                           <div className="sv-grade-top">
                             <div>
-                              <div className="sv-grade-index">Bài {index + 1}</div>
+                              <div className="sv-grade-index">
+                                {copy.problemLabel} {index + 1}
+                              </div>
                               <div className="sv-grade-title">{problem.title}</div>
                             </div>
                             <div
-                              className={`sv-grade-badge ${
-                                result?.isCorrect ? 'success' : 'fail'
-                              }`}
+                              className={`sv-grade-badge ${result?.isCorrect ? 'success' : 'fail'
+                                }`}
                             >
-                              {result?.isCorrect ? 'Passed' : 'Needs work'}
+                              {result?.isCorrect
+                                ? statusText.passed
+                                : statusText.needsWorkBadge}
                             </div>
                           </div>
                           <div className="sv-grade-meta">
-                            {TRACK_LABELS[problem.track]} ·{' '}
-                            {DIFFICULTY_LABELS[problem.difficulty] ?? problem.difficulty}
+                            {TRACK_LABELS[language][problem.track]} ·{' '}
+                            {DIFFICULTY_LABELS[language][problem.difficulty] ??
+                              problem.difficulty}
                           </div>
                           <div className="sv-grade-meta">
-                            Test case pass: {result?.passedTestCases ?? 0}/
+                            {copy.testCasePass}: {result?.passedTestCases ?? 0}/
                             {result?.totalTestCases ?? 0}
                           </div>
                           {result?.errorMessage && (
@@ -502,14 +957,14 @@ export default function Survey() {
                       onClick={leaveWorkspace}
                       type="button"
                     >
-                      Làm lại phần test
+                      {copy.redoTest}
                     </button>
                     <button
                       className="sv-btn sv-btn-primary"
                       onClick={() => setStep(2)}
                       type="button"
                     >
-                      Tiếp tục
+                      {copy.continue}
                     </button>
                   </div>
                 </>
@@ -517,43 +972,47 @@ export default function Survey() {
                 <>
                   <div className="sv-summary-bar">
                     <div className="sv-summary-item">
-                      <span className="sv-summary-label">Track</span>
-                      <strong>{fieldFocus ? TRACK_LABELS[fieldFocus] : '--'}</strong>
-                    </div>
-                    <div className="sv-summary-item">
-                      <span className="sv-summary-label">Level chọn</span>
+                      <span className="sv-summary-label">{copy.track}</span>
                       <strong>
-                        {LEVEL_OPTIONS.find((item) => item.id === selfLevel)?.title ?? '--'}
+                        {fieldFocus ? TRACK_LABELS[language][fieldFocus] : '--'}
                       </strong>
                     </div>
                     <div className="sv-summary-item">
-                      <span className="sv-summary-label">Tiến độ sample</span>
+                      <span className="sv-summary-label">{copy.selectedLevel}</span>
+                      <strong>
+                        {localize(
+                          LEVEL_OPTIONS.find((item) => item.id === selfLevel)?.title ??
+                          { vi: '--', en: '--' },
+                          language,
+                        )}
+                      </strong>
+                    </div>
+                    <div className="sv-summary-item">
+                      <span className="sv-summary-label">{copy.sampleProgress}</span>
                       <strong>{progressText}</strong>
                     </div>
                     <div className="sv-summary-item">
-                      <span className="sv-summary-label">Số challenge</span>
+                      <span className="sv-summary-label">{copy.challengeCount}</span>
                       <strong>{challengeCount}</strong>
                     </div>
                   </div>
 
-                  <p className="sv-desc">
-                    Mỗi bài đều dùng Monaco editor như phần Practice. Bạn có thể
-                    chạy sample test từng bài trước khi nộp toàn bộ lời giải.
-                  </p>
+                  <p className="sv-desc">{copy.workspaceIntro}</p>
 
                   <div className="sv-skill-layout">
                     <aside className="sv-problem-nav">
-                      <div className="sv-problem-nav-title">Danh sách bài survey</div>
+                      <div className="sv-problem-nav-title">
+                        {copy.surveyProblemList}
+                      </div>
                       <div className="sv-problem-nav-list">
-                        {problems.map((problem, index) => {
+                        {localizedProblems.map((problem, index) => {
                           const status = problemStatus(problem._id);
                           return (
                             <button
                               key={problem._id}
                               type="button"
-                              className={`sv-problem-tab ${
-                                activeProblem?._id === problem._id ? 'active' : ''
-                              }`}
+                              className={`sv-problem-tab ${activeProblem?._id === problem._id ? 'active' : ''
+                                }`}
                               onClick={() => {
                                 setActiveProblemId(problem._id);
                                 setWorkspaceTab('description');
@@ -561,18 +1020,26 @@ export default function Survey() {
                               }}
                             >
                               <div className="sv-problem-tab-top">
-                                <span>Bài {index + 1}</span>
+                                <span>
+                                  {copy.problemLabel} {index + 1}
+                                </span>
                                 <span className="sv-problem-difficulty">
-                                  {DIFFICULTY_LABELS[problem.difficulty] ??
+                                  {DIFFICULTY_LABELS[language][problem.difficulty] ??
                                     problem.difficulty}
                                 </span>
                               </div>
                               <div className="sv-problem-tab-title">{problem.title}</div>
                               <div className="sv-problem-tab-meta">
-                                {TRACK_LABELS[problem.track]} ·{' '}
-                                {LEVEL_OPTIONS.find(
-                                  (item) => item.id === problem.targetSkillLevel
-                                )?.title ?? problem.targetSkillLevel}
+                                {TRACK_LABELS[language][problem.track]} ·{' '}
+                                {localize(
+                                  LEVEL_OPTIONS.find(
+                                    (item) => item.id === problem.targetSkillLevel,
+                                  )?.title ?? {
+                                    vi: problem.targetSkillLevel,
+                                    en: problem.targetSkillLevel,
+                                  },
+                                  language,
+                                )}
                               </div>
                               <div className={`sv-status-badge ${status.tone}`}>
                                 {status.label}
@@ -592,34 +1059,40 @@ export default function Survey() {
                               onClick={() => setWorkspaceTab('description')}
                               type="button"
                             >
-                              Description
+                              {copy.description}
                             </button>
                             <button
                               className={workspaceTab === 'testcases' ? 'active' : ''}
                               onClick={() => setWorkspaceTab('testcases')}
                               type="button"
                             >
-                              Testcases
+                              {copy.testcases}
                             </button>
                           </div>
 
                           <h3 className="sv-problem-heading">{activeProblem.title}</h3>
                           <div className="sv-problem-tags">
                             <span className="sv-chip">
-                              {TRACK_LABELS[activeProblem.track]}
+                              {TRACK_LABELS[language][activeProblem.track]}
                             </span>
                             <span className="sv-chip">
-                              {LEVEL_OPTIONS.find(
-                                (item) => item.id === activeProblem.targetSkillLevel
-                              )?.title ?? activeProblem.targetSkillLevel}
+                              {localize(
+                                LEVEL_OPTIONS.find(
+                                  (item) => item.id === activeProblem.targetSkillLevel,
+                                )?.title ?? {
+                                  vi: activeProblem.targetSkillLevel,
+                                  en: activeProblem.targetSkillLevel,
+                                },
+                                language,
+                              )}
                             </span>
                             <span className="sv-chip">
-                              {DIFFICULTY_LABELS[activeProblem.difficulty] ??
+                              {DIFFICULTY_LABELS[language][activeProblem.difficulty] ??
                                 activeProblem.difficulty}
                             </span>
                             <span className="sv-chip">JavaScript</span>
                             <span className="sv-chip">
-                              ~{activeProblem.estimatedMinutes} phút
+                              ~{activeProblem.estimatedMinutes} {copy.minutes}
                             </span>
                           </div>
 
@@ -630,23 +1103,20 @@ export default function Survey() {
                               </div>
                               <div className="sv-problem-section">
                                 <div className="sv-problem-section-title">
-                                  Yêu cầu triển khai
+                                  {copy.implementationTitle}
                                 </div>
                                 <div className="sv-problem-section-box">
-                                  Hoàn thiện hàm <code>solve()</code>. Ưu tiên lời
-                                  giải rõ ràng, đúng với sample test và ổn định khi
-                                  chấm hidden test.
+                                  {copy.implementationBody.split('`solve()`')[0]}
+                                  <code>solve()</code>
+                                  {copy.implementationBody.split('`solve()`')[1] ?? ''}
                                 </div>
                               </div>
                               <div className="sv-problem-section">
                                 <div className="sv-problem-section-title">
-                                  Lưu ý
+                                  {copy.noteTitle}
                                 </div>
                                 <div className="sv-problem-section-box">
-                                  Khi bấm <strong>Chạy code</strong>, hệ thống chỉ
-                                  chạy sample test công khai. Khi bấm{' '}
-                                  <strong>Nộp tất cả lời giải</strong>, backend sẽ
-                                  chấm toàn bộ test case.
+                                  {copy.noteBody}
                                 </div>
                               </div>
                             </>
@@ -655,12 +1125,14 @@ export default function Survey() {
                               {activeProblem.sampleTestCases.length > 0 ? (
                                 activeProblem.sampleTestCases.map((testCase, index) => (
                                   <div className="sv-case-card" key={index}>
-                                    <div className="sv-case-title">Case {index + 1}</div>
+                                    <div className="sv-case-title">
+                                      {copy.caseLabel} {index + 1}
+                                    </div>
                                     <pre className="sv-case-block">
-{`Input:
+                                      {`${copy.input}:
 ${testCase.input}
 
-Expected:
+${copy.expected}:
 ${testCase.expectedOutput}`}
                                     </pre>
                                     {testCase.explanation && (
@@ -671,9 +1143,7 @@ ${testCase.expectedOutput}`}
                                   </div>
                                 ))
                               ) : (
-                                <div className="sv-case-card">
-                                  Bài này chưa có sample test công khai.
-                                </div>
+                                <div className="sv-case-card">{copy.noPublicSample}</div>
                               )}
                             </div>
                           )}
@@ -682,9 +1152,11 @@ ${testCase.expectedOutput}`}
                         <section className="sv-editor-panel">
                           <div className="sv-editor-header">
                             <div>
-                              <div className="sv-editor-title">Monaco editor</div>
+                              <div className="sv-editor-title">
+                                {copy.monacoEditor}
+                              </div>
                               <div className="sv-editor-sub">
-                                Hàm bắt buộc: <code>solve()</code>
+                                {copy.requiredFunction}: <code>solve()</code>
                               </div>
                             </div>
                             <div className="sv-editor-tools">
@@ -694,7 +1166,7 @@ ${testCase.expectedOutput}`}
                                 onClick={resetActiveProblemCode}
                                 type="button"
                               >
-                                Reset starter
+                                {copy.resetStarter}
                               </button>
                             </div>
                           </div>
@@ -729,14 +1201,14 @@ ${testCase.expectedOutput}`}
                                 onClick={() => setConsoleTab('testcase')}
                                 type="button"
                               >
-                                Testcase
+                                {copy.testcase}
                               </button>
                               <button
                                 className={consoleTab === 'result' ? 'active' : ''}
                                 onClick={() => setConsoleTab('result')}
                                 type="button"
                               >
-                                Test Result
+                                {copy.testResult}
                               </button>
                             </div>
 
@@ -747,61 +1219,67 @@ ${testCase.expectedOutput}`}
                                     {activeProblem.sampleTestCases.map((testCase, index) => (
                                       <div className="sv-console-case" key={index}>
                                         <div className="sv-console-case-title">
-                                          Case {index + 1}
+                                          {copy.caseLabel} {index + 1}
                                         </div>
                                         <pre className="sv-console-code">
-{`Input: ${testCase.input}
-Expected: ${testCase.expectedOutput}`}
+                                          {`${copy.input}: ${testCase.input}
+${copy.expected}: ${testCase.expectedOutput}`}
                                         </pre>
                                       </div>
                                     ))}
                                   </div>
                                 ) : (
                                   <div className="sv-console-empty">
-                                    Chưa có sample test công khai cho bài này.
+                                    {copy.noPublicSampleForThis}
                                   </div>
                                 )
                               ) : activeRunResult ? (
                                 <div className="sv-run-result">
                                   <div className="sv-run-summary">
                                     <span
-                                      className={`sv-status-badge ${
-                                        activeRunResult.status === 'Accepted'
+                                      className={`sv-status-badge ${activeRunResult.status === 'Accepted'
                                           ? 'success'
                                           : activeRunResult.status === 'Wrong Answer'
                                             ? 'warning'
                                             : 'danger'
-                                      }`}
+                                        }`}
                                     >
                                       {activeRunResult.status}
                                     </span>
                                     <span className="sv-run-count">
                                       {activeRunResult.passedCount}/{activeRunResult.total}{' '}
-                                      sample test pass
+                                      {copy.sampleTestPass}
                                     </span>
                                   </div>
                                   <div className="sv-run-note">{activeRunResult.notes}</div>
                                   {activeRunResult.cases.map((item) => (
                                     <div className="sv-run-case" key={item.index}>
                                       <div className="sv-run-case-top">
-                                        <span>Case {item.index + 1}</span>
+                                        <span>
+                                          {copy.caseLabel} {item.index + 1}
+                                        </span>
                                         <span
-                                          className={`sv-status-badge ${
-                                            item.passed ? 'success' : 'danger'
-                                          }`}
+                                          className={`sv-status-badge ${item.passed ? 'success' : 'danger'
+                                            }`}
                                         >
-                                          {item.passed ? 'Passed' : 'Failed'}
+                                          {item.passed
+                                            ? statusText.passed
+                                            : statusText.failed}
                                         </span>
                                       </div>
                                       <div className="sv-run-grid">
                                         <div>
-                                          <div className="sv-run-label">Input</div>
+                                          <div className="sv-run-label">
+                                            {copy.input}
+                                          </div>
                                           <pre className="sv-console-code">
                                             {item.input}
                                           </pre>
                                         </div>
                                         <div>
-                                          <div className="sv-run-label">Expected</div>
+                                          <div className="sv-run-label">
+                                            {copy.expected}
+                                          </div>
                                           <pre className="sv-console-code">
                                             {item.expectedOutput}
                                           </pre>
@@ -810,15 +1288,19 @@ Expected: ${testCase.expectedOutput}`}
                                       {!item.passed && (
                                         <div className="sv-run-grid">
                                           <div>
-                                            <div className="sv-run-label">Actual</div>
+                                            <div className="sv-run-label">
+                                              {copy.actual}
+                                            </div>
                                             <pre className="sv-console-code">
-                                              {item.actualOutput ?? '(không có output)'}
+                                              {item.actualOutput ?? statusText.noOutput}
                                             </pre>
                                           </div>
                                           <div>
-                                            <div className="sv-run-label">Error</div>
+                                            <div className="sv-run-label">
+                                              {copy.error}
+                                            </div>
                                             <pre className="sv-console-code">
-                                              {item.errorMessage ?? 'Wrong answer'}
+                                              {item.errorMessage ?? statusText.wrongAnswer}
                                             </pre>
                                           </div>
                                         </div>
@@ -828,7 +1310,7 @@ Expected: ${testCase.expectedOutput}`}
                                 </div>
                               ) : (
                                 <div className="sv-console-empty">
-                                  Chạy bài hiện tại để xem kết quả từng testcase.
+                                  {copy.runCurrentToSee}
                                 </div>
                               )}
                             </div>
@@ -845,7 +1327,7 @@ Expected: ${testCase.expectedOutput}`}
                         onClick={leaveWorkspace}
                         type="button"
                       >
-                        Đổi level
+                        {copy.changeLevel}
                       </button>
                     </div>
                     <div className="sv-action-group">
@@ -856,8 +1338,8 @@ Expected: ${testCase.expectedOutput}`}
                         type="button"
                       >
                         {runningProblemId === activeProblem?._id
-                          ? 'Đang chạy...'
-                          : 'Chạy code'}
+                          ? copy.running
+                          : copy.runCode}
                       </button>
                       <button
                         className="sv-btn sv-btn-primary"
@@ -865,7 +1347,7 @@ Expected: ${testCase.expectedOutput}`}
                         onClick={submitTest}
                         type="button"
                       >
-                        {loading ? 'Đang chấm...' : 'Nộp tất cả lời giải'}
+                        {loading ? copy.grading : copy.submitAll}
                       </button>
                     </div>
                   </div>
@@ -876,13 +1358,10 @@ Expected: ${testCase.expectedOutput}`}
 
           {step === 2 && (
             <>
-              <h1 className="sv-title">Thiết lập nhịp học</h1>
-              <p className="sv-desc">
-                Chọn khung học mỗi ngày để roadmap và milestone phù hợp hơn với
-                cường độ bạn muốn theo.
-              </p>
+              <h1 className="sv-title">{copy.step2Title}</h1>
+              <p className="sv-desc">{copy.step2Desc}</p>
 
-              <span className="sv-label">Số giờ học mỗi ngày (1–24)</span>
+              <span className="sv-label">{copy.dailyHours}</span>
               <input
                 className="sv-input"
                 type="number"
@@ -892,7 +1371,7 @@ Expected: ${testCase.expectedOutput}`}
                 onChange={(event) => setDailyHours(Number(event.target.value))}
               />
 
-              <span className="sv-label">Khung giờ tập trung</span>
+              <span className="sv-label">{copy.focusWindow}</span>
               <div className="sv-row">
                 <input
                   className="sv-input"
@@ -908,12 +1387,20 @@ Expected: ${testCase.expectedOutput}`}
                 />
               </div>
 
-              <span className="sv-label">Kiểu milestone bạn muốn</span>
+              <span className="sv-label">{copy.milestoneLabel}</span>
               <div className="sv-options">
                 {(
                   [
-                    { id: 'project', title: 'Project', sub: 'Xây một sản phẩm nhỏ' },
-                    { id: 'battle', title: 'Battle', sub: 'Đấu bài và phản xạ nhanh' },
+                    {
+                      id: 'project',
+                      title: copy.project,
+                      sub: copy.projectSub,
+                    },
+                    {
+                      id: 'battle',
+                      title: copy.battle,
+                      sub: copy.battleSub,
+                    },
                   ] as {
                     id: MilestoneTestPreference;
                     title: string;
@@ -932,19 +1419,19 @@ Expected: ${testCase.expectedOutput}`}
                 ))}
               </div>
 
-              <span className="sv-label">Mức độ kỷ luật</span>
+              <span className="sv-label">{copy.disciplineLabel}</span>
               <div className="sv-options">
                 {(
                   [
                     {
                       id: 'light',
-                      title: 'Light',
-                      sub: 'Nhắc nhở nhẹ và giữ nhịp học ổn định',
+                      title: copy.light,
+                      sub: copy.lightSub,
                     },
                     {
                       id: 'strict',
-                      title: 'Strict',
-                      sub: 'Siết milestone chặt hơn khi làm chưa tốt',
+                      title: copy.strict,
+                      sub: copy.strictSub,
                     },
                   ] as { id: DisciplineLevel; title: string; sub: string }[]
                 ).map((option) => (
@@ -966,7 +1453,7 @@ Expected: ${testCase.expectedOutput}`}
                   onClick={() => setStep(1)}
                   type="button"
                 >
-                  Quay lại
+                  {copy.back}
                 </button>
                 <button
                   className="sv-btn sv-btn-primary"
@@ -974,7 +1461,7 @@ Expected: ${testCase.expectedOutput}`}
                   onClick={submitDiscipline}
                   type="button"
                 >
-                  {loading ? 'Đang lưu...' : 'Tiếp tục'}
+                  {loading ? copy.saving : copy.continue}
                 </button>
               </div>
             </>
@@ -982,16 +1469,13 @@ Expected: ${testCase.expectedOutput}`}
 
           {step === 3 && (
             <>
-              <h1 className="sv-title">Hoàn tất onboarding survey</h1>
-              <p className="sv-desc">
-                Hệ thống đã có đủ dữ liệu để khởi tạo lộ trình học cá nhân hóa cho
-                bạn.
-              </p>
+              <h1 className="sv-title">{copy.step3Title}</h1>
+              <p className="sv-desc">{copy.step3Desc}</p>
               <div className="sv-result">
                 <div className="score">{score ?? 0}%</div>
-                {prettyEntryLevel(entryLevel) && (
+                {prettyEntryLevel(entryLevel, language) && (
                   <div className="level">
-                    Entry level: {prettyEntryLevel(entryLevel)}
+                    {copy.entryLevel}: {prettyEntryLevel(entryLevel, language)}
                   </div>
                 )}
               </div>
@@ -1001,7 +1485,7 @@ Expected: ${testCase.expectedOutput}`}
                   onClick={() => setStep(2)}
                   type="button"
                 >
-                  Quay lại
+                  {copy.back}
                 </button>
                 <button
                   className="sv-btn sv-btn-primary"
@@ -1009,7 +1493,7 @@ Expected: ${testCase.expectedOutput}`}
                   onClick={finish}
                   type="button"
                 >
-                  {loading ? 'Đang hoàn tất...' : 'Bắt đầu học'}
+                  {loading ? copy.finishing : copy.startLearning}
                 </button>
               </div>
             </>

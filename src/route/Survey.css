@@ -1,8 +1,16 @@
+/* ==========================================================================
+   CodeForGlory · Survey / Onboarding
+   Palette matches the landing page design system:
+   coral #ff7e5f (primary), purple #a78bfa (secondary), amber #fbbf24 (accent),
+   success #4ade80, navy background #070b1b -> #0d1631.
+   ========================================================================== */
+
 .sv-page {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(245, 158, 11, 0.12), transparent 36%),
-    radial-gradient(circle at top right, rgba(59, 130, 246, 0.14), transparent 32%),
+    radial-gradient(circle at top left, rgba(255, 126, 95, 0.14), transparent 38%),
+    radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 34%),
+    radial-gradient(circle at 30% 100%, rgba(255, 126, 95, 0.06), transparent 40%),
     linear-gradient(180deg, #070b1b 0%, #0d1631 100%);
   color: #ecf2ff;
   font-family: 'Lexend', system-ui, sans-serif;
@@ -15,6 +23,10 @@
   margin: 0 auto;
 }
 
+/* -------------------------------------------------------------------------
+   Step progress
+   ------------------------------------------------------------------------- */
+
 .sv-steps {
   display: flex;
   gap: 8px;
@@ -25,29 +37,38 @@
   flex: 1;
   height: 6px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(148, 163, 184, 0.16);
 }
 
 .sv-step-pill.active {
-  background: linear-gradient(90deg, #f59e0b, #f97316);
+  background: linear-gradient(90deg, #ff7e5f, #f97316);
+  box-shadow: 0 0 16px rgba(255, 126, 95, 0.45);
 }
 
 .sv-step-pill.done {
-  background: linear-gradient(90deg, #22c55e, #84cc16);
+  background: linear-gradient(90deg, #4ade80, #22c55e);
 }
 
+/* -------------------------------------------------------------------------
+   Card shell
+   ------------------------------------------------------------------------- */
+
 .sv-card {
-  background: rgba(11, 18, 40, 0.82);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  box-shadow: 0 30px 80px rgba(2, 6, 23, 0.45);
+  background: rgba(13, 20, 43, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  box-shadow:
+    0 30px 80px rgba(2, 6, 23, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
   border-radius: 24px;
-  padding: 28px;
-  backdrop-filter: blur(18px);
+  padding: 32px;
+  backdrop-filter: blur(20px);
 }
 
 .sv-title {
   color: #f8fafc;
   font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   margin: 0 0 8px;
 }
 
@@ -55,25 +76,29 @@
   color: #9fb0d8;
   font-size: 0.97rem;
   line-height: 1.65;
-  margin: 0 0 20px;
+  margin: 0 0 22px;
 }
 
 .sv-error {
-  background: rgba(220, 38, 38, 0.14);
+  background: rgba(239, 68, 68, 0.12);
   color: #fecaca;
-  border: 1px solid rgba(248, 113, 113, 0.35);
+  border: 1px solid rgba(248, 113, 113, 0.3);
   border-radius: 14px;
   padding: 12px 14px;
   font-size: 0.9rem;
   margin: 0 0 16px;
 }
 
+/* -------------------------------------------------------------------------
+   Option / level selection grids
+   ------------------------------------------------------------------------- */
+
 .sv-options,
 .sv-level-grid {
   display: grid;
   gap: 14px;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
 .sv-option,
@@ -88,8 +113,8 @@
 .sv-option,
 .sv-level-card {
   text-align: left;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 18px;
   padding: 18px;
   cursor: pointer;
@@ -104,15 +129,15 @@
 .sv-option:hover,
 .sv-level-card:hover,
 .sv-problem-tab:hover {
-  border-color: rgba(96, 165, 250, 0.55);
+  border-color: rgba(255, 126, 95, 0.45);
   transform: translateY(-1px);
 }
 
 .sv-option.selected,
 .sv-level-card.selected {
-  border-color: rgba(245, 158, 11, 0.65);
-  background: linear-gradient(180deg, rgba(245, 158, 11, 0.16), rgba(59, 130, 246, 0.08));
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.28);
+  border-color: rgba(255, 126, 95, 0.6);
+  background: linear-gradient(180deg, rgba(255, 126, 95, 0.14), rgba(167, 139, 250, 0.06));
+  box-shadow: 0 16px 40px rgba(255, 126, 95, 0.12);
 }
 
 .sv-option-title {
@@ -173,8 +198,8 @@
 }
 
 .sv-level-count {
-  background: rgba(255, 255, 255, 0.08);
-  color: #f8fafc;
+  background: rgba(255, 126, 95, 0.14);
+  color: #ffcab8;
 }
 
 .sv-level-sub {
@@ -187,43 +212,59 @@
   line-height: 1.55;
 }
 
+/* -------------------------------------------------------------------------
+   Highlight callout (workspace intro banner)
+   ------------------------------------------------------------------------- */
+
 .sv-highlight {
-  border: 1px solid rgba(96, 165, 250, 0.24);
-  background: linear-gradient(180deg, rgba(59, 130, 246, 0.12), rgba(15, 23, 42, 0.16));
+  border: 1px solid rgba(167, 139, 250, 0.28);
+  background: linear-gradient(180deg, rgba(167, 139, 250, 0.12), rgba(15, 23, 42, 0.2));
   border-radius: 18px;
   padding: 18px 20px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .sv-highlight-title {
   font-size: 0.96rem;
   font-weight: 700;
-  color: #bfdbfe;
-  margin-bottom: 6px;
+  color: #d9ceff;
+  margin-bottom: 0;
 }
 
 .sv-highlight-text {
   font-size: 0.9rem;
   line-height: 1.6;
   color: #dbeafe;
+  margin-top: 6px;
 }
+
+/* -------------------------------------------------------------------------
+   Inputs
+   ------------------------------------------------------------------------- */
 
 .sv-label {
   display: block;
   font-size: 0.88rem;
   color: #aab8da;
   margin: 16px 0 8px;
+  font-weight: 500;
 }
 
 .sv-input {
   width: 100%;
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 255, 255, 0.97);
   color: #14224f;
-  border: none;
+  border: 1px solid transparent;
   border-radius: 12px;
   padding: 12px 14px;
   font-size: 0.96rem;
   box-sizing: border-box;
+  transition: box-shadow 0.18s ease;
+}
+
+.sv-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 126, 95, 0.35);
 }
 
 .sv-row {
@@ -232,20 +273,24 @@
   flex-wrap: wrap;
 }
 
-.sv-row > * {
+.sv-row>* {
   flex: 1;
   min-width: 160px;
 }
+
+/* -------------------------------------------------------------------------
+   Summary bar
+   ------------------------------------------------------------------------- */
 
 .sv-summary-bar {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 14px;
   padding: 16px;
-  margin-bottom: 18px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  margin-bottom: 20px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 18px;
-  background: rgba(15, 23, 42, 0.55);
+  background: rgba(15, 23, 42, 0.5);
 }
 
 .sv-summary-item {
@@ -259,6 +304,10 @@
   font-size: 1rem;
 }
 
+/* -------------------------------------------------------------------------
+   Skill test workspace layout
+   ------------------------------------------------------------------------- */
+
 .sv-skill-layout {
   display: grid;
   grid-template-columns: 300px minmax(0, 1fr);
@@ -268,13 +317,14 @@
 .sv-problem-nav,
 .sv-problem-panel,
 .sv-editor-panel {
-  border: 1px solid rgba(148, 163, 184, 0.16);
+  border: 1px solid rgba(148, 163, 184, 0.14);
   border-radius: 20px;
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(15, 23, 42, 0.55);
 }
 
 .sv-problem-nav {
   padding: 16px;
+  align-self: start;
 }
 
 .sv-problem-nav-title {
@@ -294,7 +344,7 @@
   text-align: left;
   border: 1px solid rgba(148, 163, 184, 0.14);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.025);
   color: #ecf2ff;
   cursor: pointer;
   padding: 14px;
@@ -305,8 +355,8 @@
 }
 
 .sv-problem-tab.active {
-  border-color: rgba(245, 158, 11, 0.55);
-  background: linear-gradient(180deg, rgba(245, 158, 11, 0.14), rgba(59, 130, 246, 0.08));
+  border-color: rgba(255, 126, 95, 0.5);
+  background: linear-gradient(180deg, rgba(255, 126, 95, 0.14), rgba(167, 139, 250, 0.06));
 }
 
 .sv-problem-tab-title {
@@ -316,8 +366,8 @@
 }
 
 .sv-problem-difficulty {
-  background: rgba(99, 102, 241, 0.16);
-  color: #c7d2fe;
+  background: rgba(167, 139, 250, 0.16);
+  color: #d9ceff;
 }
 
 .sv-workspace {
@@ -328,7 +378,7 @@
 }
 
 .sv-problem-panel {
-  padding: 18px;
+  padding: 20px;
 }
 
 .sv-panel-tabs,
@@ -348,18 +398,20 @@
   border-radius: 10px;
   cursor: pointer;
   font-weight: 600;
+  transition: background 0.16s ease, color 0.16s ease;
 }
 
 .sv-panel-tabs button.active,
 .sv-console-tabs button.active {
-  background: rgba(59, 130, 246, 0.16);
-  color: #dbeafe;
+  background: rgba(255, 126, 95, 0.16);
+  color: #ffd8cc;
 }
 
 .sv-problem-heading {
   margin: 0 0 12px;
   color: #f8fafc;
   font-size: 1.2rem;
+  font-weight: 700;
 }
 
 .sv-problem-tags {
@@ -398,7 +450,7 @@
 .sv-run-case {
   border: 1px solid rgba(148, 163, 184, 0.15);
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.025);
 }
 
 .sv-problem-section-box {
@@ -431,7 +483,7 @@
 
 .sv-case-block,
 .sv-console-code {
-  background: rgba(2, 6, 23, 0.5);
+  background: rgba(2, 6, 23, 0.55);
   border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 12px;
   padding: 12px;
@@ -448,6 +500,10 @@
   font-size: 0.86rem;
   line-height: 1.55;
 }
+
+/* -------------------------------------------------------------------------
+   Editor panel
+   ------------------------------------------------------------------------- */
 
 .sv-editor-panel {
   display: grid;
@@ -472,6 +528,11 @@
   font-size: 0.86rem;
 }
 
+.sv-editor-sub code {
+  color: #ffcab8;
+  font-family: 'JetBrains Mono', monospace;
+}
+
 .sv-editor-tools {
   display: flex;
   align-items: center;
@@ -480,8 +541,8 @@
 }
 
 .sv-editor-language {
-  background: rgba(99, 102, 241, 0.14);
-  color: #dbeafe;
+  background: rgba(167, 139, 250, 0.16);
+  color: #d9ceff;
   border-radius: 999px;
   padding: 7px 12px;
   font-size: 0.78rem;
@@ -491,13 +552,14 @@
 .sv-link-btn {
   border: none;
   background: transparent;
-  color: #93c5fd;
+  color: #ff9d81;
   cursor: pointer;
   font-weight: 600;
+  transition: color 0.16s ease;
 }
 
 .sv-link-btn:hover {
-  color: #dbeafe;
+  color: #ffcab8;
 }
 
 .sv-editor-shell {
@@ -545,6 +607,10 @@
   margin-top: 12px;
 }
 
+/* -------------------------------------------------------------------------
+   Status badges - reused across nav tabs, run results, and grading
+   ------------------------------------------------------------------------- */
+
 .sv-status-badge {
   display: inline-flex;
   align-items: center;
@@ -556,12 +622,12 @@
 }
 
 .sv-status-badge.success {
-  background: rgba(34, 197, 94, 0.16);
+  background: rgba(74, 222, 128, 0.16);
   color: #bbf7d0;
 }
 
 .sv-status-badge.warning {
-  background: rgba(245, 158, 11, 0.16);
+  background: rgba(251, 191, 36, 0.16);
   color: #fde68a;
 }
 
@@ -570,10 +636,14 @@
   color: #fecaca;
 }
 
+/* -------------------------------------------------------------------------
+   Actions / buttons
+   ------------------------------------------------------------------------- */
+
 .sv-actions {
   justify-content: space-between;
   gap: 12px;
-  margin-top: 24px;
+  margin-top: 26px;
   flex-wrap: wrap;
 }
 
@@ -604,14 +674,23 @@
 }
 
 .sv-btn-primary {
-  background: linear-gradient(90deg, #f59e0b, #f97316);
-  color: #111827;
-  box-shadow: 0 14px 28px rgba(249, 115, 22, 0.22);
+  background: linear-gradient(90deg, #ff7e5f, #f97316);
+  color: #14071a;
+  box-shadow: 0 14px 28px rgba(255, 126, 95, 0.28);
+}
+
+.sv-btn-primary:hover:not(:disabled) {
+  box-shadow: 0 18px 34px rgba(255, 126, 95, 0.36);
 }
 
 .sv-btn-secondary {
-  background: linear-gradient(90deg, #2563eb, #1d4ed8);
-  color: #eff6ff;
+  background: linear-gradient(90deg, #a78bfa, #8b6cf5);
+  color: #14071a;
+  box-shadow: 0 14px 28px rgba(167, 139, 250, 0.24);
+}
+
+.sv-btn-secondary:hover:not(:disabled) {
+  box-shadow: 0 18px 34px rgba(167, 139, 250, 0.32);
 }
 
 .sv-btn-ghost {
@@ -620,12 +699,21 @@
   border: 1px solid rgba(148, 163, 184, 0.24);
 }
 
+.sv-btn-ghost:hover:not(:disabled) {
+  border-color: rgba(255, 126, 95, 0.4);
+  color: #ffcab8;
+}
+
 .sv-btn:disabled {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
 }
+
+/* -------------------------------------------------------------------------
+   Results
+   ------------------------------------------------------------------------- */
 
 .sv-result {
   text-align: center;
@@ -650,11 +738,16 @@
   grid-template-columns: auto 1fr;
   gap: 18px;
   align-items: center;
-  padding: 18px 20px;
-  margin-bottom: 20px;
-  border: 1px solid rgba(34, 197, 94, 0.2);
+  padding: 20px 22px;
+  margin-bottom: 22px;
+  border: 1px solid rgba(74, 222, 128, 0.22);
   border-radius: 20px;
-  background: linear-gradient(180deg, rgba(34, 197, 94, 0.1), rgba(15, 23, 42, 0.16));
+  background: linear-gradient(180deg, rgba(74, 222, 128, 0.1), rgba(15, 23, 42, 0.2));
+}
+
+.sv-result-copy {
+  display: flex;
+  flex-direction: column;
 }
 
 .sv-result-title {
@@ -671,8 +764,8 @@
 .sv-entry-chip {
   display: inline-flex;
   margin-top: 12px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #f8fafc;
+  background: rgba(255, 126, 95, 0.14);
+  color: #ffcab8;
 }
 
 .sv-grade-list {
@@ -685,15 +778,16 @@
   padding: 16px;
   border: 1px solid rgba(148, 163, 184, 0.14);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.025);
 }
 
 .sv-grade-index {
   font-size: 0.78rem;
-  color: #93c5fd;
+  color: #ff9d81;
   margin-bottom: 6px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  font-weight: 700;
 }
 
 .sv-grade-title {
@@ -710,7 +804,7 @@
 }
 
 .sv-grade-badge.success {
-  background: rgba(34, 197, 94, 0.16);
+  background: rgba(74, 222, 128, 0.16);
   color: #bbf7d0;
 }
 
@@ -729,7 +823,12 @@
   white-space: pre-wrap;
 }
 
+/* -------------------------------------------------------------------------
+   Responsive
+   ------------------------------------------------------------------------- */
+
 @media (max-width: 1200px) {
+
   .sv-skill-layout,
   .sv-workspace {
     grid-template-columns: 1fr;
