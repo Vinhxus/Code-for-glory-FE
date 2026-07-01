@@ -17,33 +17,18 @@ import {
   type SubmissionStatus,
 } from '../services/practiceApi';
 import { useSettingsStore } from '../store/settings';
+import {
+  PRACTICE_SOLUTIONS,
+  pickSolutionCode,
+  type PracticeLanguage,
+} from '../feature/practice/practiceSolutions';
+import { TheoryViewer } from './TheoryViewer';
 
 const cx = (...classes: Array<string | false | null | undefined>) =>
   classes.filter(Boolean).join(' ');
 
 const STORAGE_KEY = 'cg_survey_v2';
 const PRACTICE_LANG_KEY = 'cg_practice_language_v1';
-
-type PracticeLanguage =
-  | 'javascript'
-  | 'typescript'
-  | 'python'
-  | 'java'
-  | 'cpp'
-  | 'c'
-  | 'csharp'
-  | 'ruby'
-  | 'go'
-  | 'rust'
-  | 'php'
-  | 'swift'
-  | 'kotlin'
-  | 'dart'
-  | 'scala'
-  | 'r'
-  | 'sql'
-  | 'html'
-  | 'css';
 
 type LanguageConfig = { label: string; monaco: string };
 
@@ -89,33 +74,6 @@ function safeWritePracticeLanguage(lang: PracticeLanguage) {
   }
 }
 
-const MOCK_SOLUTIONS = [
-  {
-    id: 1,
-    title: '🔥 Beats 100% | Beginner Friendly ✅ | Hash Map',
-    author: 'CodeNinja',
-    tags: ['Hash Table', 'JavaScript', 'C++'],
-    upvotes: '11.8K',
-    views: '2.2M',
-  },
-  {
-    id: 2,
-    title: '【Video】Step by Step Easy Solution',
-    author: 'niits',
-    tags: ['Array', 'Java'],
-    upvotes: '3.8K',
-    views: '321.1K',
-  },
-  {
-    id: 3,
-    title: "3 Method's || C++ || JAVA || PYTHON",
-    author: 'Rahul Varma',
-    tags: ['Array', 'Hash Table'],
-    upvotes: '5K',
-    views: '1.1M',
-  },
-];
-
 type PracticeItem = {
   title: string;
   description: string;
@@ -140,6 +98,21 @@ type PracticeCatalogItem = {
   estimatedTime: string;
   tags: string[];
 };
+
+type PracticeSolutionCard = {
+  id: string;
+  title: string;
+  author: string;
+  tags: string[];
+  upvotes: string;
+  views: string;
+  code: string;
+  explanation: string;
+};
+
+function includesQuery(value: string, query: string) {
+  return value.toLowerCase().includes(query.toLowerCase());
+}
 
 type JudgeTemplate = {
   id: string;
@@ -2436,6 +2409,7 @@ function Practice() {
         allProblems: 'Tất cả bài',
         description: 'Mô tả',
         solutions: 'Lời giải',
+        theory: 'Lý Thuyết',
         accepted: 'Đã nhận',
         rate: 'Tỷ lệ',
         task: 'Yêu cầu',
@@ -2514,6 +2488,7 @@ function Practice() {
         allProblems: 'All problems',
         description: 'Description',
         solutions: 'Solutions',
+        theory: 'Theory',
         accepted: 'Accepted',
         rate: 'Rate',
         task: 'The Task',
@@ -2549,9 +2524,9 @@ function Practice() {
       };
 
   // UI States
-  const [leftTab, setLeftTab] = useState<'description' | 'solutions'>(
-    'description'
-  );
+  const [leftTab, setLeftTab] = useState<
+    'description' | 'solutions' | 'theory'
+  >('description');
   const [consoleTab, setConsoleTab] = useState<
     'testcase' | 'testresult' | 'submissions'
   >('testcase');
@@ -2575,6 +2550,62 @@ function Practice() {
     'All' | Difficulty
   >('All');
   const [selectedTopic, setSelectedTopic] = useState('All Topics');
+  const [solutionSearchQuery, setSolutionSearchQuery] = useState('');
+  const solutionScopeId = selectedCatalogItem?.id ?? practiceKey;
+  const practiceSolutions = useMemo<PracticeSolutionCard[]>(() => {
+    if (!selectedCatalogItem) return [];
+
+    const content = PRACTICE_SOLUTIONS[selectedCatalogItem.id];
+    const explanation = content
+      ? isVi
+        ? content.explanation.vi
+        : content.explanation.en
+      : isVi
+        ? 'Chưa có lời giải cho bài này (backend sẽ bổ sung sau).'
+        : 'No solution available yet (backend will be added later).';
+    const code = content
+      ? pickSolutionCode(content, language)
+      : isVi
+        ? '// TODO: Solution will be added later.'
+        : '// TODO: Solution will be added later.';
+
+    return [
+      {
+        id: `${selectedCatalogItem.id}-official`,
+        title: isVi
+          ? `Lời giải chuẩn · ${selectedCatalogItem.title}`
+          : `Official solution · ${selectedCatalogItem.title}`,
+        author: 'TRAE',
+        tags: selectedCatalogItem.tags,
+        upvotes: selectedCatalogItem.solvedCount,
+        views: selectedCatalogItem.acceptanceRate,
+        code,
+        explanation,
+      },
+    ];
+  }, [isVi, language, selectedCatalogItem]);
+  const filteredPracticeSolutions = useMemo(() => {
+    const query = solutionSearchQuery.trim();
+    if (!query) return practiceSolutions;
+
+    return practiceSolutions.filter((sol) => {
+      const haystack = [
+        sol.title,
+        sol.author,
+        sol.tags.join(' '),
+        sol.explanation,
+        sol.code,
+      ].join('\n');
+      return includesQuery(haystack, query);
+    });
+  }, [practiceSolutions, solutionSearchQuery]);
+  const [expandedSolutionByPractice, setExpandedSolutionByPractice] = useState<
+    Record<string, string | null>
+  >({});
+  const expandedSolutionId =
+    expandedSolutionByPractice[solutionScopeId] ??
+    filteredPracticeSolutions[0]?.id ??
+    null;
 
   // Logic States
   const [attempts, setAttempts] = useState(0);
@@ -2608,6 +2639,21 @@ function Practice() {
       }, 5000);
     },
     []
+  );
+
+  const copyToClipboard = useCallback(
+    async (text: string) => {
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast(isVi ? 'Đã copy vào clipboard.' : 'Copied to clipboard.', 'success');
+      } catch {
+        showToast(
+          isVi ? 'Không thể copy (trình duyệt chặn).' : 'Copy failed (blocked).',
+          'error'
+        );
+      }
+    },
+    [isVi, showToast]
   );
 
   const [isTooSmall, setIsTooSmall] = useState(false);
@@ -2716,6 +2762,37 @@ function Practice() {
     setCode(starter);
     lastStarterRef.current = starter;
   };
+
+  const handleApplySolutionCode = useCallback(
+    (solutionCode: string) => {
+      const starter = getStarterCode(language);
+      const normalizedCurrent = code.trim();
+      const normalizedStarter = starter.trim();
+      const normalizedSolution = solutionCode.trim();
+      const hasUserEdits =
+        normalizedCurrent !== '' &&
+        normalizedCurrent !== normalizedStarter &&
+        normalizedCurrent !== normalizedSolution;
+
+      if (hasUserEdits) {
+        const ok = window.confirm(
+          isVi
+            ? 'Bạn đang có code đã chỉnh sửa. Dán đáp án mẫu sẽ ghi đè editor hiện tại.\n\nOK: ghi đè bằng đáp án mẫu\nCancel: giữ nguyên editor'
+            : 'You have edited code in the editor. Applying the official solution will overwrite it.\n\nOK: replace with the official solution\nCancel: keep current editor content'
+        );
+        if (!ok) return;
+      }
+
+      setCode(solutionCode);
+      showToast(
+        isVi
+          ? 'Đã đưa code mẫu vào editor.'
+          : 'Official solution applied to the editor.',
+        'success'
+      );
+    },
+    [code, getStarterCode, isVi, language, showToast]
+  );
 
   const handleOpenPractice = (item: PracticeCatalogItem) => {
     navigate('/practice', {
@@ -2921,10 +2998,14 @@ function Practice() {
       }
     } catch (error) {
       console.error('Lỗi submit:', error);
+      const errorMessage =
+        error instanceof Error && error.message.trim()
+          ? error.message
+          : isVi
+            ? 'Có lỗi xảy ra khi nộp bài. Vui lòng thử lại!'
+            : 'Something went wrong while submitting. Please try again.';
       showToast(
-        isVi
-          ? 'Có lỗi xảy ra khi nộp bài. Vui lòng thử lại!'
-          : 'Something went wrong while submitting. Please try again.',
+        errorMessage,
         'error'
       );
     } finally {
@@ -3578,10 +3659,30 @@ function Practice() {
                   </span>{' '}
                   {ui.solutions}
                 </button>
+                <div className="w-px h-4 bg-[color:var(--cg-border)] mx-1" />
+                <button
+                  onClick={() => setLeftTab('theory')}
+                  className={cx(
+                    'flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors border-b-2',
+                    leftTab === 'theory'
+                      ? 'text-[#FF7E5F] border-[#FF7E5F]'
+                      : 'text-[color:var(--cg-text-muted)] border-transparent hover:text-[color:var(--cg-text)]'
+                  )}
+                >
+                  <span className="material-symbols-outlined text-[14px]">
+                    menu_book
+                  </span>{' '}
+                  {ui.theory}
+                </button>
               </div>
 
               {/* Left Content */}
-              <div className="flex-1 overflow-y-auto custom-scrollbar p-5">
+              <div
+                className={cx(
+                  'flex-1 overflow-y-auto custom-scrollbar',
+                  leftTab === 'theory' ? 'p-0' : 'p-5'
+                )}
+              >
                 {leftTab === 'description' && (
                   <div className="animate-fade-in flex flex-col h-full">
                     <h2 className="font-['Lexend'] text-xl font-bold mb-4">
@@ -3727,22 +3828,73 @@ function Practice() {
                         <input
                           type="text"
                           placeholder={ui.searchSolutions}
+                          value={solutionSearchQuery}
+                          onChange={(e) => setSolutionSearchQuery(e.target.value)}
                           className="bg-transparent border-none outline-none text-xs w-full text-[color:var(--cg-text)]"
                         />
                       </div>
-                      <button className="rounded-lg bg-[#FF7E5F] text-[#0F0B3C] font-bold text-xs px-3 py-1.5 flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setSolutionSearchQuery('')}
+                        className="rounded-lg bg-[#FF7E5F] text-[#0F0B3C] font-bold text-xs px-3 py-1.5 flex items-center gap-1"
+                      >
                         <span className="material-symbols-outlined text-[14px]">
-                          add
-                        </span>{' '}
-                        {ui.share}
+                          close
+                        </span>
+                        {isVi ? 'Xoá lọc' : 'Clear'}
                       </button>
+                    </div>
+
+                    <div className="mb-4 rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-4 py-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <div className="text-sm font-bold text-[color:var(--cg-text)]">
+                            {isVi
+                              ? 'Official solutions trong FE'
+                              : 'Official solutions in FE'}
+                          </div>
+                          <div className="mt-1 text-xs text-[color:var(--cg-text-muted)]">
+                            {isVi
+                              ? `Đang hiển thị ${filteredPracticeSolutions.length}/${practiceSolutions.length} lời giải cho bài hiện tại.`
+                              : `Showing ${filteredPracticeSolutions.length}/${practiceSolutions.length} solutions for the current problem.`}
+                          </div>
+                        </div>
+                        {!!practiceSolutions[0] && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleApplySolutionCode(practiceSolutions[0].code)
+                            }
+                            className="rounded-lg border border-[#FF7E5F]/40 px-3 py-1.5 text-xs font-bold text-[#FFB199] hover:border-[#FF7E5F] hover:text-[#FF7E5F] transition-colors"
+                          >
+                            {isVi ? 'Áp dụng vào editor' : 'Apply to editor'}
+                          </button>
+                        )}
+                      </div>
                     </div>
 
                     {/* Solutions List */}
                     <div className="flex flex-col gap-3">
-                      {MOCK_SOLUTIONS.map((sol) => (
+                      {filteredPracticeSolutions.length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] p-5 text-xs text-[color:var(--cg-text-muted)]">
+                          {isVi
+                            ? 'Không tìm thấy lời giải khớp với từ khoá hiện tại.'
+                            : 'No solutions match the current search query.'}
+                        </div>
+                      ) : (
+                        filteredPracticeSolutions.map((sol) => (
                         <div
                           key={sol.id}
+                          onClick={() =>
+                            setExpandedSolutionByPractice((prev) => {
+                              const current = prev[solutionScopeId] ?? null;
+                              return {
+                                ...prev,
+                                [solutionScopeId]:
+                                  current === sol.id ? null : sol.id,
+                              };
+                            })
+                          }
                           className="rounded-xl border border-[color:var(--cg-border)] bg-[#0A0726]/40 p-4 hover:border-[#FF7E5F]/50 transition-colors cursor-pointer group"
                         >
                           <h4 className="text-sm font-bold mb-2 group-hover:text-[#FF7E5F] transition-colors">
@@ -3783,13 +3935,63 @@ function Practice() {
                               <span className="material-symbols-outlined text-[14px]">
                                 chat_bubble
                               </span>{' '}
-                              240
+                              1
                             </span>
                           </div>
+
+                          {expandedSolutionId === sol.id && (
+                            <div className="mt-4 pt-4 border-t border-[color:var(--cg-border)]">
+                              <div className="text-[10px] font-semibold text-[color:var(--cg-text-muted)] mb-2">
+                                {isVi ? 'Giải thích' : 'Explanation'}
+                              </div>
+                              <div className="text-xs text-[color:var(--cg-text-muted)] leading-relaxed whitespace-pre-line">
+                                {sol.explanation}
+                              </div>
+
+                              <div className="mt-4 flex items-center justify-between">
+                                <div className="text-[10px] font-semibold text-[color:var(--cg-text-muted)]">
+                                  {isVi ? 'Code mẫu' : 'Code'}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleApplySolutionCode(sol.code);
+                                    }}
+                                    className="text-[10px] font-bold px-2 py-1 rounded-md bg-[#FF7E5F] text-[#0F0B3C] hover:brightness-105 transition-colors"
+                                  >
+                                    {isVi ? 'Dán vào editor' : 'Apply'}
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      void copyToClipboard(sol.code);
+                                    }}
+                                    className="text-[10px] font-bold px-2 py-1 rounded-md bg-[color:var(--cg-container-a16)] border border-[color:var(--cg-border)] hover:border-[#FF7E5F]/60 hover:text-[#FF7E5F] transition-colors"
+                                  >
+                                    {isVi ? 'Copy' : 'Copy'}
+                                  </button>
+                                </div>
+                              </div>
+                              <pre className="mt-2 text-xs text-[color:var(--cg-text)] bg-[color:var(--cg-container-a16)] border border-[color:var(--cg-border)] rounded-lg p-3 overflow-auto max-h-64 whitespace-pre-wrap">
+                                {sol.code}
+                              </pre>
+                            </div>
+                          )}
                         </div>
-                      ))}
+                      ))
+                      )}
                     </div>
                   </div>
+                )}
+
+                {leftTab === 'theory' && (
+                  <TheoryViewer
+                    topic={
+                      selectedCatalogItem?.topic ?? currentPractice.concept
+                    }
+                    isVi={isVi}
+                  />
                 )}
               </div>
             </Panel>

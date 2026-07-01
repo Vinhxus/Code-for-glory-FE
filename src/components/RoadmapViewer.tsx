@@ -5,6 +5,7 @@ import type {
   LearningPathNodeDto,
   ProgressDto,
 } from '../services/learningPathApi';
+import type { StartingStage } from './learningPathUtils';
 
 export type RoadmapKey = 'frontend' | 'backend';
 type NodeVariant = 'recommended' | 'alternative' | 'optional';
@@ -16,7 +17,25 @@ type MainStep = {
   leftNodes?: BranchNode[];
 };
 
-/* ─── DATA (unchanged) ─── */
+/* ─── STAGE BOUNDARIES ─────────────────────────────────────────────
+   Beginner:     indices  0–9  (10 nodes)
+   Intermediate: indices 10–19 (10 nodes)
+   Advanced:     indices 20–29 (10 nodes)
+──────────────────────────────────────────────────────────────────── */
+const STAGE_ORDER: Record<StartingStage, number> = {
+  beginner: 0,
+  intermediate: 1,
+  advanced: 2,
+};
+
+/** Map a 0-based global node index to its stage. */
+function indexToStage(globalIndex: number): StartingStage {
+  if (globalIndex < 10) return 'beginner';
+  if (globalIndex < 20) return 'intermediate';
+  return 'advanced';
+}
+
+/* ─── DATA ──────────────────────────────────────────────────────── */
 const FRONTEND: MainStep[] = [
   // Beginner
   { id: 'f1', title: 'Web & Internet Basics' },
@@ -165,7 +184,7 @@ const BACKEND: MainStep[] = [
   },
 ];
 
-/* ─── STYLES ─── */
+/* ─── STYLES ─────────────────────────────────────────────────────── */
 const cx = (...cls: Array<string | false | null | undefined>) =>
   cls.filter(Boolean).join(' ');
 
@@ -195,7 +214,7 @@ const DEFAULT_CONFIG = {
   leftBar: 'bg-slate-400',
 };
 
-/* ─── SUB-COMPONENTS ─── */
+/* ─── SUB-COMPONENTS ─────────────────────────────────────────────── */
 function BranchBox({ node }: { node: BranchNode }) {
   const cfg = node.variant ? VARIANT_CONFIG[node.variant] : DEFAULT_CONFIG;
   return (
@@ -258,15 +277,21 @@ function MainNode({
   index,
   status,
   deadline,
+  isPreUnlocked,
   onClick,
 }: {
   title: string;
   index: number;
   status: NodeStatus;
   deadline: string;
+  isPreUnlocked: boolean;
   onClick: () => void;
 }) {
   const getStyles = () => {
+    // Pre-unlocked: muted green — auto-passed during assessment
+    if (isPreUnlocked) {
+      return 'border-[#4ade80]/40 bg-gradient-to-br from-[#4ade80]/10 to-[#4ade80]/5 text-[#4ade80]/70 shadow-none cursor-default opacity-75';
+    }
     switch (status) {
       case 'completed':
         return 'border-[#4ade80]/70 bg-gradient-to-br from-[#4ade80]/20 to-[#4ade80]/5 text-[#4ade80] shadow-[0_0_20px_rgba(74,222,128,0.12)] cursor-pointer hover:border-[#4ade80]';
@@ -280,9 +305,49 @@ function MainNode({
     }
   };
 
+  const renderBadge = () => {
+    if (isPreUnlocked) {
+      return (
+        <div className="flex items-center gap-1 rounded-full bg-[#4ade80]/15 px-1.5 py-0.5 text-[9px] font-bold tracking-wider text-[#4ade80]/80">
+          <span className="material-symbols-outlined text-[10px]">
+            lock_open
+          </span>
+          UNLOCKED
+        </div>
+      );
+    }
+    if (status === 'completed') {
+      return (
+        <span className="material-symbols-outlined text-[14px]">
+          check_circle
+        </span>
+      );
+    }
+    if (status === 'skipped') {
+      return (
+        <span className="text-[10px] uppercase font-bold tracking-wider">
+          Skipped
+        </span>
+      );
+    }
+    if (status === 'current') {
+      return (
+        <span className="badge-purple text-[9px] py-0 px-1.5 h-4">
+          IN PROGRESS
+        </span>
+      );
+    }
+    if (status === 'locked') {
+      return (
+        <span className="material-symbols-outlined text-[14px]">lock</span>
+      );
+    }
+    return null;
+  };
+
   return (
     <div
-      onClick={onClick}
+      onClick={isPreUnlocked ? undefined : onClick}
       className={cx(
         'relative w-64 rounded-xl border-2 px-5 py-3.5 flex flex-col',
         'transition-all duration-250 select-none group',
@@ -294,29 +359,12 @@ function MainNode({
         <span className="text-xs font-mono opacity-70">
           Milestone {String(index + 1).padStart(2, '0')}
         </span>
-        {status === 'completed' && (
-          <span className="material-symbols-outlined text-[14px]">
-            check_circle
-          </span>
-        )}
-        {status === 'skipped' && (
-          <span className="text-[10px] uppercase font-bold tracking-wider">
-            Skipped
-          </span>
-        )}
-        {status === 'current' && (
-          <span className="badge-purple text-[9px] py-0 px-1.5 h-4">
-            IN PROGRESS
-          </span>
-        )}
-        {status === 'locked' && (
-          <span className="material-symbols-outlined text-[14px]">lock</span>
-        )}
+        {renderBadge()}
       </div>
       <div className="text-sm font-bold truncate">{title}</div>
 
-      {/* Deadline display */}
-      {status !== 'skipped' && status !== 'completed' && (
+      {/* Deadline: hidden for pre-unlocked, completed, skipped */}
+      {!isPreUnlocked && status !== 'skipped' && status !== 'completed' && (
         <div className="mt-2 text-[10px] font-medium opacity-70 flex items-center gap-1 border-t border-white/10 pt-2">
           <span className="material-symbols-outlined text-[12px]">
             calendar_today
@@ -325,9 +373,9 @@ function MainNode({
         </div>
       )}
 
-      {/* Hover tooltip for locked */}
-      {status === 'locked' && (
-        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 rounded-lg bg-black/90 text-white text-[10px] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 border border-white/10 roadmap-tooltip-locked"></div>
+      {/* Hover tooltip for locked nodes */}
+      {!isPreUnlocked && status === 'locked' && (
+        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 rounded-lg bg-black/90 text-white text-[10px] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 border border-white/10 roadmap-tooltip-locked" />
       )}
     </div>
   );
@@ -341,6 +389,7 @@ function StepRow({
   status,
   deadline,
   isMilestoneGate,
+  isPreUnlocked,
   onNodeClick,
 }: {
   step: MainStep;
@@ -350,10 +399,13 @@ function StepRow({
   status: NodeStatus;
   deadline: string;
   isMilestoneGate: boolean;
+  isPreUnlocked: boolean;
   onNodeClick: () => void;
 }) {
   const hasRight = !!step.rightCols?.length;
   const hasLeft = !!step.leftNodes?.length;
+  const isConnectorComplete =
+    isPreUnlocked || status === 'completed' || status === 'skipped';
 
   return (
     <div className="flex items-center relative">
@@ -373,21 +425,16 @@ function StepRow({
 
       {/* Center */}
       <div className="flex w-64 flex-col items-center">
-        <VertConnector
-          visible={!isFirst}
-          isCompleted={status === 'completed' || status === 'skipped'}
-        />
+        <VertConnector visible={!isFirst} isCompleted={isConnectorComplete} />
         <MainNode
           title={step.title}
           index={index}
           status={status}
           deadline={deadline}
+          isPreUnlocked={isPreUnlocked}
           onClick={onNodeClick}
         />
-        <VertConnector
-          visible={!isLast}
-          isCompleted={status === 'completed' || status === 'skipped'}
-        />
+        <VertConnector visible={!isLast} isCompleted={isConnectorComplete} />
       </div>
 
       {/* Right branches */}
@@ -404,8 +451,8 @@ function StepRow({
             </div>
           ))}
 
-        {/* Milestone Gate Badge */}
-        {isMilestoneGate && (
+        {/* Milestone Gate Badge — hidden on pre-unlocked nodes */}
+        {isMilestoneGate && !isPreUnlocked && (
           <div className="absolute left-8 top-1/2 -translate-y-1/2 flex items-center gap-2 px-3 py-1.5 bg-[#fbbf24]/10 border border-[#fbbf24]/40 rounded-lg text-[#fbbf24] shadow-[0_0_15px_rgba(251,191,36,0.2)] animate-pulse z-10">
             <span className="material-symbols-outlined text-[16px]">
               swords
@@ -447,17 +494,78 @@ function Legend() {
   );
 }
 
-/* ─── MAIN EXPORT ─── */
+/* ─── STAGE HEADER ───────────────────────────────────────────────── */
+function StageHeader({
+  title,
+  colorClass,
+  stageKey,
+  startingStage,
+  preUnlockedStages,
+}: {
+  title: string;
+  colorClass: string;
+  stageKey: StartingStage;
+  startingStage: StartingStage;
+  preUnlockedStages: StartingStage[];
+}) {
+  const isPreUnlocked = preUnlockedStages.includes(stageKey);
+  const isStarting = stageKey === startingStage;
+  const isLocked =
+    STAGE_ORDER[stageKey] > STAGE_ORDER[startingStage] && !isPreUnlocked;
+
+  return (
+    <div className="flex flex-col items-center gap-2 mb-8">
+      <div
+        className={cx(
+          'px-6 py-2 rounded-full border border-white/20 text-sm font-bold shadow-lg backdrop-blur-md',
+          colorClass,
+          isLocked ? 'opacity-40 grayscale' : ''
+        )}
+      >
+        {title}
+      </div>
+
+      {isPreUnlocked && (
+        <div className="flex items-center gap-1.5 rounded-full border border-[#4ade80]/30 bg-[#4ade80]/10 px-3 py-1 text-[10px] font-semibold text-[#4ade80]">
+          <span className="material-symbols-outlined text-[12px]">
+            lock_open
+          </span>
+          Pre-unlocked via assessment
+        </div>
+      )}
+      {isStarting && (
+        <div className="flex items-center gap-1.5 rounded-full border border-[#3b82f6]/40 bg-[#3b82f6]/10 px-3 py-1 text-[10px] font-semibold text-[#60a5fa]">
+          <span className="material-symbols-outlined text-[12px]">
+            play_arrow
+          </span>
+          Your starting point
+        </div>
+      )}
+      {isLocked && (
+        <div className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold text-[color:var(--cg-text-muted)]">
+          <span className="material-symbols-outlined text-[12px]">lock</span>
+          Complete previous stage to unlock
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── MAIN EXPORT ────────────────────────────────────────────────── */
 function RoadmapViewer({
   selected,
-  surveyData,
+  startingStage = 'beginner',
+  preUnlockedStages = [],
   apiNodes = [],
   apiProgress = [],
   loading = false,
   error = '',
 }: {
   selected: RoadmapKey;
-  surveyData: { hoursPerDay?: number; testScore?: number } | null;
+  /** Derived from onboarding — where the user begins on the roadmap. */
+  startingStage?: StartingStage;
+  /** Stages auto-completed during assessment (rendered as pre-unlocked). */
+  preUnlockedStages?: StartingStage[];
   apiNodes?: LearningPathNodeDto[];
   apiProgress?: ProgressDto[];
   loading?: boolean;
@@ -466,10 +574,9 @@ function RoadmapViewer({
   const t = useT();
   const navigate = useNavigate();
   const [hoveredStep, setHoveredStep] = useState<string | null>(null);
-  // reference loading prop to avoid unused variable linting when not used in JSX
   void loading;
-  // reference error prop to avoid unused variable linting when not used
   void error;
+
   const steps = useMemo<MainStep[]>(() => {
     if (apiNodes.length > 0) {
       return [...apiNodes]
@@ -495,26 +602,17 @@ function RoadmapViewer({
             : undefined,
         }));
     }
-
     return selected === 'frontend' ? FRONTEND : BACKEND;
   }, [apiNodes, selected]);
+
   const isFE = selected === 'frontend';
 
-  // State calculations
-  const totalHours = 120; // Example total
-  const hoursPerDay = surveyData?.hoursPerDay || 2;
-  const testScore = surveyData?.testScore || 0;
-
-  // If score > 80% (>= 4), jump to Advanced. If >= 3, jump to Intermediate.
-  // Advanced = start at index 20, Intermediate = start at index 10, Beginner = start at 0
-  const startingGlobalIndex = testScore === 5 ? 20 : testScore >= 3 ? 10 : 0;
-
-  const currentIndex = startingGlobalIndex; // Using this to mock progress
-
-  // Generate deadlines
+  // ETA deadline calculation (defaults to 2 h/day if not known)
+  const totalHours = 120;
+  const hoursPerDay = 2;
   const calculateDeadline = (index: number) => {
     const today = new Date();
-    const hoursPerNode = totalHours / 30; // 30 steps total
+    const hoursPerNode = totalHours / 30;
     const daysToAdd = Math.ceil((index * hoursPerNode) / hoursPerDay);
     today.setDate(today.getDate() + daysToAdd);
     return today.toLocaleDateString('en-US', {
@@ -536,54 +634,85 @@ function RoadmapViewer({
       });
   };
 
+  /**
+   * Core unlock logic:
+   *
+   *  pre-unlocked stage  → all its nodes: isPreUnlocked=true, status='completed'
+   *  starting stage      → first node: status='current'; rest: status='locked'
+   *  stage above start   → all nodes: status='locked', isPreUnlocked=false
+   *
+   * Real backend progress (apiProgress) overrides mock status
+   * but never overrides the isPreUnlocked visual treatment.
+   */
+  const deriveNodeState = (
+    globalIndex: number,
+    step: MainStep
+  ): { status: NodeStatus; isPreUnlocked: boolean } => {
+    const nodeStage = indexToStage(globalIndex);
+    const nodeStageOrder = STAGE_ORDER[nodeStage];
+    const startingOrder = STAGE_ORDER[startingStage];
+
+    // Real backend progress wins (except pre-unlocked visual stays)
+    if (apiProgress.length > 0) {
+      const prog = apiProgress.find((p) => p.nodeId === step.id);
+      if (prog?.status === 'completed') {
+        return { status: 'completed', isPreUnlocked: false };
+      }
+    }
+
+    // Pre-unlocked stage → auto-completed with special badge
+    if (preUnlockedStages.includes(nodeStage)) {
+      return { status: 'completed', isPreUnlocked: true };
+    }
+
+    // Stage above starting stage → locked
+    if (nodeStageOrder > startingOrder) {
+      return { status: 'locked', isPreUnlocked: false };
+    }
+
+    // Starting stage: first node = current, rest = locked
+    const startingIndex = startingOrder * 10; // 0, 10, or 20
+    if (globalIndex === startingIndex) {
+      return { status: 'current', isPreUnlocked: false };
+    }
+    return { status: 'locked', isPreUnlocked: false };
+  };
+
   const renderStage = (
+    stageKey: StartingStage,
     title: string,
     colorClass: string,
     items: MainStep[],
     globalOffset: number
   ) => {
-    const isStageLocked = currentIndex < globalOffset;
+    const stageOrder = STAGE_ORDER[stageKey];
+    const startingOrder = STAGE_ORDER[startingStage];
+    const isFullyLocked =
+      stageOrder > startingOrder && !preUnlockedStages.includes(stageKey);
 
     return (
       <div
         className={cx(
           'flex flex-col items-center mb-16',
-          isStageLocked ? 'opacity-40 grayscale' : ''
+          isFullyLocked ? 'opacity-40 grayscale' : ''
         )}
       >
-        <div
-          className={cx(
-            'px-6 py-2 rounded-full border border-white/20 text-sm font-bold shadow-lg mb-8 backdrop-blur-md',
-            colorClass
-          )}
-        >
-          {title}
-        </div>
+        <StageHeader
+          title={title}
+          colorClass={colorClass}
+          stageKey={stageKey}
+          startingStage={startingStage}
+          preUnlockedStages={preUnlockedStages}
+        />
+
         <div className="flex flex-col items-center min-w-[640px]">
           {items.map((step, i) => {
             const globalIndex = globalOffset + i;
-
-            let status: NodeStatus;
-            if (apiProgress && apiProgress.length > 0) {
-              const nodeProgress = apiProgress.find(
-                (p) => p.nodeId === step.id
-              );
-              if (nodeProgress) {
-                status = nodeProgress.status as NodeStatus;
-              } else {
-                status = globalIndex === 0 ? 'current' : 'locked';
-              }
-            } else {
-              status =
-                globalIndex < currentIndex
-                  ? 'completed'
-                  : globalIndex === currentIndex
-                    ? 'current'
-                    : 'locked';
-            }
-
+            const { status, isPreUnlocked } = deriveNodeState(
+              globalIndex,
+              step
+            );
             const deadline = calculateDeadline(globalIndex + 1);
-            // Every 10th node is the final capstone for that stage
             const isMilestoneGate = (i + 1) % 10 === 0;
 
             return (
@@ -605,6 +734,7 @@ function RoadmapViewer({
                   status={status}
                   deadline={deadline}
                   isMilestoneGate={isMilestoneGate}
+                  isPreUnlocked={isPreUnlocked}
                   onNodeClick={() => handleNodeClick(status, step)}
                 />
               </div>
@@ -633,6 +763,14 @@ function RoadmapViewer({
             <div className="w-2 h-2 rounded-full bg-slate-500" />{' '}
             {t('roadmap.locked')}
           </div>
+          {preUnlockedStages.length > 0 && (
+            <div className="flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[12px] text-[#4ade80]/70">
+                lock_open
+              </span>
+              <span className="text-[#4ade80]/70">Pre-unlocked</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -671,29 +809,33 @@ function RoadmapViewer({
           />
         </div>
 
-        {/* Render Stages */}
+        {/* i18n CSS trick */}
+        <style>{`
+          .roadmap-deadline-label::before { content: "${t('roadmap.estCompletion')}"; }
+          .roadmap-tooltip-locked::before { content: "${t('roadmap.tooltip.locked')}"; }
+        `}</style>
+
+        {/* Stages */}
         <div
           className="flex flex-col w-full items-center"
           onMouseLeave={() => setHoveredStep(null)}
         >
-          {/* Note: I injected a tiny effect up top or we can just pass translations into MainNode, but I'll use CSS trick or just string replace for now. Actually, let's just pass t down if we want to, but to avoid prop drilling we can render translations in a portal or style block */}
-          <style>{`
-            .roadmap-deadline-label::before { content: "${t('roadmap.estCompletion')}"; }
-            .roadmap-tooltip-locked::before { content: "${t('roadmap.tooltip.locked')}"; }
-          `}</style>
           {renderStage(
+            'beginner',
             t('roadmap.stage.beginner'),
             'bg-green-500/10 text-green-400 border-green-500/30',
             steps.slice(0, Math.min(10, steps.length)),
             0
           )}
           {renderStage(
+            'intermediate',
             t('roadmap.stage.intermediate'),
             'bg-blue-500/10 text-blue-400 border-blue-500/30',
             steps.slice(10, Math.min(20, steps.length)),
             10
           )}
           {renderStage(
+            'advanced',
             t('roadmap.stage.advanced'),
             'bg-purple-500/10 text-purple-400 border-purple-500/30',
             steps.slice(20),

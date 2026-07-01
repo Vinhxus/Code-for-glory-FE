@@ -13,6 +13,7 @@
   padding: 0 24px;
   background: var(--cg-sidebar, #12111a);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .header-logo {
@@ -41,7 +42,7 @@
 }
 
 .header-nav-link {
-  color: #e2e8f0;
+  color: var(--cg-text, #ffffff);
   text-decoration: none;
   font-size: 14px;
   padding: 6px 12px;
@@ -70,7 +71,7 @@
   border-radius: 8px;
   border: none;
   background: transparent;
-  color: #ffffff;
+  color: var(--cg-text, #ffffff);
 }
 
 .header-profile-btn {
@@ -80,7 +81,7 @@
   cursor: pointer;
   background: transparent;
   border: none;
-  color: #ffffff;
+  color: var(--cg-text, #ffffff);
 }
 
 .header-hamburger-toggle {

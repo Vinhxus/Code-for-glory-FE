@@ -881,7 +881,6 @@ Expected: ${testCase.expectedOutput}`}
                 Chọn khung học mỗi ngày để roadmap và milestone phù hợp hơn với
                 cường độ bạn muốn theo.
               </p>
-
               <span className="sv-label">Số giờ học mỗi ngày (1–24)</span>
               <input
                 className="sv-input"
