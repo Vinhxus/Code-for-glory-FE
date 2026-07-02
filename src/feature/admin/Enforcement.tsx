@@ -46,12 +46,13 @@ interface AdminConfigResponse {
   _id: string;
   scope: string;
   key: string;
-  value: Record<string, unknown>;
+  value: unknown;
 }
+
 
 // Lấy URL từ biến môi trường hoặc chạy mặc định ở localhost
 const API_URL =
-  (import.meta.env.VITE_API_URL ?? 'http://localhost:3000') + '/admin/configs';
+  (import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api') + '/admin/configs';
 
 // ─────────────────────────────────────────────────────────────────────────
 // Dữ liệu mặc định (Fallback) — dùng khi chưa có dữ liệu từ Backend

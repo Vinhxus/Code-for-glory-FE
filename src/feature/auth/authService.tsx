@@ -39,7 +39,7 @@ interface LoginRawResponse {
   };
 }
 
-export const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+export const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
 
 // BE bọc MỌI response trong envelope:
 //  - thành công: { data: <payload>, meta }

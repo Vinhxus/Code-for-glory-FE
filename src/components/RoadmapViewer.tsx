@@ -658,6 +658,15 @@ function RoadmapViewer({
       if (prog?.status === 'completed') {
         return { status: 'completed', isPreUnlocked: false };
       }
+      if (prog?.status === 'skipped') {
+        return { status: 'skipped', isPreUnlocked: false };
+      }
+      if (prog && ['current', 'open', 'in_progress'].includes(prog.status)) {
+        return { status: 'current', isPreUnlocked: false };
+      }
+      if (prog && ['locked', 'temp_locked'].includes(prog.status)) {
+        return { status: 'locked', isPreUnlocked: false };
+      }
     }
 
     // Pre-unlocked stage → auto-completed with special badge

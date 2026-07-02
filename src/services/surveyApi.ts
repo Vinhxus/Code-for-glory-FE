@@ -36,6 +36,12 @@ export interface CodingProblem {
 export interface SkillTestStartResponse {
   problems: CodingProblem[];
   totalProblems: number;
+  requestedLevel: SkillLevel;
+  requestedQuestionCount: number;
+  deliveredQuestionCount: number;
+  poolSize: number;
+  poolBreakdown: Partial<Record<CareerField, number>>;
+  fallbackUsed: boolean;
 }
 
 export interface CodeSolution {
@@ -122,7 +128,7 @@ export function saveCareerPath(
   return api.post<SurveyDraft>('/survey/career-path', payload);
 }
 
-/** Segment 2a — fetch 1–3 coding problems for the field. */
+/** Segment 2a — fetch up to 5 coding problems for the field. */
 export function startSkillTest(
   payload: SkillTestStartPayload
 ): Promise<SkillTestStartResponse> {

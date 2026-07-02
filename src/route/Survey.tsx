@@ -16,6 +16,7 @@ import {
   type MilestoneTestPreference,
   type QuestionGrade,
   type SkillLevel,
+  type SkillTestStartResponse,
   type SkillTestRunResult,
 } from '../services/surveyApi';
 import { useSettingsStore, type AppLanguage } from '../store/settings';
@@ -104,23 +105,31 @@ const LEVEL_OPTIONS: BilingualOption<SkillLevel>[] = [
   },
 ];
 
+const RANDOM_CHALLENGE_COUNT = 5;
+
 const LEVEL_CHALLENGE_COUNT: Record<SkillLevel, number> = {
-  novice: 1,
-  apprentice: 2,
-  journeyman: 3,
-  master: 3,
+  novice: RANDOM_CHALLENGE_COUNT,
+  apprentice: RANDOM_CHALLENGE_COUNT,
+  journeyman: RANDOM_CHALLENGE_COUNT,
+  master: RANDOM_CHALLENGE_COUNT,
+};
+
+const LEVEL_POOL_SIZE_BY_FIELD: Record<CareerField, number> = {
+  frontend: 10,
+  backend: 10,
+  fullstack: 20,
 };
 
 const TOTAL_STEPS = 4;
 
 const ENTRY_LEVEL_LABELS: Record<AppLanguage, Record<string, string>> = {
   vi: {
-    root: 'Root',
+    root: 'Beginner',
     intermediate: 'Intermediate',
     advanced: 'Advanced',
   },
   en: {
-    root: 'Root',
+    root: 'Beginner',
     intermediate: 'Intermediate',
     advanced: 'Advanced',
   },
@@ -197,7 +206,16 @@ const SURVEY_COPY = {
     step1Title: 'Đánh giá kỹ năng bằng code',
     step1Desc:
       'Chọn level tự đánh giá của bạn. Hệ thống sẽ tạo bộ bài survey coding theo đúng level và track bạn vừa chọn.',
+    step1Hint:
+      'Mỗi level có một ngân hàng bài riêng. Mỗi lần bắt đầu, hệ thống sẽ bốc ngẫu nhiên 5 bài để tránh học tủ và giữ trải nghiệm mới.',
     challengeUnit: 'bài',
+    randomPickLabel: 'Random set',
+    poolSizeLabel: 'Ngân hàng level',
+    randomRuleLabel: 'Cách chọn',
+    randomRuleValue: 'Random 5 bài',
+    reshuffle: 'Bốc bộ khác',
+    poolFallbackHint:
+      'Một số bài được lấy thêm từ level lân cận để đủ số lượng cần giao.',
     workspaceTitle: 'Survey coding workspace',
     back: 'Quay lại',
     preparing: 'Đang chuẩn bị...',
@@ -205,6 +223,13 @@ const SURVEY_COPY = {
     resultTitle: 'Kết quả skill survey',
     resultDesc: 'Điểm này được tính từ toàn bộ test case công khai và ẩn.',
     entryLevel: 'Entry level',
+    unlockedLearningPath: 'Learning path được mở sẵn',
+    placementInsightBeginner:
+      'Bạn sẽ bắt đầu từ Beginner stage. Các stage cao hơn sẽ tiếp tục khóa để lộ trình vừa sức hơn.',
+    placementInsightIntermediate:
+      'Bạn sẽ bắt đầu từ Intermediate stage. Toàn bộ stage Beginner sẽ được đánh dấu đã hoàn thành trong learning path cho cả Frontend và Backend.',
+    placementInsightAdvanced:
+      'Bạn sẽ bắt đầu từ Advanced stage. Toàn bộ stage Beginner và Intermediate sẽ được đánh dấu đã hoàn thành trong learning path cho cả Frontend và Backend.',
     problemLabel: 'Bài',
     testCasePass: 'Test case pass',
     redoTest: 'Làm lại phần test',
@@ -281,7 +306,16 @@ const SURVEY_COPY = {
     step1Title: 'Skill assessment by coding',
     step1Desc:
       'Pick your self-assessed level. The system will generate survey coding tasks based on that level and the track you selected.',
+    step1Hint:
+      'Each level has its own bank. Every time you start, the system draws 5 random problems so the experience stays fresh and harder to memorize.',
     challengeUnit: 'tasks',
+    randomPickLabel: 'Random set',
+    poolSizeLabel: 'Level pool',
+    randomRuleLabel: 'Selection',
+    randomRuleValue: 'Random 5 problems',
+    reshuffle: 'Draw another set',
+    poolFallbackHint:
+      'Some problems were borrowed from nearby levels to fill the requested set.',
     workspaceTitle: 'Survey coding workspace',
     back: 'Back',
     preparing: 'Preparing...',
@@ -289,6 +323,13 @@ const SURVEY_COPY = {
     resultTitle: 'Survey skill result',
     resultDesc: 'This score is computed from both public and hidden test cases.',
     entryLevel: 'Entry level',
+    unlockedLearningPath: 'Pre-unlocked in learning path',
+    placementInsightBeginner:
+      'You will start from the Beginner stage. Higher stages stay locked so the roadmap remains appropriately paced.',
+    placementInsightIntermediate:
+      'You will start from the Intermediate stage. The full Beginner stage will be marked completed across both Frontend and Backend learning paths.',
+    placementInsightAdvanced:
+      'You will start from the Advanced stage. The full Beginner and Intermediate stages will be marked completed across both Frontend and Backend learning paths.',
     problemLabel: 'Problem',
     testCasePass: 'Test cases passed',
     redoTest: 'Retake this test section',
@@ -473,6 +514,22 @@ function prettyEntryLevel(value: string | null, language: AppLanguage): string |
   return ENTRY_LEVEL_LABELS[language][value] ?? value;
 }
 
+function getUnlockedLearningPathLabels(
+  value: string | null,
+  language: AppLanguage,
+): string[] {
+  if (value === 'advanced') {
+    return [
+      ENTRY_LEVEL_LABELS[language].root,
+      ENTRY_LEVEL_LABELS[language].intermediate,
+    ];
+  }
+  if (value === 'intermediate') {
+    return [ENTRY_LEVEL_LABELS[language].root];
+  }
+  return [];
+}
+
 function localize(label: Bilingual, language: AppLanguage) {
   return language === 'vi' ? label.vi : label.en;
 }
@@ -542,12 +599,42 @@ function localizeProblem(problem: CodingProblem, language: AppLanguage): CodingP
   };
 }
 
+type SkillTestMeta = Pick<
+  SkillTestStartResponse,
+  | 'requestedLevel'
+  | 'requestedQuestionCount'
+  | 'deliveredQuestionCount'
+  | 'poolSize'
+  | 'poolBreakdown'
+  | 'fallbackUsed'
+>;
+
+function formatPoolBreakdown(
+  fieldFocus: CareerField | null,
+  meta: SkillTestMeta | null,
+  language: AppLanguage,
+) {
+  if (!fieldFocus) return '—';
+  const poolSize = meta?.poolSize ?? LEVEL_POOL_SIZE_BY_FIELD[fieldFocus];
+  const breakdown = meta?.poolBreakdown;
+
+  if (fieldFocus !== 'fullstack') {
+    return `${poolSize} ${language === 'vi' ? 'bài' : 'problems'}`;
+  }
+
+  const frontendCount = breakdown?.frontend ?? 10;
+  const backendCount = breakdown?.backend ?? 10;
+
+  return language === 'vi'
+    ? `${poolSize} bài (${frontendCount} FE + ${backendCount} BE)`
+    : `${poolSize} problems (${frontendCount} FE + ${backendCount} BE)`;
+}
+
 export default function Survey() {
   const navigate = useNavigate();
   const language = useSettingsStore((state) => state.language);
   const copy = SURVEY_COPY[language];
   const statusText = STATUS_LABELS[language];
-  const isVi = language === 'vi';
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -580,6 +667,7 @@ export default function Survey() {
   const [milestone, setMilestone] =
     useState<MilestoneTestPreference>('project');
   const [discipline, setDiscipline] = useState<DisciplineLevel>('light');
+  const [skillTestMeta, setSkillTestMeta] = useState<SkillTestMeta | null>(null);
 
   const localizedProblems = useMemo(
     () => problems.map((problem) => localizeProblem(problem, language)),
@@ -603,7 +691,18 @@ export default function Survey() {
   }, [problems, runResults]);
 
   const challengeCount =
-    LEVEL_CHALLENGE_COUNT[selfLevel ?? 'apprentice'] ?? 2;
+    skillTestMeta?.requestedQuestionCount ??
+    LEVEL_CHALLENGE_COUNT[selfLevel ?? 'apprentice'] ??
+    RANDOM_CHALLENGE_COUNT;
+  const unlockedLearningPathLabels = useMemo(
+    () => getUnlockedLearningPathLabels(entryLevel, language),
+    [entryLevel, language],
+  );
+  const placementInsight = useMemo(() => {
+    if (entryLevel === 'advanced') return copy.placementInsightAdvanced;
+    if (entryLevel === 'intermediate') return copy.placementInsightIntermediate;
+    return copy.placementInsightBeginner;
+  }, [copy, entryLevel]);
 
   const submitCareerPath = async () => {
     if (!fieldFocus) return;
@@ -633,6 +732,14 @@ export default function Survey() {
         questionCount: LEVEL_CHALLENGE_COUNT[selfLevel],
       });
       setProblems(res.problems);
+      setSkillTestMeta({
+        requestedLevel: res.requestedLevel,
+        requestedQuestionCount: res.requestedQuestionCount,
+        deliveredQuestionCount: res.deliveredQuestionCount,
+        poolSize: res.poolSize,
+        poolBreakdown: res.poolBreakdown,
+        fallbackUsed: res.fallbackUsed,
+      });
       setCode(
         Object.fromEntries(res.problems.map((problem) => [problem._id, problem.starterCode]))
       );
@@ -738,6 +845,7 @@ export default function Survey() {
 
   const leaveWorkspace = () => {
     setProblems([]);
+    setSkillTestMeta(null);
     setActiveProblemId(null);
     setRunResults({});
     setScore(null);
@@ -846,6 +954,10 @@ export default function Survey() {
               {problems.length === 0 ? (
                 <>
                   <p className="sv-desc">{copy.step1Desc}</p>
+                  <div className="sv-highlight">
+                    <div className="sv-highlight-title">{copy.randomPickLabel}</div>
+                    <p className="sv-highlight-text">{copy.step1Hint}</p>
+                  </div>
 
                   <div className="sv-level-grid">
                     {LEVEL_OPTIONS.map((option) => (
@@ -861,7 +973,7 @@ export default function Survey() {
                             {localize(option.title, language)}
                           </span>
                           <span className="sv-level-count">
-                            {LEVEL_CHALLENGE_COUNT[option.id]} {copy.challengeUnit}
+                            {LEVEL_POOL_SIZE_BY_FIELD[fieldFocus ?? 'frontend']} {copy.challengeUnit}
                           </span>
                         </div>
                         <div className="sv-level-sub">
@@ -870,12 +982,19 @@ export default function Survey() {
                         <div className="sv-level-detail">
                           {option.detail ? localize(option.detail, language) : ''}
                         </div>
+                        <div className="sv-level-helper">
+                          {copy.randomRuleValue}
+                        </div>
                       </button>
                     ))}
                   </div>
 
                   <div className="sv-highlight">
                     <div className="sv-highlight-title">{copy.workspaceTitle}</div>
+                    <p className="sv-highlight-text">
+                      {copy.poolSizeLabel}:{' '}
+                      {formatPoolBreakdown(fieldFocus, null, language)}
+                    </p>
                   </div>
 
                   <div className="sv-actions">
@@ -908,6 +1027,19 @@ export default function Survey() {
                           {copy.entryLevel}: {prettyEntryLevel(entryLevel, language)}
                         </div>
                       )}
+                      <div className="sv-placement-copy">{placementInsight}</div>
+                      {unlockedLearningPathLabels.length > 0 ? (
+                        <div className="sv-placement-pill-row">
+                          <span className="sv-placement-label">
+                            {copy.unlockedLearningPath}
+                          </span>
+                          {unlockedLearningPathLabels.map((label) => (
+                            <span className="sv-placement-pill" key={label}>
+                              {label}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
                     </div>
                   </div>
 
@@ -995,9 +1127,23 @@ export default function Survey() {
                       <span className="sv-summary-label">{copy.challengeCount}</span>
                       <strong>{challengeCount}</strong>
                     </div>
+                    <div className="sv-summary-item">
+                      <span className="sv-summary-label">{copy.poolSizeLabel}</span>
+                      <strong>{formatPoolBreakdown(fieldFocus, skillTestMeta, language)}</strong>
+                    </div>
+                    <div className="sv-summary-item">
+                      <span className="sv-summary-label">{copy.randomRuleLabel}</span>
+                      <strong>{copy.randomRuleValue}</strong>
+                    </div>
                   </div>
 
                   <p className="sv-desc">{copy.workspaceIntro}</p>
+                  {skillTestMeta?.fallbackUsed ? (
+                    <div className="sv-highlight">
+                      <div className="sv-highlight-title">{copy.randomPickLabel}</div>
+                      <p className="sv-highlight-text">{copy.poolFallbackHint}</p>
+                    </div>
+                  ) : null}
 
                   <div className="sv-skill-layout">
                     <aside className="sv-problem-nav">
@@ -1329,6 +1475,14 @@ ${copy.expected}: ${testCase.expectedOutput}`}
                       >
                         {copy.changeLevel}
                       </button>
+                      <button
+                        className="sv-btn sv-btn-ghost"
+                        disabled={loading || !selfLevel}
+                        onClick={loadSkillTest}
+                        type="button"
+                      >
+                        {copy.reshuffle}
+                      </button>
                     </div>
                     <div className="sv-action-group">
                       <button
@@ -1478,6 +1632,17 @@ ${copy.expected}: ${testCase.expectedOutput}`}
                     {copy.entryLevel}: {prettyEntryLevel(entryLevel, language)}
                   </div>
                 )}
+                <p className="sv-result-note">{placementInsight}</p>
+                {unlockedLearningPathLabels.length > 0 ? (
+                  <div className="sv-placement-pill-row sv-placement-pill-row-center">
+                    <span className="sv-placement-label">{copy.unlockedLearningPath}</span>
+                    {unlockedLearningPathLabels.map((label) => (
+                      <span className="sv-placement-pill" key={label}>
+                        {label}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
               </div>
               <div className="sv-actions">
                 <button

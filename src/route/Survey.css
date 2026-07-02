@@ -212,6 +212,13 @@
   line-height: 1.55;
 }
 
+.sv-level-helper {
+  margin-top: 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #dbeafe;
+}
+
 /* -------------------------------------------------------------------------
    Highlight callout (workspace intro banner)
    ------------------------------------------------------------------------- */
@@ -761,11 +768,49 @@
   line-height: 1.55;
 }
 
+.sv-placement-copy,
+.sv-result-note {
+  margin-top: 12px;
+  color: #dbeafe;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
 .sv-entry-chip {
   display: inline-flex;
   margin-top: 12px;
   background: rgba(255, 126, 95, 0.14);
   color: #ffcab8;
+}
+
+.sv-placement-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.sv-placement-pill-row-center {
+  justify-content: center;
+}
+
+.sv-placement-label {
+  color: #9fb0d8;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.sv-placement-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: rgba(74, 222, 128, 0.14);
+  border: 1px solid rgba(74, 222, 128, 0.24);
+  color: #bbf7d0;
+  font-size: 0.76rem;
+  font-weight: 700;
 }
 
 .sv-grade-list {
