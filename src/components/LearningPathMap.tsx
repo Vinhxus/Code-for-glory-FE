@@ -121,6 +121,7 @@ function LearningPathMap() {
   const [serverStartingStage, setServerStartingStage] =
     useState<StartingStage | null>(null);
   const [hoursPerDay, setHoursPerDay] = useState<number | null>(null);
+  const [fieldFocus, setFieldFocus] = useState<string | null>(null);
 
   // ── Backend data ─────────────────────────────────────────────────
   const [apiNodes, setApiNodes] = useState<LearningPathNodeDto[]>([]);
@@ -178,9 +179,15 @@ function LearningPathMap() {
         }
 
         setSelected(preferredTrack);
+        if (survey) {
+          setFieldFocus(survey.fieldFocus);
+        }
         if (mappedStage) {
           setServerStartingStage(mappedStage);
-          setStartingStage(mappedStage);
+          const isFieldMatch =
+            survey?.fieldFocus === 'fullstack' ||
+            survey?.fieldFocus === preferredTrack;
+          setStartingStage(isFieldMatch ? mappedStage : 'beginner');
           return;
         }
 
@@ -197,11 +204,18 @@ function LearningPathMap() {
   // Re-derive stage whenever the selected track changes
   useEffect(() => {
     if (serverStartingStage) {
-      setStartingStage(serverStartingStage);
+      const isFieldMatch =
+        fieldFocus === 'fullstack' ||
+        fieldFocus === selected;
+      if (isFieldMatch) {
+        setStartingStage(serverStartingStage);
+      } else {
+        setStartingStage('beginner');
+      }
       return;
     }
     setStartingStage(getStartingStage(selected));
-  }, [selected, serverStartingStage]);
+  }, [selected, serverStartingStage, fieldFocus]);
 
   // ── Fetch roadmap nodes from backend ─────────────────────────────
   useEffect(() => {

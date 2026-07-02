@@ -2367,161 +2367,161 @@ function Practice() {
   }, [nodeTitle, selectedCatalogItem]);
   const ui = isVi
     ? {
-        practiceHub: 'TRUNG TÂM PRACTICE',
-        clearFilters: 'Xoá bộ lọc',
-        startPracticing: 'Bắt đầu luyện tập',
-        curatedPractice: 'BÀI TẬP CHỌN LỌC',
-        tracks: 'FRONTEND + BACKEND',
-        hubTitle: 'Duyệt bài theo chủ đề trước khi vào workspace code.',
-        hubSubtitle:
-          'Trang practice giờ hoạt động như một problem hub đúng nghĩa với danh sách chọn lọc, topic chip và bộ lọc rõ ràng hơn.',
-        openFirst: 'Mở thử thách đầu tiên',
-        frontendTopics: 'Chủ đề Frontend',
-        backendTopics: 'Chủ đề Backend',
-        totalProblems: 'TỔNG SỐ BÀI',
-        totalSubtitle: 'Danh mục bài tập gọn gàng trước khi vào editor.',
-        trackSplit: 'TỶ LỆ THEO TRACK',
-        topicDirectory: 'DANH MỤC CHỦ ĐỀ',
-        discoverByTopic: 'Khám phá thử thách theo chủ đề',
-        topicSubtitle:
-          'Các topic pill được tối ưu để quét nhanh giống trải nghiệm trên các nền tảng luyện thuật toán.',
-        visibleProblems: 'bài đang hiển thị',
-        allTopics: 'Tất cả chủ đề',
-        frontendPath: 'LỘ TRÌNH FRONTEND',
-        frontendPathTitle: 'Chủ đề UI engineering',
-        backendPath: 'LỘ TRÌNH BACKEND',
-        backendPathTitle: 'Chủ đề service và dữ liệu',
-        problems: 'bài',
-        problemList: 'DANH SÁCH BÀI',
-        browseOpen: 'Duyệt, lọc rồi mở workspace',
-        searchChallenges: 'Tìm challenge, chủ đề hoặc tag...',
-        all: 'Tất cả',
-        easy: 'Dễ',
-        medium: 'Trung bình',
-        hard: 'Khó',
-        problem: 'Bài toán',
-        track: 'Track',
-        difficulty: 'Độ khó',
-        acceptance: 'Tỷ lệ',
-        action: 'Hành động',
-        noMatching: 'Không có bài phù hợp',
-        tryAnother: 'Hãy thử chủ đề khác hoặc xoá bộ lọc hiện tại.',
-        allProblems: 'Tất cả bài',
-        description: 'Mô tả',
-        solutions: 'Lời giải',
-        theory: 'Lý Thuyết',
-        accepted: 'Đã nhận',
-        rate: 'Tỷ lệ',
-        task: 'Yêu cầu',
-        topics: 'Chủ đề',
-        companies: 'Công ty',
-        askedBy: 'Thường được hỏi bởi:',
-        hint1: 'Gợi ý 1',
-        hint2: 'Gợi ý 2',
-        hint2Body:
-          'Một cách brute force là duyệt mọi cặp số có thể, nhưng sẽ quá chậm. Hãy thử nghĩ theo hướng hash map.',
-        similarQuestions: 'Câu hỏi tương tự',
-        discussion: 'Thảo luận (2K)',
-        discussionBody: 'Khu vực thảo luận cộng đồng sẽ nằm ở đây.',
-        searchSolutions: 'Tìm lời giải...',
-        share: 'Chia sẻ',
-        code: 'Code',
-        locked: 'ĐÃ KHOÁ',
-        attempt: 'LƯỢT',
-        testcase: 'Test case',
-        testResult: 'Kết quả test',
-        submissions: 'Bài nộp',
-        runFirst: 'Bạn cần chạy code trước',
-        runToSee: 'Chạy code để xem kết quả test',
-        status: 'Trạng thái',
-        language: 'Ngôn ngữ',
-        runtime: 'Thời gian chạy',
-        memory: 'Bộ nhớ',
-        notes: 'Ghi chú',
-        run: 'Chạy',
-        wait: 'ĐỢI',
-        submitting: 'ĐANG NỘP...',
-        submit: 'Nộp bài',
-      }
+      practiceHub: 'TRUNG TÂM PRACTICE',
+      clearFilters: 'Xoá bộ lọc',
+      startPracticing: 'Bắt đầu luyện tập',
+      curatedPractice: 'BÀI TẬP CHỌN LỌC',
+      tracks: 'FRONTEND + BACKEND',
+      hubTitle: 'Duyệt bài theo chủ đề trước khi vào workspace code.',
+      hubSubtitle:
+        'Trang practice giờ hoạt động như một problem hub đúng nghĩa với danh sách chọn lọc, topic chip và bộ lọc rõ ràng hơn.',
+      openFirst: 'Mở thử thách đầu tiên',
+      frontendTopics: 'Chủ đề Frontend',
+      backendTopics: 'Chủ đề Backend',
+      totalProblems: 'TỔNG SỐ BÀI',
+      totalSubtitle: 'Danh mục bài tập gọn gàng trước khi vào editor.',
+      trackSplit: 'TỶ LỆ THEO TRACK',
+      topicDirectory: 'DANH MỤC CHỦ ĐỀ',
+      discoverByTopic: 'Khám phá thử thách theo chủ đề',
+      topicSubtitle:
+        'Các topic pill được tối ưu để quét nhanh giống trải nghiệm trên các nền tảng luyện thuật toán.',
+      visibleProblems: 'bài đang hiển thị',
+      allTopics: 'Tất cả chủ đề',
+      frontendPath: 'LỘ TRÌNH FRONTEND',
+      frontendPathTitle: 'Chủ đề UI engineering',
+      backendPath: 'LỘ TRÌNH BACKEND',
+      backendPathTitle: 'Chủ đề service và dữ liệu',
+      problems: 'bài',
+      problemList: 'DANH SÁCH BÀI',
+      browseOpen: 'Duyệt, lọc rồi mở workspace',
+      searchChallenges: 'Tìm challenge, chủ đề hoặc tag...',
+      all: 'Tất cả',
+      easy: 'Dễ',
+      medium: 'Trung bình',
+      hard: 'Khó',
+      problem: 'Bài toán',
+      track: 'Track',
+      difficulty: 'Độ khó',
+      acceptance: 'Tỷ lệ',
+      action: 'Hành động',
+      noMatching: 'Không có bài phù hợp',
+      tryAnother: 'Hãy thử chủ đề khác hoặc xoá bộ lọc hiện tại.',
+      allProblems: 'Tất cả bài',
+      description: 'Mô tả',
+      solutions: 'Lời giải',
+      theory: 'Lý Thuyết',
+      accepted: 'Đã nhận',
+      rate: 'Tỷ lệ',
+      task: 'Yêu cầu',
+      topics: 'Chủ đề',
+      companies: 'Công ty',
+      askedBy: 'Thường được hỏi bởi:',
+      hint1: 'Gợi ý 1',
+      hint2: 'Gợi ý 2',
+      hint2Body:
+        'Một cách brute force là duyệt mọi cặp số có thể, nhưng sẽ quá chậm. Hãy thử nghĩ theo hướng hash map.',
+      similarQuestions: 'Câu hỏi tương tự',
+      discussion: 'Thảo luận (2K)',
+      discussionBody: 'Khu vực thảo luận cộng đồng sẽ nằm ở đây.',
+      searchSolutions: 'Tìm lời giải...',
+      share: 'Chia sẻ',
+      code: 'Code',
+      locked: 'ĐÃ KHOÁ',
+      attempt: 'LƯỢT',
+      testcase: 'Test case',
+      testResult: 'Kết quả test',
+      submissions: 'Bài nộp',
+      runFirst: 'Bạn cần chạy code trước',
+      runToSee: 'Chạy code để xem kết quả test',
+      status: 'Trạng thái',
+      language: 'Ngôn ngữ',
+      runtime: 'Thời gian chạy',
+      memory: 'Bộ nhớ',
+      notes: 'Ghi chú',
+      run: 'Chạy',
+      wait: 'ĐỢI',
+      submitting: 'ĐANG NỘP...',
+      submit: 'Nộp bài',
+    }
     : {
-        practiceHub: 'PRACTICE HUB',
-        clearFilters: 'Clear filters',
-        startPracticing: 'Start practicing',
-        curatedPractice: 'CURATED PRACTICE',
-        tracks: 'FRONTEND + BACKEND',
-        hubTitle:
-          'Browse problems by topic before entering the code workspace.',
-        hubSubtitle:
-          'The practice page behaves like a proper problem hub with curated lists, topic chips, and clearer filtering.',
-        openFirst: 'Open first challenge',
-        frontendTopics: 'Frontend topics',
-        backendTopics: 'Backend topics',
-        totalProblems: 'TOTAL PROBLEMS',
-        totalSubtitle:
-          'Polished practice catalog instead of jumping straight into the editor.',
-        trackSplit: 'TRACK SPLIT',
-        topicDirectory: 'TOPIC DIRECTORY',
-        discoverByTopic: 'Discover challenges by topic',
-        topicSubtitle:
-          'Topic pills are intentionally dense and scannable so users can browse the catalog like algorithm platforms.',
-        visibleProblems: 'visible problems',
-        allTopics: 'All Topics',
-        frontendPath: 'FRONTEND PATH',
-        frontendPathTitle: 'UI engineering topics',
-        backendPath: 'BACKEND PATH',
-        backendPathTitle: 'Service and data topics',
-        problems: 'problems',
-        problemList: 'PROBLEM LIST',
-        browseOpen: 'Browse, filter, then open a workspace',
-        searchChallenges: 'Search challenges, topics, or tags...',
-        all: 'All',
-        easy: 'Easy',
-        medium: 'Medium',
-        hard: 'Hard',
-        problem: 'Problem',
-        track: 'Track',
-        difficulty: 'Difficulty',
-        acceptance: 'Acceptance',
-        action: 'Action',
-        noMatching: 'No matching problems',
-        tryAnother: 'Try another topic or clear the current filters.',
-        allProblems: 'All problems',
-        description: 'Description',
-        solutions: 'Solutions',
-        theory: 'Theory',
-        accepted: 'Accepted',
-        rate: 'Rate',
-        task: 'The Task',
-        topics: 'Topics',
-        companies: 'Companies',
-        askedBy: 'Frequently asked by:',
-        hint1: 'Hint 1',
-        hint2: 'Hint 2',
-        hint2Body:
-          "A really brute force way would be to search for all possible pairs of numbers but that would be too slow. Again, it's best to try and think of a hash map.",
-        similarQuestions: 'Similar Questions',
-        discussion: 'Discussion (2K)',
-        discussionBody: 'Community discussion goes here.',
-        searchSolutions: 'Search solutions...',
-        share: 'Share',
-        code: 'Code',
-        locked: 'LOCKED',
-        attempt: 'ATTEMPT',
-        testcase: 'Testcase',
-        testResult: 'Test Result',
-        submissions: 'Submissions',
-        runFirst: 'You must run your code first',
-        runToSee: 'Run code to see test results',
-        status: 'Status',
-        language: 'Language',
-        runtime: 'Runtime',
-        memory: 'Memory',
-        notes: 'Notes',
-        run: 'Run',
-        wait: 'WAIT',
-        submitting: 'SUBMITTING...',
-        submit: 'Submit',
-      };
+      practiceHub: 'PRACTICE HUB',
+      clearFilters: 'Clear filters',
+      startPracticing: 'Start practicing',
+      curatedPractice: 'CURATED PRACTICE',
+      tracks: 'FRONTEND + BACKEND',
+      hubTitle:
+        'Browse problems by topic before entering the code workspace.',
+      hubSubtitle:
+        'The practice page behaves like a proper problem hub with curated lists, topic chips, and clearer filtering.',
+      openFirst: 'Open first challenge',
+      frontendTopics: 'Frontend topics',
+      backendTopics: 'Backend topics',
+      totalProblems: 'TOTAL PROBLEMS',
+      totalSubtitle:
+        'Polished practice catalog instead of jumping straight into the editor.',
+      trackSplit: 'TRACK SPLIT',
+      topicDirectory: 'TOPIC DIRECTORY',
+      discoverByTopic: 'Discover challenges by topic',
+      topicSubtitle:
+        'Topic pills are intentionally dense and scannable so users can browse the catalog like algorithm platforms.',
+      visibleProblems: 'visible problems',
+      allTopics: 'All Topics',
+      frontendPath: 'FRONTEND PATH',
+      frontendPathTitle: 'UI engineering topics',
+      backendPath: 'BACKEND PATH',
+      backendPathTitle: 'Service and data topics',
+      problems: 'problems',
+      problemList: 'PROBLEM LIST',
+      browseOpen: 'Browse, filter, then open a workspace',
+      searchChallenges: 'Search challenges, topics, or tags...',
+      all: 'All',
+      easy: 'Easy',
+      medium: 'Medium',
+      hard: 'Hard',
+      problem: 'Problem',
+      track: 'Track',
+      difficulty: 'Difficulty',
+      acceptance: 'Acceptance',
+      action: 'Action',
+      noMatching: 'No matching problems',
+      tryAnother: 'Try another topic or clear the current filters.',
+      allProblems: 'All problems',
+      description: 'Description',
+      solutions: 'Solutions',
+      theory: 'Theory',
+      accepted: 'Accepted',
+      rate: 'Rate',
+      task: 'The Task',
+      topics: 'Topics',
+      companies: 'Companies',
+      askedBy: 'Frequently asked by:',
+      hint1: 'Hint 1',
+      hint2: 'Hint 2',
+      hint2Body:
+        "A really brute force way would be to search for all possible pairs of numbers but that would be too slow. Again, it's best to try and think of a hash map.",
+      similarQuestions: 'Similar Questions',
+      discussion: 'Discussion (2K)',
+      discussionBody: 'Community discussion goes here.',
+      searchSolutions: 'Search solutions...',
+      share: 'Share',
+      code: 'Code',
+      locked: 'LOCKED',
+      attempt: 'ATTEMPT',
+      testcase: 'Testcase',
+      testResult: 'Test Result',
+      submissions: 'Submissions',
+      runFirst: 'You must run your code first',
+      runToSee: 'Run code to see test results',
+      status: 'Status',
+      language: 'Language',
+      runtime: 'Runtime',
+      memory: 'Memory',
+      notes: 'Notes',
+      run: 'Run',
+      wait: 'WAIT',
+      submitting: 'SUBMITTING...',
+      submit: 'Submit',
+    };
 
   // UI States
   const [leftTab, setLeftTab] = useState<
@@ -2627,6 +2627,16 @@ function Practice() {
     type: 'success' | 'error' | 'info';
   } | null>(null);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Coin reward notification
+  const [coinToast, setCoinToast] = useState<number | null>(null);
+  const coinToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showCoinToast = useCallback((amount: number) => {
+    if (coinToastTimeoutRef.current) clearTimeout(coinToastTimeoutRef.current);
+    setCoinToast(amount);
+    coinToastTimeoutRef.current = setTimeout(() => setCoinToast(null), 4000);
+  }, []);
 
   const showToast = useCallback(
     (message: string, type: 'success' | 'error' | 'info' = 'info') => {
@@ -2873,9 +2883,9 @@ function Practice() {
         selectedTopic === 'All Topics' ? true : item.topic === selectedTopic;
       const matchesSearch = keyword
         ? [item.title, item.summary, item.topic, item.track, ...item.tags]
-            .join(' ')
-            .toLowerCase()
-            .includes(keyword)
+          .join(' ')
+          .toLowerCase()
+          .includes(keyword)
         : true;
       return matchesTrack && matchesDifficulty && matchesTopic && matchesSearch;
     });
@@ -2975,6 +2985,11 @@ function Practice() {
       setIsCooldown(false);
       setCooldownTime(0);
       setIsLocked(false);
+
+      // Show coin reward notification if earned
+      if (response.coinsEarned > 0) {
+        showCoinToast(response.coinsEarned);
+      }
 
       // Show success toast immediately — accepted regardless of progress sync
       showToast(
@@ -3883,103 +3898,103 @@ function Practice() {
                         </div>
                       ) : (
                         filteredPracticeSolutions.map((sol) => (
-                        <div
-                          key={sol.id}
-                          onClick={() =>
-                            setExpandedSolutionByPractice((prev) => {
-                              const current = prev[solutionScopeId] ?? null;
-                              return {
-                                ...prev,
-                                [solutionScopeId]:
-                                  current === sol.id ? null : sol.id,
-                              };
-                            })
-                          }
-                          className="rounded-xl border border-[color:var(--cg-border)] bg-[#0A0726]/40 p-4 hover:border-[#FF7E5F]/50 transition-colors cursor-pointer group"
-                        >
-                          <h4 className="text-sm font-bold mb-2 group-hover:text-[#FF7E5F] transition-colors">
-                            {sol.title}
-                          </h4>
-                          <div className="flex items-center gap-2 mb-3">
-                            <div className="h-5 w-5 rounded-full bg-gradient-to-br from-[#FF7E5F] to-[#FFA500] flex items-center justify-center text-[10px] text-[#0F0B3C] font-bold">
-                              {sol.author[0]}
-                            </div>
-                            <span className="text-xs text-[color:var(--cg-text-muted)]">
-                              {sol.author}
-                            </span>
-                          </div>
-                          <div className="flex flex-wrap gap-1 mb-3">
-                            {sol.tags.map((tag) => (
-                              <span
-                                key={tag}
-                                className="px-2 py-0.5 rounded-md text-[10px] bg-[color:var(--cg-container-a16)] text-[color:var(--cg-text-muted)] border border-[color:var(--cg-border)]"
-                              >
-                                {tag}
+                          <div
+                            key={sol.id}
+                            onClick={() =>
+                              setExpandedSolutionByPractice((prev) => {
+                                const current = prev[solutionScopeId] ?? null;
+                                return {
+                                  ...prev,
+                                  [solutionScopeId]:
+                                    current === sol.id ? null : sol.id,
+                                };
+                              })
+                            }
+                            className="rounded-xl border border-[color:var(--cg-border)] bg-[#0A0726]/40 p-4 hover:border-[#FF7E5F]/50 transition-colors cursor-pointer group"
+                          >
+                            <h4 className="text-sm font-bold mb-2 group-hover:text-[#FF7E5F] transition-colors">
+                              {sol.title}
+                            </h4>
+                            <div className="flex items-center gap-2 mb-3">
+                              <div className="h-5 w-5 rounded-full bg-gradient-to-br from-[#FF7E5F] to-[#FFA500] flex items-center justify-center text-[10px] text-[#0F0B3C] font-bold">
+                                {sol.author[0]}
+                              </div>
+                              <span className="text-xs text-[color:var(--cg-text-muted)]">
+                                {sol.author}
                               </span>
-                            ))}
-                          </div>
-                          <div className="flex items-center gap-4 text-[10px] font-semibold text-[color:var(--cg-text-muted)]">
-                            <span className="flex items-center gap-1 hover:text-emerald-400">
-                              <span className="material-symbols-outlined text-[14px]">
-                                arrow_upward
-                              </span>{' '}
-                              {sol.upvotes}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <span className="material-symbols-outlined text-[14px]">
-                                visibility
-                              </span>{' '}
-                              {sol.views}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <span className="material-symbols-outlined text-[14px]">
-                                chat_bubble
-                              </span>{' '}
-                              1
-                            </span>
-                          </div>
-
-                          {expandedSolutionId === sol.id && (
-                            <div className="mt-4 pt-4 border-t border-[color:var(--cg-border)]">
-                              <div className="text-[10px] font-semibold text-[color:var(--cg-text-muted)] mb-2">
-                                {isVi ? 'Giải thích' : 'Explanation'}
-                              </div>
-                              <div className="text-xs text-[color:var(--cg-text-muted)] leading-relaxed whitespace-pre-line">
-                                {sol.explanation}
-                              </div>
-
-                              <div className="mt-4 flex items-center justify-between">
-                                <div className="text-[10px] font-semibold text-[color:var(--cg-text-muted)]">
-                                  {isVi ? 'Code mẫu' : 'Code'}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleApplySolutionCode(sol.code);
-                                    }}
-                                    className="text-[10px] font-bold px-2 py-1 rounded-md bg-[#FF7E5F] text-[#0F0B3C] hover:brightness-105 transition-colors"
-                                  >
-                                    {isVi ? 'Dán vào editor' : 'Apply'}
-                                  </button>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      void copyToClipboard(sol.code);
-                                    }}
-                                    className="text-[10px] font-bold px-2 py-1 rounded-md bg-[color:var(--cg-container-a16)] border border-[color:var(--cg-border)] hover:border-[#FF7E5F]/60 hover:text-[#FF7E5F] transition-colors"
-                                  >
-                                    {isVi ? 'Copy' : 'Copy'}
-                                  </button>
-                                </div>
-                              </div>
-                              <pre className="mt-2 text-xs text-[color:var(--cg-text)] bg-[color:var(--cg-container-a16)] border border-[color:var(--cg-border)] rounded-lg p-3 overflow-auto max-h-64 whitespace-pre-wrap">
-                                {sol.code}
-                              </pre>
                             </div>
-                          )}
-                        </div>
-                      ))
+                            <div className="flex flex-wrap gap-1 mb-3">
+                              {sol.tags.map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="px-2 py-0.5 rounded-md text-[10px] bg-[color:var(--cg-container-a16)] text-[color:var(--cg-text-muted)] border border-[color:var(--cg-border)]"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                            <div className="flex items-center gap-4 text-[10px] font-semibold text-[color:var(--cg-text-muted)]">
+                              <span className="flex items-center gap-1 hover:text-emerald-400">
+                                <span className="material-symbols-outlined text-[14px]">
+                                  arrow_upward
+                                </span>{' '}
+                                {sol.upvotes}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <span className="material-symbols-outlined text-[14px]">
+                                  visibility
+                                </span>{' '}
+                                {sol.views}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <span className="material-symbols-outlined text-[14px]">
+                                  chat_bubble
+                                </span>{' '}
+                                1
+                              </span>
+                            </div>
+
+                            {expandedSolutionId === sol.id && (
+                              <div className="mt-4 pt-4 border-t border-[color:var(--cg-border)]">
+                                <div className="text-[10px] font-semibold text-[color:var(--cg-text-muted)] mb-2">
+                                  {isVi ? 'Giải thích' : 'Explanation'}
+                                </div>
+                                <div className="text-xs text-[color:var(--cg-text-muted)] leading-relaxed whitespace-pre-line">
+                                  {sol.explanation}
+                                </div>
+
+                                <div className="mt-4 flex items-center justify-between">
+                                  <div className="text-[10px] font-semibold text-[color:var(--cg-text-muted)]">
+                                    {isVi ? 'Code mẫu' : 'Code'}
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleApplySolutionCode(sol.code);
+                                      }}
+                                      className="text-[10px] font-bold px-2 py-1 rounded-md bg-[#FF7E5F] text-[#0F0B3C] hover:brightness-105 transition-colors"
+                                    >
+                                      {isVi ? 'Dán vào editor' : 'Apply'}
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        void copyToClipboard(sol.code);
+                                      }}
+                                      className="text-[10px] font-bold px-2 py-1 rounded-md bg-[color:var(--cg-container-a16)] border border-[color:var(--cg-border)] hover:border-[#FF7E5F]/60 hover:text-[#FF7E5F] transition-colors"
+                                    >
+                                      {isVi ? 'Copy' : 'Copy'}
+                                    </button>
+                                  </div>
+                                </div>
+                                <pre className="mt-2 text-xs text-[color:var(--cg-text)] bg-[color:var(--cg-container-a16)] border border-[color:var(--cg-border)] rounded-lg p-3 overflow-auto max-h-64 whitespace-pre-wrap">
+                                  {sol.code}
+                                </pre>
+                              </div>
+                            )}
+                          </div>
+                        ))
                       )}
                     </div>
                   </div>
