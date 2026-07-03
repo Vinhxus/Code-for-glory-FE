@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import SideNav from '../components/SideNav';
 import { useSettingsStore } from '../store/settings';
@@ -44,7 +45,55 @@ export default function EventDetail() {
   const { toggleRegistration, isRegistered, toggleBookmark, isBookmarked } =
     useEventsStore();
 
+  const [copiedIcon, setCopiedIcon] = useState<string | null>(null);
+
   const event = EVENTS.find((ev) => ev.id === Number(id));
+
+  const flashCopied = (icon: string) => {
+    setCopiedIcon(icon);
+    window.setTimeout(() => {
+      setCopiedIcon((cur) => (cur === icon ? null : cur));
+    }, 1600);
+  };
+
+  const handleShareAction = async (icon: string) => {
+    if (!event) return;
+    const shareUrl = window.location.href;
+
+    try {
+      if (icon === 'link') {
+        await navigator.clipboard.writeText(shareUrl);
+        flashCopied(icon);
+        return;
+      }
+
+      if (icon === 'share') {
+        if (navigator.share) {
+          await navigator.share({
+            title: event.title,
+            text: event.desc,
+            url: shareUrl,
+          });
+        } else {
+          await navigator.clipboard.writeText(shareUrl);
+          flashCopied(icon);
+        }
+        return;
+      }
+
+      if (icon === 'content_copy') {
+        await navigator.clipboard.writeText(
+          `${event.title}\n${event.desc}\n${shareUrl}`
+        );
+        flashCopied(icon);
+      }
+    } catch (err) {
+      // AbortError xảy ra khi user tự đóng share sheet — không phải lỗi thật
+      if ((err as Error)?.name !== 'AbortError') {
+        console.error('Share action failed:', err);
+      }
+    }
+  };
 
   if (!event) {
     return (
@@ -360,16 +409,15 @@ export default function EventDetail() {
               <div className="glass-card p-6 space-y-4">
                 <button
                   onClick={() => toggleRegistration(event.id)}
-                  className={`w-full py-4 rounded-xl font-bold text-sm transition-all hover:opacity-85 active:scale-[0.98] ${
-                    registered
+                  className={`w-full py-4 rounded-xl font-bold text-sm transition-all hover:opacity-85 active:scale-[0.98] ${registered
                       ? 'bg-gradient-to-r from-[#1a6b3c] to-[#15803d] text-white'
                       : 'text-white'
-                  }`}
+                    }`}
                   style={
                     !registered
                       ? {
-                          background: `linear-gradient(135deg, ${colors.accent}, ${colors.accent}cc)`,
-                        }
+                        background: `linear-gradient(135deg, ${colors.accent}, ${colors.accent}cc)`,
+                      }
                       : undefined
                   }
                 >
@@ -384,11 +432,10 @@ export default function EventDetail() {
 
                 <button
                   onClick={() => toggleBookmark(event.id)}
-                  className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${
-                    saved
+                  className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${saved
                       ? 'text-[#fbbf24] border border-[#fbbf2440] bg-[#fbbf241a]'
                       : 'text-[color:var(--cg-text-muted)] border border-[color:var(--cg-border)] hover:text-[#fbbf24] hover:border-[#fbbf2440]'
-                  }`}
+                    }`}
                 >
                   <span className="material-symbols-outlined text-[18px]">
                     {saved ? 'bookmark_added' : 'bookmark'}
@@ -401,7 +448,29 @@ export default function EventDetail() {
                       ? 'Lưu sự kiện'
                       : 'Bookmark Event'}
                 </button>
+
+                {event.officialLink && (
+                  <a
+                    href={event.officialLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 border border-[color:var(--cg-border)] text-[color:var(--cg-text-muted)] hover:text-white hover:border-white/30 transition-all"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">
+                      open_in_new
+                    </span>
+                    {isVi ? 'Trang đăng ký chính thức' : 'Official Registration Page'}
+                  </a>
+                )}
               </div>
+
+              {event.officialLink && (
+                <p className="text-[11px] leading-relaxed text-[color:var(--cg-text-muted)] px-1">
+                  {isVi
+                    ? 'Đây là link tới cuộc thi thật do đơn vị bên ngoài tổ chức, độc lập với hệ thống XP của CodeForGlory.'
+                    : 'This links to a real contest hosted by an external organizer, independent of CodeForGlory\u2019s XP system.'}
+                </p>
+              )}
 
               {/* Event Info */}
               <div className="glass-card p-6 space-y-4">
@@ -456,17 +525,45 @@ export default function EventDetail() {
                   {isVi ? 'Chia sẻ' : 'Share Event'}
                 </h3>
                 <div className="flex gap-2">
-                  {['link', 'share', 'content_copy'].map((icon) => (
-                    <button
-                      key={icon}
-                      className="flex-1 py-3 rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] flex items-center justify-center hover:bg-[color:var(--cg-container-a30)] transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-[18px] text-[color:var(--cg-text-muted)]">
-                        {icon}
-                      </span>
-                    </button>
-                  ))}
+                  {['link', 'share', 'content_copy'].map((icon) => {
+                    const isCopied = copiedIcon === icon;
+                    const label =
+                      icon === 'link'
+                        ? isVi
+                          ? 'Sao chép liên kết'
+                          : 'Copy link'
+                        : icon === 'share'
+                          ? isVi
+                            ? 'Chia sẻ'
+                            : 'Share'
+                          : isVi
+                            ? 'Sao chép mô tả'
+                            : 'Copy description';
+
+                    return (
+                      <button
+                        key={icon}
+                        type="button"
+                        onClick={() => handleShareAction(icon)}
+                        title={label}
+                        aria-label={label}
+                        className={`flex-1 py-3 rounded-xl border flex items-center justify-center transition-colors ${isCopied
+                            ? 'border-[#4ade8040] bg-[#4ade8018] text-[#4ade80]'
+                            : 'border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a30)]'
+                          }`}
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          {isCopied ? 'check' : icon}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
+                {copiedIcon && (
+                  <p className="text-[11px] font-semibold text-center text-[#4ade80] animate-fade-in-up">
+                    {isVi ? 'Đã sao chép!' : 'Copied!'}
+                  </p>
+                )}
               </div>
             </div>
           </div>

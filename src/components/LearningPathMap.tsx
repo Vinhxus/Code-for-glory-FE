@@ -180,7 +180,7 @@ function LearningPathMap() {
 
         setSelected(preferredTrack);
         if (survey) {
-          setFieldFocus(survey.fieldFocus);
+          setFieldFocus(survey.fieldFocus ?? null);
         }
         if (mappedStage) {
           setServerStartingStage(mappedStage);

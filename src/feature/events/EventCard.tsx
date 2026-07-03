@@ -26,13 +26,11 @@ const COLOR_MAP: Record<
 
 interface Props {
   event: Event;
-  onViewDetails?: (event: Event) => void;
   animationDelay?: number;
 }
 
 export default function EventCard({
   event,
-  onViewDetails,
   animationDelay = 0,
 }: Props) {
   const navigate = useNavigate();
@@ -43,7 +41,6 @@ export default function EventCard({
 
   const handleViewDetails = () => {
     navigate(`/events/${event.id}`);
-    if (onViewDetails) onViewDetails(event);
   };
 
   return (
@@ -99,11 +96,10 @@ export default function EventCard({
           <button
             onClick={() => toggleBookmark(event.id)}
             aria-label={saved ? 'Remove bookmark' : 'Bookmark event'}
-            className={`w-[38px] h-[38px] flex items-center justify-center rounded-xl border transition-all text-sm ${
-              saved
+            className={`w-[38px] h-[38px] flex items-center justify-center rounded-xl border transition-all text-sm ${saved
                 ? 'text-[#fbbf24] border-[#fbbf2440] bg-[#fbbf241a]'
                 : 'text-[color:var(--cg-text-muted)] border-[color:var(--cg-border)] hover:text-[#fbbf24] hover:border-[#fbbf2440]'
-            }`}
+              }`}
           >
             <span className="material-symbols-outlined text-[18px]">
               {saved ? 'bookmark_added' : 'bookmark'}
