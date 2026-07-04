@@ -1,4 +1,4 @@
-export type BattleField = 'FE' | 'BE';
+export type BattleField = 'FE' | 'BE' | 'CORE';
 export type BattleMode = 'SPEED' | 'PERFORMANCE';
 export type BattleStatus =
   | 'WAITING'
@@ -12,6 +12,7 @@ export interface BattlePlayer {
   avatar?: string;
   currentScore: number;
   hasSubmitted: boolean;
+  submissionCount?: number;
 }
 
 export interface BattleQuestion {

@@ -10,9 +10,12 @@ import SideNav from '../components/SideNav';
 import { updateNodeProgress } from '../services/learningPathApi';
 import {
   getPracticeSubmissions,
+  getProgressSummary,
   runPracticeCode,
   submitPracticeCode,
+  type ChapterProgressSummary,
   type JudgeRunResult,
+  type ProgressSummaryResponse,
   type SubmissionRecord,
   type SubmissionStatus,
 } from '../services/practiceApi';
@@ -2442,6 +2445,11 @@ function Practice() {
       wait: 'ĐỢI',
       submitting: 'ĐANG NỘP...',
       submit: 'Nộp bài',
+      chapterProgress: 'Tiến độ theo chủ đề',
+      chapterProgressSubtitle:
+        'Số bài đã giải theo từng mức độ, giống bảng tiến độ trên LeetCode.',
+      solvedBadge: 'Đã giải',
+      loadingProgress: 'Đang tải tiến độ...',
     }
     : {
       practiceHub: 'PRACTICE HUB',
@@ -2521,6 +2529,11 @@ function Practice() {
       wait: 'WAIT',
       submitting: 'SUBMITTING...',
       submit: 'Submit',
+      chapterProgress: 'Progress by topic',
+      chapterProgressSubtitle:
+        'Problems solved per difficulty, similar to the LeetCode progress panel.',
+      solvedBadge: 'Solved',
+      loadingProgress: 'Loading progress...',
     };
 
   // UI States
@@ -2550,6 +2563,10 @@ function Practice() {
     'All' | Difficulty
   >('All');
   const [selectedTopic, setSelectedTopic] = useState('All Topics');
+  // Tổng hợp Easy/Medium/Hard đã giải theo chapter (topic), kiểu LeetCode.
+  // null = chưa load xong (lần đầu vào trang) — tránh nháy UI về "0 đã giải".
+  const [progressSummary, setProgressSummary] =
+    useState<ProgressSummaryResponse | null>(null);
   const [solutionSearchQuery, setSolutionSearchQuery] = useState('');
   const solutionScopeId = selectedCatalogItem?.id ?? practiceKey;
   const practiceSolutions = useMemo<PracticeSolutionCard[]>(() => {
@@ -2738,6 +2755,61 @@ function Practice() {
       isMounted = false;
     };
   }, [activePracticeId]);
+
+  // Tổng hợp Easy/Medium/Hard theo chapter + danh sách bài đã Accepted,
+  // dùng để tick ✔ trên mỗi problem row và hiện khối "Chapter Progress"
+  // kiểu LeetCode ở Hub view. Tách thành callback riêng để gọi lại ngay
+  // sau khi submit Accepted, không phải chờ user rời trang rồi quay lại.
+  const refreshProgressSummary = useCallback(async () => {
+    try {
+      const summary = await getProgressSummary();
+      setProgressSummary(summary);
+    } catch (error) {
+      // Best-effort: không tick được cũng không nên chặn luồng làm bài,
+      // chỉ log để dễ debug khi BE chưa có endpoint này.
+      console.warn('Không tải được tiến độ chapter:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshProgressSummary();
+  }, [refreshProgressSummary]);
+
+  // Set tra cứu nhanh "bài này đã Accepted chưa" — dùng ở cả Hub view
+  // (tick trên list) lẫn workspace view (badge "Đã hoàn thành" trên đề bài).
+  const solvedPracticeIdSet = useMemo(
+    () => new Set(progressSummary?.solvedPracticeIds ?? []),
+    [progressSummary]
+  );
+
+  // Map nhanh chapter (topic) -> breakdown Easy/Medium/Hard đã giải, để
+  // render khối Chapter Progress mà không phải Array.find() mỗi lần render.
+  const chapterProgressMap = useMemo(() => {
+    const map = new Map<string, ChapterProgressSummary>();
+    (progressSummary?.chapters ?? []).forEach((c) => map.set(c.chapter, c));
+    return map;
+  }, [progressSummary]);
+
+  // Tổng "total" theo chapter+difficulty từ chính PRACTICE_CATALOG tĩnh ở
+  // FE — ghép với số "đã giải" từ BE để ra dạng "X/Y" giống LeetCode.
+  // Tính 1 lần duy nhất vì PRACTICE_CATALOG là hằng số, không đổi.
+  const chapterTotalsByTopic = useMemo(() => {
+    const map = new Map<
+      string,
+      { easy: number; medium: number; hard: number; total: number }
+    >();
+    PRACTICE_CATALOG.forEach((item) => {
+      if (!map.has(item.topic)) {
+        map.set(item.topic, { easy: 0, medium: 0, hard: 0, total: 0 });
+      }
+      const bucket = map.get(item.topic)!;
+      bucket.total += 1;
+      if (item.difficulty === 'Medium') bucket.medium += 1;
+      else if (item.difficulty === 'Hard') bucket.hard += 1;
+      else bucket.easy += 1;
+    });
+    return map;
+  }, []);
 
   const handleChangeLanguage = (next: PracticeLanguage) => {
     const prev = language;
@@ -2999,6 +3071,11 @@ function Practice() {
         'success'
       );
 
+      // Refresh chapter progress ngay lập tức để tick ✔ hiện ra tức thì
+      // khi user quay lại Hub view, không phải đợi lần mount kế tiếp.
+      // Best-effort tương tự updateNodeProgress bên dưới — không chặn UX.
+      void refreshProgressSummary();
+
       // Sync learning-path progress separately — don't let failures block the UX
       if (nodeId) {
         try {
@@ -3239,6 +3316,94 @@ function Practice() {
                   </button>
                 ))}
               </div>
+
+              {/* Chapter Progress — tổng hợp Easy/Medium/Hard đã giải theo
+                  từng chapter (topic), giống bảng "Progress" của LeetCode. */}
+              <div className="mt-6 rounded-[24px] border border-[color:var(--cg-border)] bg-[#0A0726]/40 p-5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h3 className="text-sm font-bold text-[color:var(--cg-text)]">
+                      {ui.chapterProgress}
+                    </h3>
+                    <p className="mt-1 text-xs text-[color:var(--cg-text-muted)]">
+                      {ui.chapterProgressSubtitle}
+                    </p>
+                  </div>
+                  {progressSummary && (
+                    <div className="flex items-center gap-3 text-xs font-semibold">
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1 text-emerald-300">
+                        {ui.easy} {progressSummary.overall.easy}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/10 px-3 py-1 text-amber-300">
+                        {ui.medium} {progressSummary.overall.medium}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-400/20 bg-rose-500/10 px-3 py-1 text-rose-300">
+                        {ui.hard} {progressSummary.overall.hard}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {!progressSummary ? (
+                  <p className="mt-4 text-xs text-[color:var(--cg-text-muted)]">
+                    {ui.loadingProgress}
+                  </p>
+                ) : (
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    {Array.from(chapterTotalsByTopic.entries()).map(
+                      ([topic, totals]) => {
+                        const solved = chapterProgressMap.get(topic)
+                          ?.breakdown ?? { easy: 0, medium: 0, hard: 0 };
+                        const totalSolved =
+                          solved.easy + solved.medium + solved.hard;
+                        const pct =
+                          totals.total === 0
+                            ? 0
+                            : Math.round((totalSolved / totals.total) * 100);
+                        return (
+                          <button
+                            key={topic}
+                            type="button"
+                            onClick={() => setSelectedTopic(topic)}
+                            className={cx(
+                              'rounded-2xl border p-4 text-left transition',
+                              selectedTopic === topic
+                                ? 'border-[#FF7E5F]/40 bg-[#FF7E5F]/10'
+                                : 'border-[color:var(--cg-border)] bg-white/[0.03] hover:border-[#FF7E5F]/25 hover:bg-white/[0.06]'
+                            )}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="truncate text-xs font-bold text-[color:var(--cg-text)]">
+                                {topic}
+                              </span>
+                              <span className="shrink-0 text-[11px] font-semibold text-[color:var(--cg-text-muted)]">
+                                {totalSolved}/{totals.total}
+                              </span>
+                            </div>
+                            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/30">
+                              <div
+                                className="h-full rounded-full bg-[#FF7E5F] transition-all"
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                            <div className="mt-3 flex items-center gap-3 text-[11px] font-semibold">
+                              <span className="text-emerald-300">
+                                {ui.easy} {solved.easy}/{totals.easy}
+                              </span>
+                              <span className="text-amber-300">
+                                {ui.medium} {solved.medium}/{totals.medium}
+                              </span>
+                              <span className="text-rose-300">
+                                {ui.hard} {solved.hard}/{totals.hard}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      }
+                    )}
+                  </div>
+                )}
+              </div>
             </section>
 
             <section className="grid gap-4 xl:grid-cols-2">
@@ -3385,69 +3550,86 @@ function Practice() {
                 </div>
 
                 <div className="divide-y divide-[color:var(--cg-border)] bg-[rgba(8,8,26,0.24)]">
-                  {filteredPractices.map((item, index) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => handleOpenPractice(item)}
-                      className="grid w-full gap-4 px-5 py-5 text-left transition hover:bg-white/5 md:grid-cols-[minmax(0,1.8fr)_120px_110px_120px_120px]"
-                    >
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-3">
-                          <span className="text-xs font-semibold text-[color:var(--cg-text-muted)]">
-                            {String(index + 1).padStart(2, '0')}.
-                          </span>
-                          <h3 className="truncate text-sm font-bold md:text-[15px]">
-                            {item.title}
-                          </h3>
+                  {filteredPractices.map((item, index) => {
+                    const isSolved = solvedPracticeIdSet.has(item.id);
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => handleOpenPractice(item)}
+                        className="grid w-full gap-4 px-5 py-5 text-left transition hover:bg-white/5 md:grid-cols-[minmax(0,1.8fr)_120px_110px_120px_120px]"
+                      >
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-3">
+                            {isSolved ? (
+                              <span
+                                className="material-symbols-outlined shrink-0 text-[18px] text-emerald-400"
+                                title={ui.solvedBadge}
+                              >
+                                check_circle
+                              </span>
+                            ) : (
+                              <span className="text-xs font-semibold text-[color:var(--cg-text-muted)]">
+                                {String(index + 1).padStart(2, '0')}.
+                              </span>
+                            )}
+                            <h3 className="truncate text-sm font-bold md:text-[15px]">
+                              {item.title}
+                            </h3>
+                            {isSolved && (
+                              <span className="rounded-full border border-emerald-400/25 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-300">
+                                {ui.solvedBadge}
+                              </span>
+                            )}
+                          </div>
+                          <p className="mt-2 max-w-3xl text-sm leading-6 text-[color:var(--cg-text-muted)]">
+                            {item.summary}
+                          </p>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <span className="rounded-full border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-3 py-1 text-[11px] font-semibold text-[color:var(--cg-text-muted)]">
+                              {item.topic}
+                            </span>
+                            <span className="rounded-full border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-3 py-1 text-[11px] font-semibold text-[color:var(--cg-text-muted)]">
+                              {item.estimatedTime}
+                            </span>
+                            <span className="rounded-full border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-3 py-1 text-[11px] font-semibold text-[color:var(--cg-text-muted)]">
+                              {item.solvedCount} solved
+                            </span>
+                          </div>
                         </div>
-                        <p className="mt-2 max-w-3xl text-sm leading-6 text-[color:var(--cg-text-muted)]">
-                          {item.summary}
-                        </p>
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          <span className="rounded-full border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-3 py-1 text-[11px] font-semibold text-[color:var(--cg-text-muted)]">
-                            {item.topic}
-                          </span>
-                          <span className="rounded-full border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-3 py-1 text-[11px] font-semibold text-[color:var(--cg-text-muted)]">
-                            {item.estimatedTime}
-                          </span>
-                          <span className="rounded-full border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-3 py-1 text-[11px] font-semibold text-[color:var(--cg-text-muted)]">
-                            {item.solvedCount} solved
+
+                        <div className="flex items-start md:items-center">
+                          <span className="rounded-full border border-sky-400/20 bg-sky-500/10 px-3 py-1.5 text-xs font-semibold text-sky-200">
+                            {item.track}
                           </span>
                         </div>
-                      </div>
 
-                      <div className="flex items-start md:items-center">
-                        <span className="rounded-full border border-sky-400/20 bg-sky-500/10 px-3 py-1.5 text-xs font-semibold text-sky-200">
-                          {item.track}
-                        </span>
-                      </div>
-
-                      <div className="flex items-start md:items-center">
-                        <span
-                          className={cx(
-                            'rounded-full px-3 py-1.5 text-xs font-semibold',
-                            getDifficultyBadgeClass(item.difficulty)
-                          )}
-                        >
-                          {item.difficulty}
-                        </span>
-                      </div>
-
-                      <div className="flex items-start text-sm font-semibold text-[color:var(--cg-text)] md:items-center">
-                        {item.acceptanceRate}
-                      </div>
-
-                      <div className="flex items-start md:items-center">
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#FF7E5F]/25 bg-[#FF7E5F]/10 px-3 py-1.5 text-xs font-semibold text-[#FFB29F]">
-                          Open
-                          <span className="material-symbols-outlined text-[14px]">
-                            arrow_forward
+                        <div className="flex items-start md:items-center">
+                          <span
+                            className={cx(
+                              'rounded-full px-3 py-1.5 text-xs font-semibold',
+                              getDifficultyBadgeClass(item.difficulty)
+                            )}
+                          >
+                            {item.difficulty}
                           </span>
-                        </span>
-                      </div>
-                    </button>
-                  ))}
+                        </div>
+
+                        <div className="flex items-start text-sm font-semibold text-[color:var(--cg-text)] md:items-center">
+                          {item.acceptanceRate}
+                        </div>
+
+                        <div className="flex items-start md:items-center">
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#FF7E5F]/25 bg-[#FF7E5F]/10 px-3 py-1.5 text-xs font-semibold text-[#FFB29F]">
+                            Open
+                            <span className="material-symbols-outlined text-[14px]">
+                              arrow_forward
+                            </span>
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
 
                   {filteredPractices.length === 0 && (
                     <div className="px-5 py-14 text-center">
@@ -3715,6 +3897,14 @@ function Practice() {
                       >
                         {selectedCatalogItem?.difficulty || 'Easy'}
                       </span>
+                      {solvedPracticeIdSet.has(activePracticeId) && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-400/25">
+                          <span className="material-symbols-outlined text-[12px]">
+                            check_circle
+                          </span>
+                          {ui.solvedBadge}
+                        </span>
+                      )}
                       <span className="px-2 py-0.5 rounded text-[10px] font-bold text-[color:var(--cg-text-muted)] bg-[color:var(--cg-container-a16)] border border-[color:var(--cg-border)]">
                         {selectedCatalogItem?.solvedCount || '38.3M'}{' '}
                         {ui.accepted}

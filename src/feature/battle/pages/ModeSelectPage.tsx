@@ -47,6 +47,7 @@ const MODE: {
 const FIELD_LABEL: Record<string, string> = {
   FE: 'Frontend Engineering',
   BE: 'Backend Engineering',
+  CORE: 'Core Knowledge',
 };
 
 const ModeSelectPage = () => {
@@ -74,6 +75,12 @@ const ModeSelectPage = () => {
     return () => stopPolling();
   }, []);
 
+  useEffect(() => {
+    if (!field) {
+      navigate(BATTLE_ROUTES.FIELD, { replace: true });
+    }
+  }, [field, navigate]);
+
   const startPolling = (id: string) => {
     pollingRef.current = window.setInterval(async () => {
       try {
@@ -92,7 +99,6 @@ const ModeSelectPage = () => {
   };
 
   if (!field) {
-    navigate(BATTLE_ROUTES.FIELD);
     return null;
   }
 

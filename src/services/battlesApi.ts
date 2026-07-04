@@ -53,6 +53,62 @@ export type LeaderboardRow = {
   tier: string;
 };
 
+export type ArenaOverviewStat = {
+  key: string;
+  label: string;
+  value: string;
+  subtitle: string;
+  accent: string;
+};
+
+export type ArenaFocusLane = {
+  field: BattleField;
+  title: string;
+  summary: string;
+  difficulty: string;
+  matchType: string;
+  estimatedQueue: string;
+  topics: string[];
+  outcomes: string[];
+  platforms: string[];
+  highlight: string;
+};
+
+export type ArenaTournament = {
+  id: string;
+  title: string;
+  organizer: string;
+  field: BattleField | 'all';
+  cadence: string;
+  format: string;
+  level: string;
+  focus: string[];
+  link: string;
+  note: string;
+};
+
+export type ArenaKnowledgeTrack = {
+  field: BattleField;
+  title: string;
+  description: string;
+  milestones: Array<{
+    title: string;
+    detail: string;
+  }>;
+};
+
+export type ArenaOverview = {
+  season: {
+    badge: string;
+    title: string;
+    subtitle: string;
+  };
+  stats: ArenaOverviewStat[];
+  focusLanes: ArenaFocusLane[];
+  tournaments: ArenaTournament[];
+  knowledgeTracks: ArenaKnowledgeTrack[];
+};
+
 export type SubmitAnswerResult = {
   isCorrect: boolean;
   points: number;
@@ -115,6 +171,10 @@ export async function getBattleHistory(params?: {
 export async function getLeaderboard(field: BattleField, limit = 20) {
   const query = new URLSearchParams({ field, limit: String(limit) });
   return request<LeaderboardRow[]>(`/battles/leaderboard?${query.toString()}`);
+}
+
+export async function getArenaOverview() {
+  return request<ArenaOverview>('/battles/overview');
 }
 
 export async function submitBattleAnswer(

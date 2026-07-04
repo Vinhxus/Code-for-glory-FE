@@ -17,19 +17,28 @@ const FIELDS: {
   {
     value: 'FE',
     icon: '🖥️',
-    title: 'Frontend',
+    title: 'Frontend Arena',
     description:
-      'Build UIs, tackle CSS challenges, and optimize rendering performance.',
-    tags: ['React', 'CSS Grid', 'Tailwind'],
+      'Battle với UI engineering, React patterns, accessibility, rendering, và browser behavior.',
+    tags: ['React', 'TypeScript', 'A11y'],
   },
   {
     value: 'BE',
     icon: '⚙️',
-    title: 'Backend',
+    title: 'Backend Arena',
     description:
-      'Forge robust APIs, manage complex databases, and optimize high-performance server-side logic.',
-    tags: ['Node.js', 'SQL', 'API'],
-    badge: '840 Online',
+      'Tập trung vào API design, database, caching, queue, reliability và system trade-offs.',
+    tags: ['NestJS', 'SQL', 'Caching'],
+    badge: 'Hot',
+  },
+  {
+    value: 'CORE',
+    icon: '🧠',
+    title: 'Core Knowledge',
+    description:
+      'Luyện DSA, debugging, HTTP, testing, security và tư duy kỹ thuật nền cho mọi hướng đi.',
+    tags: ['DSA', 'HTTP', 'Testing'],
+    badge: 'Recommended',
   },
 ];
 
@@ -69,15 +78,15 @@ const FieldSelectPage = () => {
               SELECT BATTLEGROUND
             </div>
             <h1 className="font-['Lexend'] text-4xl font-bold tracking-tight">
-              Select Your <span className="gradient-text">Battleground</span>
+              Select Your <span className="gradient-text">Arena Track</span>
             </h1>
             <p className="text-sm text-(--cg-text-muted) max-w-md mx-auto">
-              Choose your technical domain and face off against rivals to earn
-              experiences.
+              Chọn lane thi đấu phù hợp với định hướng của bạn rồi bước vào
+              battle thật.
             </p>
           </div>
           {/* Card  */}
-          <div className="grid w-full max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 animate-fade-in-up">
+          <div className="grid w-full max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 animate-fade-in-up">
             {FIELDS.map((f) => (
               <FieldCard
                 key={f.value}
@@ -91,7 +100,7 @@ const FieldSelectPage = () => {
             ))}
           </div>
           <p className="text-xs text-(--cg-text-muted) animate-fade-in-up">
-            Est. wait: ~12s
+            Matchmaking sẽ tự tìm đối thủ cùng lane và cùng mode.
           </p>
         </main>
       </div>
