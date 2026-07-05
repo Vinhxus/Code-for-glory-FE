@@ -2294,6 +2294,19 @@ function getDifficultyBadgeClass(difficulty: Difficulty) {
   }
 }
 
+function getCoinRewardByDifficulty(difficulty: Difficulty) {
+  switch (difficulty) {
+    case 'Easy':
+      return 100;
+    case 'Medium':
+      return 200;
+    case 'Hard':
+      return 300;
+    default:
+      return 0;
+  }
+}
+
 const ResizeHandle = () => (
   <PanelResizeHandle className="w-1.5 hover:bg-[#FF7E5F]/30 transition-colors cursor-col-resize active:bg-[#FF7E5F]/50 flex items-center justify-center group z-10 mx-1 rounded-full">
     <div className="w-0.5 h-8 bg-[color:var(--cg-border)] group-hover:bg-[#FF7E5F] rounded-full transition-colors" />
@@ -2450,6 +2463,9 @@ function Practice() {
         'Số bài đã giải theo từng mức độ, giống bảng tiến độ trên LeetCode.',
       solvedBadge: 'Đã giải',
       loadingProgress: 'Đang tải tiến độ...',
+      reward: 'Thưởng',
+      coinsUnit: 'coins',
+      firstSolveReward: 'Thưởng lần solve đầu tiên',
     }
     : {
       practiceHub: 'PRACTICE HUB',
@@ -2534,6 +2550,9 @@ function Practice() {
         'Problems solved per difficulty, similar to the LeetCode progress panel.',
       solvedBadge: 'Solved',
       loadingProgress: 'Loading progress...',
+      reward: 'Reward',
+      coinsUnit: 'coins',
+      firstSolveReward: 'First-solve reward',
     };
 
   // UI States
@@ -3020,6 +3039,7 @@ function Practice() {
         title: currentPractice.title,
         topic: selectedCatalogItem?.topic ?? currentPractice.concept,
         track: selectedCatalogItem?.track ?? 'Frontend',
+        difficulty: selectedCatalogItem?.difficulty,
         language,
         code,
         locale: isVi ? 'vi' : 'en',
@@ -3592,6 +3612,10 @@ function Practice() {
                             <span className="rounded-full border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-3 py-1 text-[11px] font-semibold text-[color:var(--cg-text-muted)]">
                               {item.estimatedTime}
                             </span>
+                            <span className="rounded-full border border-[#fbbf24]/25 bg-[#fbbf24]/10 px-3 py-1 text-[11px] font-semibold text-[#fcd34d]">
+                              +{getCoinRewardByDifficulty(item.difficulty)}{' '}
+                              {ui.coinsUnit}
+                            </span>
                             <span className="rounded-full border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-3 py-1 text-[11px] font-semibold text-[color:var(--cg-text-muted)]">
                               {item.solvedCount} solved
                             </span>
@@ -3923,11 +3947,30 @@ function Practice() {
                           {selectedCatalogItem.topic}
                         </span>
                       )}
+                      {selectedCatalogItem?.difficulty && (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold text-[#fcd34d] bg-[#fbbf24]/10 border border-[#fbbf24]/25">
+                          +{getCoinRewardByDifficulty(selectedCatalogItem.difficulty)}{' '}
+                          {ui.coinsUnit}
+                        </span>
+                      )}
                     </div>
 
                     <div className="text-sm leading-relaxed text-[color:var(--cg-text)] font-medium whitespace-pre-wrap mb-8">
                       {currentPractice.description}
                     </div>
+
+                    {selectedCatalogItem?.difficulty && (
+                      <div className="mb-8 rounded-2xl border border-[#fbbf24]/20 bg-[#fbbf24]/8 p-4">
+                        <div className="text-[11px] font-semibold tracking-[0.22em] text-[#fcd34d]">
+                          {ui.firstSolveReward}
+                        </div>
+                        <div className="mt-2 text-sm font-semibold text-[color:var(--cg-text)]">
+                          {selectedCatalogItem.difficulty} = +
+                          {getCoinRewardByDifficulty(selectedCatalogItem.difficulty)}{' '}
+                          {ui.coinsUnit}
+                        </div>
+                      </div>
+                    )}
 
                     <div className="mb-8">
                       <h3 className="font-['Lexend'] text-sm font-semibold mb-3 flex items-center gap-2">
