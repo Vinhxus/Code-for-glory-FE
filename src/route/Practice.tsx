@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
+﻿import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import {
@@ -3094,6 +3094,23 @@ function Practice() {
       // Refresh chapter progress ngay lập tức để tick ✔ hiện ra tức thì
       // khi user quay lại Hub view, không phải đợi lần mount kế tiếp.
       // Best-effort tương tự updateNodeProgress bên dưới — không chặn UX.
+
+      // Optimistic update: add practiceId to solvedPracticeIds immediately so
+      // the "Solved" badge appears without waiting for the API round-trip.
+      setProgressSummary((prev) => {
+        if (!prev) return prev;
+        if (prev.solvedPracticeIds.includes(activePracticeId)) return prev;
+        const diff = selectedCatalogItem?.difficulty?.toLowerCase();
+        const newOverall = { ...prev.overall };
+        if (diff === 'easy') newOverall.easy += 1;
+        else if (diff === 'medium') newOverall.medium += 1;
+        else if (diff === 'hard') newOverall.hard += 1;
+        return {
+          ...prev,
+          solvedPracticeIds: [...prev.solvedPracticeIds, activePracticeId],
+          overall: newOverall,
+        };
+      });
       void refreshProgressSummary();
 
       // Sync learning-path progress separately — don't let failures block the UX
@@ -3772,6 +3789,58 @@ function Practice() {
           </div>
         </div>
       )}
+
+      {/* Coin reward popup */}
+      {coinToast !== null && (
+        <div
+          className="fixed top-24 right-6 z-[1000] pointer-events-none select-none"
+          style={{ animation: 'coinPopIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards' }}
+        >
+          <div className="relative flex flex-col items-center">
+            {/* Floating coin particles */}
+            {([0, 1, 2, 3, 4, 5] as const).map((i) => (
+              <span
+                key={i}
+                className="absolute text-xl"
+                style={{ animation: `coinFloat${i} 1.4s ease-out forwards`, top: 0, left: '50%', transform: 'translateX(-50%)' }}
+              >
+                🪙
+              </span>
+            ))}
+            {/* Main reward card */}
+            <div className="flex items-center gap-3 rounded-2xl border border-[#fbbf24]/40 bg-gradient-to-br from-[#78350f]/80 to-[#0d0706]/90 px-5 py-4 shadow-[0_0_40px_rgba(251,191,36,0.35),0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl" style={{ minWidth: 210 }}>
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#fbbf24]/20 border border-[#fbbf24]/40 text-2xl shadow-[0_0_20px_rgba(251,191,36,0.4)]">
+                🏆
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-semibold tracking-[0.15em] uppercase" style={{ color: 'rgba(252,211,77,0.65)' }}>
+                  {isVi ? 'Phần thưởng' : 'Reward Earned'}
+                </span>
+                <span className="text-[26px] font-extrabold leading-tight" style={{ color: '#fcd34d', textShadow: '0 0 20px rgba(251,191,36,0.8)' }}>
+                  +{coinToast} 🪙
+                </span>
+                <span className="text-[10px] font-medium" style={{ color: 'rgba(252,211,77,0.5)' }}>
+                  {isVi ? 'coins đã được thêm vào tài khoản' : 'coins added to your account'}
+                </span>
+              </div>
+            </div>
+          </div>
+          <style>{`
+            @keyframes coinPopIn {
+              0%   { opacity:0; transform: scale(0.4) translateY(30px); }
+              60%  { opacity:1; transform: scale(1.1) translateY(-6px);  }
+              100% { opacity:1; transform: scale(1)   translateY(0);      }
+            }
+            @keyframes coinFloat0 { 0%{opacity:1;transform:translate(-50%,0) scale(1)} 100%{opacity:0;transform:translate(calc(-50% - 45px),-80px) scale(0.4)} }
+            @keyframes coinFloat1 { 0%{opacity:1;transform:translate(-50%,0) scale(1)} 100%{opacity:0;transform:translate(calc(-50% + 45px),-90px) scale(0.4)} }
+            @keyframes coinFloat2 { 0%{opacity:1;transform:translate(-50%,0) scale(1)} 100%{opacity:0;transform:translate(calc(-50% - 20px),-100px) scale(0.4)} }
+            @keyframes coinFloat3 { 0%{opacity:1;transform:translate(-50%,0) scale(1)} 100%{opacity:0;transform:translate(calc(-50% + 20px),-85px) scale(0.4)} }
+            @keyframes coinFloat4 { 0%{opacity:1;transform:translate(-50%,0) scale(1)} 100%{opacity:0;transform:translate(calc(-50% - 65px),-65px) scale(0.4)} }
+            @keyframes coinFloat5 { 0%{opacity:1;transform:translate(-50%,0) scale(1)} 100%{opacity:0;transform:translate(calc(-50% + 65px),-70px) scale(0.4)} }
+          `}</style>
+        </div>
+      )}
+
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <div
           className="absolute inset-0"
@@ -4414,14 +4483,14 @@ function Practice() {
                   className="rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] backdrop-blur-md flex flex-col overflow-hidden animate-fade-in delay-300"
                 >
                   {/* Console Tabs */}
-                  <div className="flex items-center gap-1 px-2 pt-2 border-b border-[color:var(--cg-border)] bg-[#0A0726]/40">
+                  <div className="flex items-center gap-0.5 px-2 pt-1.5 border-b-2 border-white/10 bg-[#060418]/80 backdrop-blur-sm">
                     <button
                       onClick={() => setConsoleTab('testcase')}
                       className={cx(
-                        'flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors border-b-2',
+                        'flex items-center gap-1.5 px-3 py-2 text-xs font-bold transition-all border-b-2 -mb-[2px] rounded-t-md',
                         consoleTab === 'testcase'
-                          ? 'text-emerald-400 border-emerald-400'
-                          : 'text-[color:var(--cg-text-muted)] border-transparent hover:text-[color:var(--cg-text)]'
+                          ? 'text-emerald-300 border-emerald-400 bg-emerald-500/10'
+                          : 'text-slate-400 border-transparent hover:text-white hover:bg-white/5'
                       )}
                     >
                       <span className="material-symbols-outlined text-[14px]">
@@ -4432,10 +4501,10 @@ function Practice() {
                     <button
                       onClick={() => setConsoleTab('testresult')}
                       className={cx(
-                        'flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors border-b-2',
+                        'flex items-center gap-1.5 px-3 py-2 text-xs font-bold transition-all border-b-2 -mb-[2px] rounded-t-md',
                         consoleTab === 'testresult'
-                          ? 'text-emerald-400 border-emerald-400'
-                          : 'text-[color:var(--cg-text-muted)] border-transparent hover:text-[color:var(--cg-text)]'
+                          ? 'text-emerald-300 border-emerald-400 bg-emerald-500/10'
+                          : 'text-slate-400 border-transparent hover:text-white hover:bg-white/5'
                       )}
                     >
                       <span className="material-symbols-outlined text-[14px]">
@@ -4443,20 +4512,28 @@ function Practice() {
                       </span>{' '}
                       {ui.testResult}
                     </button>
-                    <div className="w-px h-4 bg-[color:var(--cg-border)] mx-1" />
+                    <div className="w-px h-5 bg-white/10 mx-1" />
                     <button
                       onClick={() => setConsoleTab('submissions')}
                       className={cx(
-                        'flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors border-b-2',
+                        'flex items-center gap-1.5 px-3 py-2 text-xs font-bold transition-all border-b-2 -mb-[2px] rounded-t-md',
                         consoleTab === 'submissions'
-                          ? 'text-emerald-400 border-emerald-400'
-                          : 'text-[color:var(--cg-text-muted)] border-transparent hover:text-[color:var(--cg-text)]'
+                          ? 'text-[#fbbf24] border-[#fbbf24] bg-[#fbbf24]/10'
+                          : 'text-slate-400 border-transparent hover:text-white hover:bg-white/5'
                       )}
                     >
                       <span className="material-symbols-outlined text-[14px]">
                         history
                       </span>{' '}
                       {ui.submissions}
+                      {submissionHistory.length > 0 && (
+                        <span className={cx(
+                          'ml-1 rounded-full px-1.5 py-0.5 text-[9px] font-extrabold leading-none',
+                          consoleTab === 'submissions' ? 'bg-[#fbbf24]/25 text-[#fbbf24]' : 'bg-white/10 text-slate-400'
+                        )}>
+                          {submissionHistory.length}
+                        </span>
+                      )}
                     </button>
                   </div>
 
@@ -4617,7 +4694,7 @@ function Practice() {
 
                     {consoleTab === 'submissions' && (
                       <div className="animate-fade-in text-xs w-full">
-                        <div className="grid grid-cols-[80px_1fr_1fr_1fr_1fr] px-4 py-2 text-[color:var(--cg-text-muted)] font-semibold border-b border-[color:var(--cg-border)] sticky top-0 bg-[color:var(--cg-container-a16)] z-10">
+                        <div className="grid grid-cols-[80px_1fr_1fr_1fr_1fr] px-4 py-2.5 border-b-2 border-[#fbbf24]/20 sticky top-0 bg-[#0a0720]/95 backdrop-blur-md z-10 text-[11px] font-bold tracking-wide text-[#fbbf24]/70">
                           <div>{ui.status}</div>
                           <div>{ui.language}</div>
                           <div>{ui.runtime}</div>
