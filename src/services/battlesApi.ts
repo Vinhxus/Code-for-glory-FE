@@ -168,6 +168,10 @@ export async function getBattleHistory(params?: {
   return request<BattleHistory>(`/battles/history${suffix}`);
 }
 
+export async function getGlobalLeaderboard(limit = 50) {
+  return request<LeaderboardRow[]>(`/battles/leaderboard-global?limit=${limit}`);
+}
+
 export async function getLeaderboard(field: BattleField, limit = 20) {
   const query = new URLSearchParams({ field, limit: String(limit) });
   return request<LeaderboardRow[]>(`/battles/leaderboard?${query.toString()}`);

@@ -387,7 +387,7 @@ function Homepage() {
                 <button
                   type="button"
                   className="neon-btn px-6 py-3 text-sm"
-                  onClick={() => navigate('/survey')}
+                  onClick={() => navigate('/battle')}
                 >
                   {t('home.arena.cta')}
                 </button>
@@ -451,7 +451,7 @@ function Homepage() {
                 <button
                   type="button"
                   className="w-full rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] py-2.5 text-xs font-semibold transition hover:bg-[color:var(--cg-container-a22)]"
-                  onClick={() => navigate('/survey')}
+                  onClick={() => navigate('/leaderboard')}
                 >
                   {t('home.top.viewAll')}
                 </button>

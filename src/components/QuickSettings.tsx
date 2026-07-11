@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSettingsStore } from '../store/settings';
 
 function QuickSettings() {
@@ -9,6 +9,35 @@ function QuickSettings() {
 
   const langLabel = useMemo(() => (language === 'en' ? 'EN' : 'VI'), [language]);
   const isDark = theme === 'dark';
+
+  // Theo dõi trạng thái Neon Theme từ localStorage
+  const [isNeonActive, setIsNeonActive] = useState(
+    () => typeof window !== 'undefined' && localStorage.getItem('shopTheme') === 'neon'
+  );
+
+  // Poll mỗi 1s để đồng bộ khi Neon Theme được bật/tắt từ Shop page
+  useEffect(() => {
+    const check = () => setIsNeonActive(localStorage.getItem('shopTheme') === 'neon');
+    const t = window.setInterval(check, 1000);
+    return () => window.clearInterval(t);
+  }, []);
+
+  const handleToggleTheme = () => {
+    // Tắt Neon Theme trước khi chuyển về Dark/Light
+    if (isNeonActive) {
+      document.documentElement.classList.remove('theme-neon');
+      localStorage.removeItem('shopTheme');
+      setIsNeonActive(false);
+    }
+    toggleTheme();
+  };
+
+  const handleDisableNeon = () => {
+    document.documentElement.classList.remove('theme-neon');
+    localStorage.removeItem('shopTheme');
+    setIsNeonActive(false);
+  };
+
   const text = useMemo(
     () =>
       language === 'vi'
@@ -17,12 +46,14 @@ function QuickSettings() {
             toggleTheme: 'Chuyển giao diện',
             dark: 'Tối',
             light: 'Sáng',
+            disableNeon: 'Tắt Neon',
           }
         : {
             toggleLanguage: 'Toggle language',
             toggleTheme: 'Toggle theme',
             dark: 'Dark',
             light: 'Light',
+            disableNeon: 'Disable Neon',
           },
     [language]
   );
@@ -42,10 +73,25 @@ function QuickSettings() {
         {langLabel}
       </button>
 
-      {/* Theme toggle */}
+      {/* Neon Theme OFF button — chỉ hiện khi Neon đang bật */}
+      {isNeonActive && (
+        <button
+          type="button"
+          onClick={handleDisableNeon}
+          className="inline-flex items-center gap-1.5 rounded-xl border border-[#39ff14]/50 bg-[#39ff14]/10 px-3 py-2 text-xs font-bold text-[#39ff14] transition-all duration-200 hover:bg-[#39ff14]/20 hover:shadow-[0_0_12px_rgba(57,255,20,0.3)] animate-pulse"
+          title={text.disableNeon}
+        >
+          <span className="material-symbols-outlined text-[16px]">
+            palette
+          </span>
+          {text.disableNeon}
+        </button>
+      )}
+
+      {/* Theme toggle (Dark/Light) */}
       <button
         type="button"
-        onClick={toggleTheme}
+        onClick={handleToggleTheme}
         className="group inline-flex items-center gap-1.5 rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-3 py-2 text-xs font-bold tracking-widest text-[color:var(--cg-text)] transition-all duration-200 hover:bg-[color:var(--cg-container-a22)] hover:border-[color:var(--cg-green)]/30 hover:shadow-[0_0_12px_rgba(74,222,128,0.15)]"
         title={text.toggleTheme}
       >

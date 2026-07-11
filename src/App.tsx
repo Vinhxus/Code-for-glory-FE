@@ -36,6 +36,7 @@ import Network from './route/Network';
 import Forum from './route/Forum';
 import Mobile from './route/Mobile';
 import Shop from './route/Shop';
+import Leaderboard from './route/Leaderboard';
 import { profileRoutes } from './route/profileRoot';
 import TabComponent from './feature/history';
 import { Streak } from './route/Streak';
@@ -115,6 +116,7 @@ function App() {
         <Route path="/forum" element={<Forum />} />
         <Route path="/mobile" element={<Mobile />} />
         <Route path="/shop" element={<Shop />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/home" element={<Navigate to="/" replace />} />
 
         {/* ================= PROTECTED ROUTES (ADMIN ONLY) ================= */}

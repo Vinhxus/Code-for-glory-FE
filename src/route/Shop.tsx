@@ -14,6 +14,27 @@ import {
   type ShopMe,
 } from '../services/shopApi';
 
+// Áp dụng / xóa neon theme
+function applyNeonTheme(active: boolean) {
+  if (active) {
+    document.documentElement.classList.add('theme-neon');
+    localStorage.setItem('shopTheme', 'neon');
+  } else {
+    document.documentElement.classList.remove('theme-neon');
+    localStorage.removeItem('shopTheme');
+  }
+}
+
+// Tính thời gian còn lại của XP boost
+function xpBoostCountdown(expiresAt: string | null): string | null {
+  if (!expiresAt) return null;
+  const ms = new Date(expiresAt).getTime() - Date.now();
+  if (ms <= 0) return null;
+  const mins = Math.ceil(ms / 60000);
+  if (mins < 60) return `${mins}m`;
+  return `${Math.ceil(mins / 60)}h ${mins % 60}m`;
+}
+
 type TabKey = 'store' | 'inventory' | 'history';
 
 type CartLine = {
@@ -103,6 +124,7 @@ export default function Shop() {
   const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [xpCountdown, setXpCountdown] = useState<string | null>(null);
 
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<string>('');
@@ -145,8 +167,20 @@ export default function Shop() {
 
   useEffect(() => {
     void load();
+    // Restore neon theme nếu đã bật trước đó
+    if (localStorage.getItem('shopTheme') === 'neon') {
+      document.documentElement.classList.add('theme-neon');
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Cập nhật countdown XP boost mỗi 30 giây
+  useEffect(() => {
+    const update = () => setXpCountdown(xpBoostCountdown(me?.xpBoostExpiresAt ?? null));
+    update();
+    const t = window.setInterval(update, 30000);
+    return () => window.clearInterval(t);
+  }, [me?.xpBoostExpiresAt]);
 
   useEffect(() => {
     const t = window.setTimeout(() => {
@@ -216,7 +250,17 @@ export default function Shop() {
   const handleUseInventory = async (inventoryId: string) => {
     try {
       const res = await useInventoryItem(inventoryId);
-      showToast('ok', isVi ? `Đã dùng. Còn lại: ${res.remaining}` : `Used. Remaining: ${res.remaining}`);
+
+      // Áp dụng effect phía FE theo SKU
+      if (res.sku === 'SKIN_NEON') {
+        applyNeonTheme(true);
+      }
+
+      // Hiển thị toast với message effect chi tiết
+      const effectMsg = isVi ? res.effectVi : res.effectEn;
+      const remainMsg = isVi ? ` (Còn lại: ${res.remaining})` : ` (Remaining: ${res.remaining})`;
+      showToast('ok', effectMsg + remainMsg);
+
       await refreshMe();
     } catch (e) {
       showToast('err', (e as Error).message);
@@ -458,38 +502,143 @@ export default function Shop() {
                 </>
               ) : tab === 'inventory' ? (
                 <div className="space-y-3">
-                  {me?.inventory?.length ? (
-                    me.inventory.map((row) => (
-                      <div
-                        key={row.id}
-                        className="flex items-center justify-between gap-4 rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] p-4"
-                      >
-                        <div className="min-w-0">
-                          <div className="text-xs font-semibold text-[color:var(--cg-text-muted)]">
-                            {row.item?.category ?? '—'}
-                          </div>
-                          <div className="mt-1 truncate text-base font-bold">
-                            {row.item?.name ?? '—'}
-                          </div>
-                          <div className="mt-1 text-xs text-[color:var(--cg-text-muted)]">
-                            {isVi ? 'Dùng gần nhất:' : 'Last used:'} {formatDate(row.lastUsedAt, language)}
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <div className="rounded-xl border border-[color:var(--cg-border)] bg-black/20 px-3 py-2 text-sm font-bold">
-                            {text.qty}: {row.quantity}
-                          </div>
-                          <button
-                            disabled={row.quantity <= 0}
-                            onClick={() => handleUseInventory(row.id)}
-                            className="rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-4 py-2 text-sm font-bold transition hover:bg-[color:var(--cg-container-a22)] disabled:opacity-50"
-                          >
-                            {text.use}
-                          </button>
-                        </div>
+                  {/* Active effects banner */}
+                  {(xpCountdown || me?.badges?.includes('gold-name-tag') || (me?.bonusSubmitAttempts ?? 0) > 0) && (
+                    <div className="rounded-2xl border border-[#fbbf24]/30 bg-[#fbbf24]/10 p-4 space-y-2">
+                      <div className="text-xs font-bold text-[#fbbf24] mb-2">
+                        {isVi ? '⚡ Hiệu ứng đang active' : '⚡ Active Effects'}
                       </div>
-                    ))
+                      {xpCountdown && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="text-lg">🚀</span>
+                          <span className="font-semibold">{isVi ? 'XP Boost x2' : 'XP Boost x2'}</span>
+                          <span className="ml-auto rounded-full bg-[#fbbf24]/20 px-2 py-0.5 text-xs font-bold text-[#fbbf24]">
+                            {isVi ? `còn ${xpCountdown}` : `${xpCountdown} left`}
+                          </span>
+                        </div>
+                      )}
+                      {(me?.bonusSubmitAttempts ?? 0) > 0 && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="text-lg">✅</span>
+                          <span className="font-semibold">{isVi ? 'Lượt submit bonus' : 'Bonus Submissions'}</span>
+                          <span className="ml-auto rounded-full bg-[#4ade80]/20 px-2 py-0.5 text-xs font-bold text-[#4ade80]">
+                            +{me?.bonusSubmitAttempts}
+                          </span>
+                        </div>
+                      )}
+                      {me?.badges?.includes('gold-name-tag') && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="text-lg">🏅</span>
+                          <span className="font-semibold">{isVi ? 'Gold Name Tag đang active' : 'Gold Name Tag Active'}</span>
+                          <span className="ml-auto rounded-full bg-[#fbbf24]/20 px-2 py-0.5 text-xs font-bold text-[#fbbf24]">
+                            {isVi ? 'Vĩnh viễn' : 'Permanent'}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Inventory items */}
+                  {me?.inventory?.length ? (
+                    me.inventory.map((row) => {
+                      const sku = row.item?.sku ?? '';
+                      const isXpActive = sku === 'BOOST_XP_1H' && !!xpCountdown;
+                      const isNeonActive = sku === 'SKIN_NEON' && localStorage.getItem('shopTheme') === 'neon';
+                      const isGoldActive = sku === 'NAME_TAG_GOLD' && me?.badges?.includes('gold-name-tag');
+                      const isActive = isXpActive || isNeonActive || isGoldActive;
+
+                      return (
+                        <div
+                          key={row.id}
+                          className={[
+                            'flex items-center justify-between gap-4 rounded-2xl border p-4 transition',
+                            isActive
+                              ? 'border-[#fbbf24]/40 bg-[#fbbf24]/5'
+                              : 'border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)]',
+                          ].join(' ')}
+                        >
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <div className="text-xs font-semibold text-[color:var(--cg-text-muted)]">
+                                {row.item?.category ?? '—'}
+                              </div>
+                              {isActive && (
+                                <span className="rounded-full bg-[#4ade80]/20 px-2 py-0.5 text-[10px] font-bold text-[#4ade80]">
+                                  {isVi ? 'ĐANG ACTIVE' : 'ACTIVE'}
+                                </span>
+                              )}
+                            </div>
+                            <div className="mt-1 truncate text-base font-bold">
+                              {row.item?.name ?? '—'}
+                            </div>
+                            <div className="mt-1 text-xs text-[color:var(--cg-text-muted)]">
+                              {isVi ? 'Dùng gần nhất:' : 'Last used:'} {formatDate(row.lastUsedAt, language)}
+                            </div>
+                            {/* Effect hint */}
+                            {sku === 'BOOST_XP_1H' && (
+                              <div className="mt-1 text-[11px] text-[#fbbf24]">
+                                {isVi ? '🚀 Kích hoạt XP x2 trong 1 giờ (có thể cộng dồn)' : '🚀 Activates 2x XP for 1 hour (stackable)'}
+                              </div>
+                            )}
+                            {sku === 'SKIN_NEON' && (
+                              <div className="mt-1 text-[11px] text-[#a78bfa]">
+                                {isVi ? '✨ Bật/tắt Neon Theme cho giao diện' : '✨ Toggle Neon Theme for the UI'}
+                              </div>
+                            )}
+                            {sku === 'EXTRA_SUBMISSIONS_5' && (
+                              <div className="mt-1 text-[11px] text-[#4ade80]">
+                                {isVi ? '✅ Thêm 5 lượt submit bài tập' : '✅ Adds 5 extra exercise submission attempts'}
+                              </div>
+                            )}
+                            {sku === 'NAME_TAG_GOLD' && (
+                              <div className="mt-1 text-[11px] text-[#fbbf24]">
+                                {isVi ? '🏅 Gắn viền vàng vào tên trong forum/battle' : '🏅 Adds a gold border to your name in forum/battle'}
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <div className="rounded-xl border border-[color:var(--cg-border)] bg-black/20 px-3 py-2 text-sm font-bold">
+                              {text.qty}: {row.quantity}
+                            </div>
+                            {/* Neon toggle riêng */}
+                            {sku === 'SKIN_NEON' && row.quantity > 0 ? (
+                              <button
+                                onClick={() => {
+                                  const isOn = localStorage.getItem('shopTheme') === 'neon';
+                                  if (isOn) {
+                                    applyNeonTheme(false);
+                                    // không consume khi tắt
+                                    showToast('ok', isVi ? '✨ Neon Theme đã tắt' : '✨ Neon Theme turned off');
+                                    refreshMe(); // re-render
+                                  } else {
+                                    handleUseInventory(row.id);
+                                  }
+                                }}
+                                className={[
+                                  'rounded-xl border px-4 py-2 text-sm font-bold transition',
+                                  isNeonActive
+                                    ? 'border-[#a78bfa]/60 bg-[#a78bfa]/10 text-[#a78bfa] hover:bg-[#a78bfa]/20'
+                                    : 'border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] hover:bg-[color:var(--cg-container-a22)]',
+                                ].join(' ')}
+                              >
+                                {isNeonActive
+                                  ? (isVi ? 'Tắt' : 'Disable')
+                                  : (isVi ? 'Bật' : 'Enable')}
+                              </button>
+                            ) : (
+                              <button
+                                disabled={row.quantity <= 0}
+                                onClick={() => handleUseInventory(row.id)}
+                                className="rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-4 py-2 text-sm font-bold transition hover:bg-[color:var(--cg-container-a22)] disabled:opacity-50"
+                              >
+                                {text.use}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
                   ) : (
                     <div className="text-sm text-[color:var(--cg-text-muted)]">{text.empty}</div>
                   )}

@@ -36,8 +36,22 @@ export type ShopMe = {
   coins: number;
   canClaimDailyReward: boolean;
   lastDailyClaimAt: string | null;
+  // Active effects từ shop items
+  xpBoostExpiresAt: string | null;
+  bonusSubmitAttempts: number;
+  badges: string[];
   inventory: ShopInventoryRow[];
   purchases: ShopPurchase[];
+};
+
+export type UseItemResult = {
+  ok: boolean;
+  remaining: number;
+  sku: string;
+  effectVi: string;
+  effectEn: string;
+  xpBoostExpiresAt: string | null;
+  bonusSubmitAttempts: number;
 };
 
 export async function getShopItems(params?: {
@@ -87,7 +101,7 @@ export async function redeemCoupon(code: string) {
 }
 
 export async function useInventoryItem(inventoryId: string) {
-  return request<{ ok: boolean; remaining: number }>(`/shop/inventory/use`, {
+  return request<UseItemResult>(`/shop/inventory/use`, {
     method: 'POST',
     body: JSON.stringify({ inventoryId }),
   });
