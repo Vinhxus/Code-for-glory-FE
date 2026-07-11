@@ -19,7 +19,7 @@ const MODE: {
   stats: { label: string; value: string }[];
 }[] = [
   {
-    value: 'speed',
+    value: 'SPEED',
     icon: '⚡',
     title: 'Speed Mode',
     description:
@@ -31,7 +31,7 @@ const MODE: {
     ],
   },
   {
-    value: 'performance',
+    value: 'PERFORMANCE',
     icon: '🚀',
     title: 'Performance Mode',
     description:
@@ -54,7 +54,7 @@ const ModeSelectPage = () => {
   const navigate = useNavigate();
   const { field, setBattleMode, setBattleId } = useBattleStore();
 
-  const [selectedMode, setSelectedMode] = useState<BattleMode>('performance');
+  const [selectedMode, setSelectedMode] = useState<BattleMode>('PERFORMANCE');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -85,7 +85,7 @@ const ModeSelectPage = () => {
     pollingRef.current = window.setInterval(async () => {
       try {
         const battle = await getBattleById(id);
-        if (battle.status === 'in_progress') {
+        if (battle.status === 'IN_PROGRESS') {
           stopPolling();
           setBattleMode(selectedMode);
           setBattleId(battle._id);
@@ -109,7 +109,7 @@ const ModeSelectPage = () => {
       const battle = await createBattle(field, selectedMode);
       setBattleMode(selectedMode);
 
-      if (battle.status === 'in_progress') {
+      if (battle.status === 'IN_PROGRESS') {
         setBattleId(battle._id);
         navigate(`${BATTLE_ROUTES.ARENA}/${battle._id}`);
         return;

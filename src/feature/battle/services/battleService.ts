@@ -24,7 +24,14 @@ type ApiBattle = {
     username?: string;
     avatar?: string;
     score: number;
+    ratingBefore?: number;
+    ratingAfter?: number;
+    passedTestCount?: number;
     submissionCount?: number;
+    result?: string;
+    totalPassedTests?: number;
+    totalTests?: number;
+    totalMemoryKb?: number;
   }>;
   questions?: Array<{
     questionId: string;
@@ -77,9 +84,15 @@ const normalizeBattle = (battle: ApiBattle): Battle => ({
     userId: player.userId,
     username: player.username ?? 'Unknown',
     avatar: player.avatar,
-    currentScore: player.score,
-    hasSubmitted: Boolean(player.submissionCount && player.submissionCount > 0),
+    score: player.score,
+    ratingBefore: player.ratingBefore ?? 1000,
+    ratingAfter: player.ratingAfter,
+    passedTestCount: player.passedTestCount ?? 0,
     submissionCount: player.submissionCount ?? 0,
+    result: player.result,
+    totalPassedTests: player.totalPassedTests,
+    totalTests: player.totalTests,
+    totalMemoryKb: player.totalMemoryKb,
   })),
   questions: (battle.questions ?? []).map((question) => ({
     questionId: question.questionId,
@@ -87,20 +100,11 @@ const normalizeBattle = (battle: ApiBattle): Battle => ({
     content: question.content,
     difficulty: question.difficulty,
   })),
-  timeLimit: battle.timeLimitSeconds ?? 0,
+  timeLimitSeconds: battle.timeLimitSeconds ?? 0,
   startTime: battle.startTime,
   endTime: battle.endTime,
-  result:
-    battle.status === 'finished' || battle.status === 'cancelled'
-      ? {
-          winnerId: battle.winnerId ?? undefined,
-          isDraw: battle.isDraw ?? false,
-          finalScores: battle.players.map((player) => ({
-            userId: player.userId,
-            score: player.score,
-          })),
-        }
-      : undefined,
+  winnerId: battle.winnerId ?? undefined,
+  isDraw: battle.isDraw ?? false,
 });
 
 export const createBattle = async (

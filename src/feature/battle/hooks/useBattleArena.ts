@@ -53,7 +53,7 @@ export const useBattleArena = (battleId: string | undefined) => {
         setBattle(data);
 
         // Chỉ set tạm timeLimit, timer-tick từ server sẽ cập nhật chính xác ngay sau đó
-        if (data.status === 'in_progress') {
+        if (data.status === 'IN_PROGRESS') {
           setTimeLeft(data.timeLimitSeconds);
         }
       } catch {
@@ -190,7 +190,7 @@ export const useBattleArena = (battleId: string | undefined) => {
 
   const dismissFeedback = () => setSubmitResult(null);
 
-  const isWaiting = battle?.status === 'waiting';
+  const isWaiting = battle?.status === 'WAITING';
 
   return {
     battle,
