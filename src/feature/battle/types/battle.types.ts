@@ -12,9 +12,15 @@ export interface BattlePlayer {
   userId: string;
   username: string;
   avatar?: string;
-  currentScore: number;
-  hasSubmitted: boolean;
-  submissionCount?: number;
+  score: number;
+  ratingBefore: number;
+  ratingAfter?: number;
+  passedTestCount: number;
+  submissionCount: number;
+  result?: string;
+  totalPassedTests?: number;
+  totalTests?: number;
+  totalMemoryKb?: number;
 }
 
 export interface BattleQuestion {

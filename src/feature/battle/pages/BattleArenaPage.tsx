@@ -95,7 +95,7 @@ const BattleArenaPage = () => {
               <div className="flex flex-col items-start">
                 <span className="text-xs text-(--cg-text-muted)">You</span>
                 <span className="font-['Lexend'] text-lg font-bold text-[#ff7e5f]">
-                  {me?.currentScore ?? 0} pts
+                  {me?.score ?? 0} pts
                 </span>
               </div>
 
@@ -119,7 +119,7 @@ const BattleArenaPage = () => {
                   {opponent?.username ?? 'Waiting...'}
                 </span>
                 <span className="font-['Lexend'] text-lg font-bold text-(--cg-text)">
-                  {opponent?.currentScore ?? 0} pts
+                  {opponent?.score ?? 0} pts
                 </span>
               </div>
             </div>

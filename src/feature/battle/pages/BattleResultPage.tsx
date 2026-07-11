@@ -82,7 +82,11 @@ const BattleResultPage = () => {
       ? 'victory'
       : 'defeat';
   const config = RESULT_CONFIG[resultType];
-
+  const me = battle.players.find((p) => p.userId === myRealId);
+  const opponent = battle.players.find((p) => p.userId !== myRealId);
+  const myPassedTests = me?.totalPassedTests ?? 0;
+  const myTotalTests = me?.totalTests ?? 0;
+  const myMemoryKb = me?.totalMemoryKb ?? 0;
   return (
     <ResultShell>
       <div className="w-full max-w-md rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] p-10 text-center backdrop-blur-md">
@@ -101,13 +105,19 @@ const BattleResultPage = () => {
             <span className="text-[color:var(--cg-text-muted)]">
               {config.statLabels.left}
             </span>
-            <span className="font-semibold">{config.statValues.left}</span>
+            <span className="font-semibold">
+              {myPassedTests} / {myTotalTests}
+            </span>
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="text-[color:var(--cg-text-muted)]">
               {config.statLabels.right}
             </span>
-            <span className="font-semibold">{config.statValues.right}</span>
+            <span className="font-semibold">
+              {myMemoryKb > 1024
+                ? `${(myMemoryKb / 1024).toFixed(1)} MB`
+                : `${myMemoryKb} KB`}
+            </span>
           </div>
         </div>
 
