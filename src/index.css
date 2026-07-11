@@ -346,6 +346,16 @@ body {
     transform: scale(0.85);
   }
 }
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
 
 /* ─── Animation Utility Classes ─── */
 .animate-fade-in-up {
@@ -399,7 +409,9 @@ body {
 .animate-status-pulse {
   animation: status-pulse 2s ease-in-out infinite;
 }
-
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
 /* Stagger delays */
 .delay-50 {
   animation-delay: 50ms;

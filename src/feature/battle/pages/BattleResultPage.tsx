@@ -54,7 +54,6 @@ const BattleResultPage = () => {
       </ResultShell>
     );
   }
-
   if (isLoading) {
     return (
       <ResultShell>
@@ -82,7 +81,6 @@ const BattleResultPage = () => {
     : battle.winnerId === myRealId
       ? 'victory'
       : 'defeat';
-
   const config = RESULT_CONFIG[resultType];
 
   return (

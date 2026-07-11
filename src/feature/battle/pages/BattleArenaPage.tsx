@@ -141,7 +141,7 @@ const BattleArenaPage = () => {
                     <h2 className="font-['Lexend'] text-xl font-semibold">
                       {currentQuestion.title}
                     </h2>
-                    <p className="mt-3 text-sm leading-relaxed text-(--cg-text-muted)">
+                    <p className="mt-3 text-sm leading-relaxed text-(--cg-text-muted) whitespace-pre-wrap">
                       {currentQuestion.content}
                     </p>
                   </>
