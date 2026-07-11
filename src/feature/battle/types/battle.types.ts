@@ -1,12 +1,12 @@
 // export type BattleField = 'FE' | 'BE';
-export type BattleField = 'frontend' | 'backend';
-export type BattleMode = 'speed' | 'performance';
+export type BattleField = 'FE' | 'BE' | 'CORE';
+export type BattleMode = 'SPEED' | 'PERFORMANCE';
 export type BattleStatus =
-  | 'waiting'
-  | 'matched'
-  | 'in_progress'
-  | 'finished'
-  | 'cancelled';
+  | 'WAITING'
+  | 'MATCHED'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | 'ABANDONED';
 
 export interface BattlePlayer {
   userId: string;

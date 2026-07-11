@@ -28,7 +28,7 @@ const BattleResultPage = () => {
         const data = await getBattleById(battleId);
         if (!isMounted) return;
 
-        if (data.status !== 'finished' && data.status !== 'cancelled') {
+        if (data.status !== 'COMPLETED' && data.status !== 'ABANDONED') {
           navigate(`${BATTLE_ROUTES.ARENA}/${battleId}`, { replace: true });
           return;
         }
