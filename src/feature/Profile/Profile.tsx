@@ -1,5 +1,6 @@
 import './Profile.css';
 import { useNavigate } from 'react-router-dom';
+import ActivityHeatmap from '../../route/ActivityHeatmap';
 
 const skillsData = {
   frontend: {
@@ -131,6 +132,8 @@ function Profile() {
           </div>
         ))}
       </div>
+
+      <ActivityHeatmap />
 
       <div className="row row-courses">
         {courses.map((c) => (

@@ -1,0 +1,406 @@
+/* ═══════════════════════════════════════
+   ACTIVITY HEATMAP CARD
+═══════════════════════════════════════ */
+.card-activity {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.activity-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.activity-header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.activity-count {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--cg-text);
+    line-height: 1.15;
+}
+
+.activity-count-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.82rem;
+    color: var(--cg-text-muted);
+}
+
+.activity-info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    opacity: 0.7;
+    font-size: 0.78rem;
+}
+
+.activity-info-icon:hover {
+    opacity: 1;
+}
+
+/* tooltip của icon info dùng lại pattern .tooltip-box có sẵn, chỉ chỉnh vị trí
+   vì icon này nằm giữa dòng chữ, không phải ở mép trái như sidebar */
+.activity-info-tooltip {
+    left: 50%;
+    top: calc(100% + 8px);
+    transform: translateX(-50%) scale(0.9);
+    white-space: normal;
+    width: 220px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.activity-info-icon:hover .activity-info-tooltip {
+    transform: translateX(-50%) scale(1);
+}
+
+.activity-header-right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+.activity-meta {
+    font-size: 0.78rem;
+    color: var(--cg-text-muted);
+    white-space: nowrap;
+}
+
+.activity-meta strong {
+    color: var(--cg-text);
+    font-weight: 700;
+}
+
+/* ─── Range dropdown ─── */
+.activity-range-select {
+    position: relative;
+}
+
+.activity-range-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--cg-container-a16);
+    border: 1px solid var(--cg-border);
+    color: var(--cg-text);
+    border-radius: 7px;
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background 0.15s,
+        border-color 0.15s;
+}
+
+.activity-range-btn:hover {
+    background: var(--cg-container-a22);
+    border-color: var(--cg-coral);
+}
+
+.activity-range-caret {
+    font-size: 0.65rem;
+    opacity: 0.7;
+}
+
+.activity-range-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    background: var(--cg-container);
+    border: 1px solid var(--cg-border);
+    border-radius: 8px;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    min-width: 120px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    z-index: 20;
+}
+
+.activity-range-option {
+    background: transparent;
+    border: none;
+    color: var(--cg-text);
+    text-align: left;
+    font-size: 0.78rem;
+    padding: 7px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.activity-range-option:hover {
+    background: var(--cg-container-a16);
+}
+
+.activity-range-option.is-active {
+    color: var(--cg-coral);
+    font-weight: 700;
+}
+
+/* ═══════════════════════════════════════
+   GRID
+═══════════════════════════════════════ */
+.activity-scroll {
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.activity-grid-inner {
+    position: relative;
+    min-width: 100%;
+}
+
+.activity-months-row {
+    position: relative;
+    height: 16px;
+    margin-left: 30px;
+}
+
+.activity-month-label {
+    position: absolute;
+    top: 0;
+    font-size: 0.68rem;
+    color: var(--cg-text-muted);
+    white-space: nowrap;
+}
+
+.activity-body-row {
+    display: flex;
+    gap: 6px;
+}
+
+.activity-day-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: 24px;
+    flex-shrink: 0;
+}
+
+.activity-day-label {
+    height: 12px;
+    font-size: 0.62rem;
+    line-height: 12px;
+    color: var(--cg-text-muted);
+    text-align: right;
+}
+
+.activity-columns {
+    display: flex;
+    gap: 3px;
+}
+
+.activity-week-col {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.activity-cell {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    background: var(--cg-heat-0);
+    outline: none;
+    cursor: default;
+    transition:
+        transform 0.1s ease,
+        outline-color 0.1s ease;
+}
+
+.activity-cell[role='button'] {
+    cursor: pointer;
+}
+
+.activity-cell:hover,
+.activity-cell:focus-visible {
+    transform: scale(1.25);
+    outline: 1.5px solid var(--cg-text);
+    outline-offset: 0.5px;
+}
+
+.activity-cell[data-level='0'] {
+    background: var(--cg-heat-0);
+}
+
+.activity-cell[data-level='1'] {
+    background: var(--cg-heat-1);
+}
+
+.activity-cell[data-level='2'] {
+    background: var(--cg-heat-2);
+}
+
+.activity-cell[data-level='3'] {
+    background: var(--cg-heat-3);
+}
+
+.activity-cell[data-level='4'] {
+    background: var(--cg-heat-4);
+}
+
+.activity-cell--empty {
+    background: transparent;
+}
+
+.activity-cell--skeleton {
+    background: var(--cg-container-a22);
+    animation: activity-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes activity-pulse {
+
+    0%,
+    100% {
+        opacity: 0.5;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+.activity-skeleton-line {
+    border-radius: 5px;
+    background: var(--cg-container-a22);
+    animation: activity-pulse 1.4s ease-in-out infinite;
+}
+
+.activity-skeleton-line--title {
+    width: 90px;
+    height: 22px;
+}
+
+/* ─── Tooltip ─── */
+.activity-tooltip {
+    position: absolute;
+    transform: translate(-50%, calc(-100% - 10px));
+    background: #1a1550;
+    border: 1px solid var(--cg-border);
+    border-radius: 8px;
+    padding: 7px 11px;
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--cg-text);
+    white-space: nowrap;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+    pointer-events: none;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+}
+
+.activity-tooltip strong {
+    font-weight: 700;
+    color: var(--cg-text);
+}
+
+.activity-tooltip span {
+    color: var(--cg-text-muted);
+}
+
+/* ═══════════════════════════════════════
+   LEGEND / FOOTER
+═══════════════════════════════════════ */
+.activity-legend {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.68rem;
+    color: var(--cg-text-muted);
+    border-top: 1px solid var(--cg-border);
+    padding-top: 12px;
+}
+
+.activity-legend .activity-cell {
+    cursor: default;
+}
+
+.activity-legend .activity-cell:hover {
+    transform: none;
+    outline: none;
+}
+
+.activity-legend-link {
+    margin-left: auto;
+    background: transparent;
+    border: none;
+    color: var(--cg-coral);
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 2px 4px;
+}
+
+.activity-legend-link:hover {
+    color: var(--cg-coral-hover);
+    text-decoration: underline;
+}
+
+.activity-inline-link {
+    background: transparent;
+    border: none;
+    color: var(--cg-coral);
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+}
+
+.activity-empty-state {
+    font-size: 0.85rem;
+    color: var(--cg-text-muted);
+    padding: 24px 0;
+    text-align: center;
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════ */
+@media (max-width: 860px) {
+    .activity-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .activity-header-right {
+        gap: 12px;
+    }
+}
+
+@media (max-width: 600px) {
+    .activity-count {
+        font-size: 1.25rem;
+    }
+
+    .activity-meta {
+        font-size: 0.72rem;
+    }
+
+    .activity-legend {
+        flex-wrap: wrap;
+    }
+
+    .activity-legend-link {
+        margin-left: 0;
+        width: 100%;
+        text-align: right;
+    }
+}

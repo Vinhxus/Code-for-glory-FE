@@ -55,6 +55,21 @@ export type ProgressSummaryResponse = {
   chapters: ChapterProgressSummary[];
 };
 
+export type ActivityDay = {
+  date: string; // 'yyyy-MM-dd'
+  count: number;
+};
+
+export type ActivityCalendarResponse = {
+  totalSubmissions: number;
+  totalActiveDays: number;
+  maxStreak: number;
+  currentStreak: number;
+  rangeStart: string;
+  rangeEnd: string;
+  days: ActivityDay[];
+};
+
 export type PracticeEvaluationPayload = {
   practiceId: string;
   title: string;
@@ -92,4 +107,10 @@ export async function getPracticeSubmissions(practiceId: string) {
 
 export async function getProgressSummary() {
   return request<ProgressSummaryResponse>(`/exercises/progress-summary`);
+}
+
+export async function getActivityCalendar(days = 365) {
+  return request<ActivityCalendarResponse>(
+    `/exercises/activity-calendar?days=${days}`
+  );
 }
