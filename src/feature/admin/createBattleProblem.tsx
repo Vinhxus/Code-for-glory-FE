@@ -11,7 +11,7 @@ interface TrialCondition {
 }
 
 const API_URL =
-  (import.meta.env.VITE_API_URL ?? 'http://localhost:3000') + '/admin/configs';
+  (import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api') + '/admin/configs';
 
 export default function CreateBattleProblem() {
   const navigate = useNavigate();

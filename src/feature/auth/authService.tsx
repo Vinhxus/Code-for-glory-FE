@@ -39,7 +39,7 @@ interface LoginRawResponse {
   };
 }
 
-export const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+export const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
 
 // BE bọc MỌI response trong envelope:
 //  - thành công: { data: <payload>, meta }
@@ -102,6 +102,43 @@ export async function loginApi(data: LoginRequest): Promise<AuthResponse> {
       id: raw.user?._id ?? '',
       email: raw.user?.email ?? '',
       name: raw.user?.username ?? '', // Map username của BE thành name hiển thị ở FE
+      role: raw.user?.role ?? 'user',
+    },
+  };
+}
+
+// ===== Google OAuth =====
+
+/**
+ * FE gửi access_token của Google (lấy từ useGoogleLogin) lên BE.
+ * BE tự gọi Google UserInfo endpoint để verify + lấy email/name/avatar,
+ * sau đó trả về đúng envelope giống loginApi (accessToken, refreshToken, user).
+ */
+export async function googleLoginApi(
+  googleAccessToken: string
+): Promise<AuthResponse> {
+  const res = await fetch(`${BASE_URL}/auth/google`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ accessToken: googleAccessToken }),
+  });
+
+  const raw = await handleResponse<LoginRawResponse>(res);
+
+  if (!raw || !raw.accessToken || !raw.refreshToken) {
+    throw new Error('Google login fail: Do not receive tokens from system.');
+  }
+
+  localStorage.setItem('access_token', raw.accessToken);
+  localStorage.setItem('refresh_token', raw.refreshToken);
+
+  return {
+    accessToken: raw.accessToken,
+    refreshToken: raw.refreshToken,
+    user: {
+      id: raw.user?._id ?? '',
+      email: raw.user?.email ?? '',
+      name: raw.user?.username ?? '',
       role: raw.user?.role ?? 'user',
     },
   };

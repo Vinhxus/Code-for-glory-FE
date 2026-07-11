@@ -1,13 +1,9 @@
-import { useState } from 'react';
 import SideNav from '../components/SideNav';
 import { useSettingsStore } from '../store/settings';
 import EventCard from '../feature/events/EventCard';
-import EventModal from '../feature/events/EventModal';
 import { EVENTS } from '../feature/events/events.data';
-import type { Event } from '../feature/events/event.type';
 
 export default function Events() {
-  const [selected, setSelected] = useState<Event | null>(null);
   const language = useSettingsStore((s) => s.language);
   const isVi = language === 'vi';
 
@@ -40,15 +36,12 @@ export default function Events() {
               <EventCard
                 key={ev.id}
                 event={ev}
-                onViewDetails={setSelected}
                 animationDelay={i * 100}
               />
             ))}
           </div>
         </main>
       </div>
-
-      <EventModal event={selected} onClose={() => setSelected(null)} />
     </div>
   );
 }

@@ -23,9 +23,12 @@ export interface CodingProblem {
   title: string;
   content: string;
   difficulty: string;
+  track: CareerField;
+  targetSkillLevel: SkillLevel;
   language: 'javascript';
   starterCode: string;
   timeLimitSeconds: number;
+  estimatedMinutes: number;
   sampleTestCases: SampleTestCase[];
   totalTestCases: number;
 }
@@ -33,12 +36,44 @@ export interface CodingProblem {
 export interface SkillTestStartResponse {
   problems: CodingProblem[];
   totalProblems: number;
+  requestedLevel: SkillLevel;
+  requestedQuestionCount: number;
+  deliveredQuestionCount: number;
+  poolSize: number;
+  poolBreakdown: Partial<Record<CareerField, number>>;
+  fallbackUsed: boolean;
 }
 
 export interface CodeSolution {
   questionId: string;
   code: string;
   timeSpentSeconds?: number;
+}
+
+export type SkillRunStatus =
+  | 'Accepted'
+  | 'Wrong Answer'
+  | 'Runtime Error'
+  | 'Time Limit Exceeded';
+
+export interface SkillTestCaseRunResult {
+  index: number;
+  input: string;
+  expectedOutput: string;
+  actualOutput?: string;
+  passed: boolean;
+  errorMessage?: string;
+  isHidden: boolean;
+}
+
+export interface SkillTestRunResult {
+  questionId: string;
+  status: SkillRunStatus;
+  passedCount: number;
+  total: number;
+  notes: string;
+  errorMessage?: string;
+  cases: SkillTestCaseRunResult[];
 }
 
 export interface QuestionGrade {
@@ -93,7 +128,7 @@ export function saveCareerPath(
   return api.post<SurveyDraft>('/survey/career-path', payload);
 }
 
-/** Segment 2a — fetch 1–3 coding problems for the field. */
+/** Segment 2a — fetch up to 5 coding problems for the field. */
 export function startSkillTest(
   payload: SkillTestStartPayload
 ): Promise<SkillTestStartResponse> {
@@ -109,6 +144,14 @@ export function submitSkillTest(
     solutions,
     totalTimeSeconds,
   });
+}
+
+/** Segment 2b-alt — run sample checks for one survey coding problem. */
+export function runSkillTestQuestion(payload: {
+  questionId: string;
+  code: string;
+}): Promise<SkillTestRunResult> {
+  return api.post<SkillTestRunResult>('/survey/skill-test/run', payload);
 }
 
 /** Segment 3 — discipline / penalty setup. */

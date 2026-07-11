@@ -10,6 +10,7 @@ import {
   type LearningPathNodeDto,
   type ProgressDto,
 } from '../services/learningPathApi';
+import { getMySurvey } from '../services/surveyApi';
 import { useSettingsStore } from '../store/settings';
 import {
   getStartingStage,
@@ -100,6 +101,13 @@ const STAGE_STYLE: Record<
   },
 };
 
+function surveyEntryLevelToStage(entryLevel?: string | null): StartingStage | null {
+  if (entryLevel === 'advanced') return 'advanced';
+  if (entryLevel === 'intermediate') return 'intermediate';
+  if (entryLevel === 'root') return 'beginner';
+  return null;
+}
+
 function LearningPathMap() {
   const t = useT();
   const language = useSettingsStore((s) => s.language);
@@ -110,7 +118,10 @@ function LearningPathMap() {
 
   // ── Starting stage derived from onboarding results ───────────────
   const [startingStage, setStartingStage] = useState<StartingStage>('beginner');
+  const [serverStartingStage, setServerStartingStage] =
+    useState<StartingStage | null>(null);
   const [hoursPerDay, setHoursPerDay] = useState<number | null>(null);
+  const [fieldFocus, setFieldFocus] = useState<string | null>(null);
 
   // ── Backend data ─────────────────────────────────────────────────
   const [apiNodes, setApiNodes] = useState<LearningPathNodeDto[]>([]);
@@ -124,59 +135,87 @@ function LearningPathMap() {
   // ── Read ALL onboarding data on mount ────────────────────────────
   // Uses the canonical storage keys from learningPathUtils, NOT cg_survey_v2.
   useEffect(() => {
-    // Derive track preference from assessment or survey
-    try {
-      const assessmentRaw = localStorage.getItem('cg_skill_assessment_v1');
-      const surveyRaw = localStorage.getItem('cg_survey_v1');
+    const boot = async () => {
+      try {
+        const assessmentRaw = localStorage.getItem('cg_skill_assessment_v1');
+        const surveyRaw = localStorage.getItem('cg_survey_v1');
 
-      let preferredTrack: RoadmapKey = 'frontend';
-      if (assessmentRaw) {
-        const a = JSON.parse(assessmentRaw) as {
-          surveyTracks?: string[];
-          maxDifficultyByTrack?: Record<string, string>;
-        };
-        const tracks = a.surveyTracks ?? [];
-        if (tracks.includes('backend') && !tracks.includes('frontend')) {
+        let preferredTrack: RoadmapKey = 'frontend';
+        if (assessmentRaw) {
+          const a = JSON.parse(assessmentRaw) as {
+            surveyTracks?: string[];
+          };
+          const tracks = a.surveyTracks ?? [];
+          if (tracks.includes('backend') && !tracks.includes('frontend')) {
+            preferredTrack = 'backend';
+          }
+        } else if (surveyRaw) {
+          const s = JSON.parse(surveyRaw) as { tracks?: string[] };
+          const tracks = s.tracks ?? [];
+          if (tracks.includes('backend') && !tracks.includes('frontend')) {
+            preferredTrack = 'backend';
+          }
+        }
+
+        const survey = await getMySurvey().catch(() => null);
+        const mappedStage = surveyEntryLevelToStage(survey?.computedEntryLevel);
+
+        if (survey?.fieldFocus === 'backend') {
           preferredTrack = 'backend';
         }
-      } else if (surveyRaw) {
-        const s = JSON.parse(surveyRaw) as { tracks?: string[] };
-        const tracks = s.tracks ?? [];
-        if (tracks.includes('backend') && !tracks.includes('frontend')) {
-          preferredTrack = 'backend';
+        if (typeof survey?.dailyHours === 'number' && survey.dailyHours > 0) {
+          setHoursPerDay(survey.dailyHours);
+        } else if (surveyRaw) {
+          const s = JSON.parse(surveyRaw) as { weeklyTime?: string };
+          const midpoints: Record<string, number> = {
+            '2-4': 3 / 7,
+            '5-7': 6 / 7,
+            '8-12': 10 / 7,
+            '13+': 14 / 7,
+          };
+          if (s.weeklyTime && midpoints[s.weeklyTime]) {
+            setHoursPerDay(midpoints[s.weeklyTime]);
+          }
         }
-      }
 
-      // Derive hours/day from survey (for ETA calculation)
-      if (surveyRaw) {
-        const s = JSON.parse(surveyRaw) as { weeklyTime?: string };
-        // weeklyTime is stored as '2-4' | '5-7' | '8-12' | '13+'
-        // Convert weekly hours → daily hours (÷ 7) using midpoint
-        const midpoints: Record<string, number> = {
-          '2-4': 3 / 7,
-          '5-7': 6 / 7,
-          '8-12': 10 / 7,
-          '13+': 14 / 7,
-        };
-        if (s.weeklyTime && midpoints[s.weeklyTime]) {
-          setHoursPerDay(midpoints[s.weeklyTime]);
-        }
-      }
-
-      // Defer to avoid synchronous setState in effect body
-      setTimeout(() => {
         setSelected(preferredTrack);
+        if (survey) {
+          setFieldFocus(survey.fieldFocus ?? null);
+        }
+        if (mappedStage) {
+          setServerStartingStage(mappedStage);
+          const isFieldMatch =
+            survey?.fieldFocus === 'fullstack' ||
+            survey?.fieldFocus === preferredTrack;
+          setStartingStage(isFieldMatch ? mappedStage : 'beginner');
+          return;
+        }
+
+        setServerStartingStage(null);
         setStartingStage(getStartingStage(preferredTrack));
-      }, 0);
-    } catch {
-      // ignore – defaults remain
-    }
+      } catch {
+        setServerStartingStage(null);
+      }
+    };
+
+    void boot();
   }, []);
 
   // Re-derive stage whenever the selected track changes
   useEffect(() => {
+    if (serverStartingStage) {
+      const isFieldMatch =
+        fieldFocus === 'fullstack' ||
+        fieldFocus === selected;
+      if (isFieldMatch) {
+        setStartingStage(serverStartingStage);
+      } else {
+        setStartingStage('beginner');
+      }
+      return;
+    }
     setStartingStage(getStartingStage(selected));
-  }, [selected]);
+  }, [selected, serverStartingStage, fieldFocus]);
 
   // ── Fetch roadmap nodes from backend ─────────────────────────────
   useEffect(() => {
@@ -233,6 +272,19 @@ function LearningPathMap() {
     () => getPreUnlockedStages(startingStage),
     [startingStage]
   );
+  const stats = useMemo(() => {
+    const completed = apiProgress.filter((item) => item.status === 'completed').length;
+    const inProgress = apiProgress.filter((item) =>
+      ['current', 'open', 'in_progress'].includes(item.status)
+    ).length;
+
+    return {
+      topics: apiNodes.length || 30,
+      completed,
+      inProgress:
+        inProgress > 0 ? inProgress : completed < (apiNodes.length || 30) ? 1 : 0,
+    };
+  }, [apiNodes.length, apiProgress]);
 
   const stageStyle = STAGE_STYLE[startingStage];
   const stageLabel = stageLabelText(startingStage, isVi ? 'vi' : 'en');
@@ -392,7 +444,11 @@ function LearningPathMap() {
                   {s.icon}
                 </span>
                 <span className="text-xs font-bold" style={{ color: s.color }}>
-                  {s.value}
+                  {s.labelKey === 'roadmap.topics'
+                    ? String(stats.topics)
+                    : s.labelKey === 'roadmap.completed'
+                      ? String(stats.completed)
+                      : String(stats.inProgress)}
                 </span>
                 <span className="text-[10px] font-medium text-[color:var(--cg-text-muted)]">
                   {t(s.labelKey)}

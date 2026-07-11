@@ -1,28 +1,10 @@
-// ─── GuildPages.tsx ───────────────────────────────────────────────────────────
-// Tất cả 7 page exports (All + 6 types) trong 1 file.
-// Mỗi page chỉ là wrapper 3 dòng gọi GuildTypePage hoặc GuildsAll.
-//
-// CÁCH DÙNG — thêm vào App.tsx / router:
-//   import { GuildsAll, GuildBackend, GuildFrontend,
-//            GuildDataScience, GuildDevOps, GuildSecurity, GuildMobile }
-//     from './GuildPages';
-//
-// React Router v6:
-//   <Route path="/guilds"              element={<GuildsAll />} />
-//   <Route path="/guilds/backend"      element={<GuildBackend />} />
-//   <Route path="/guilds/frontend"     element={<GuildFrontend />} />
-//   <Route path="/guilds/data-science" element={<GuildDataScience />} />
-//   <Route path="/guilds/devops"       element={<GuildDevOps />} />
-//   <Route path="/guilds/security"     element={<GuildSecurity />} />
-//   <Route path="/guilds/mobile"       element={<GuildMobile />} />
-
-import { useState, useMemo } from 'react';
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SideNav from '../components/SideNav';
 import { useSettingsStore } from '../store/settings';
 import GuildTypePage from './GuildTypePage';
 import {
-  GUILDS,
   TYPE_ICONS,
   TYPE_COLORS,
   fmtMembers,
@@ -31,6 +13,13 @@ import {
   type Quest,
   type GuildType,
 } from './guildData';
+import {
+  getGuildOverview,
+  getGuilds,
+  joinGuild,
+  type GuildSortBy,
+} from '../services/guildsApi';
+import { ApiError } from '../services/apiClient';
 
 // ─── 6 Type Pages ─────────────────────────────────────────────────────────────
 
@@ -170,11 +159,17 @@ function GuildCard({
   expanded,
   onToggle,
   isVi,
+  onView,
+  onJoin,
+  joining,
 }: {
   guild: Guild;
   expanded: boolean;
   onToggle: () => void;
   isVi: boolean;
+  onView: () => void;
+  onJoin: () => void;
+  joining: boolean;
 }) {
   const { color } = guild;
   const fillPct = Math.round((guild.members / guild.maxMembers) * 100);
@@ -342,24 +337,44 @@ function GuildCard({
             style={{
               background: guild.openToJoin ? color : 'rgba(255,255,255,0.06)',
               color: guild.openToJoin ? '#0f0b3c' : 'var(--cg-text-muted)',
-              cursor: guild.openToJoin ? 'pointer' : 'not-allowed',
+              cursor: guild.canJoin ? 'pointer' : 'not-allowed',
             }}
-            disabled={!guild.openToJoin}
+            disabled={!guild.canJoin || joining}
+            onClick={onJoin}
           >
-            {guild.openToJoin
+            {joining
               ? isVi
-                ? 'Tham gia'
-                : 'Join Guild'
-              : isVi
-                ? 'Đóng'
-                : 'Full'}
+                ? 'Đang tham gia...'
+                : 'Joining...'
+              : guild.isMember
+                ? isVi
+                  ? 'Đã tham gia'
+                  : 'Joined'
+                : guild.canJoin
+                  ? isVi
+                    ? 'Tham gia'
+                    : 'Join Guild'
+                  : isVi
+                    ? 'Không thể tham gia'
+                    : 'Unavailable'}
           </button>
           <button
-            className="px-3 py-[10px] rounded-xl text-[13px] font-bold transition-all duration-150 hover:opacity-80"
+            className="px-4 py-[10px] rounded-xl text-[13px] font-bold transition-all duration-150 hover:opacity-90"
             style={{
               border: `1px solid ${color}40`,
               background: `${color}0f`,
               color,
+            }}
+            onClick={onView}
+          >
+            {isVi ? 'Xem guild' : 'View Guild'}
+          </button>
+          <button
+            className="px-3 py-[10px] rounded-xl text-[13px] font-bold transition-all duration-150 hover:opacity-80"
+            style={{
+              border: `1px solid ${color}25`,
+              background: 'rgba(255,255,255,0.04)',
+              color: 'var(--cg-text-muted)',
             }}
             onClick={onToggle}
           >
@@ -373,7 +388,15 @@ function GuildCard({
   );
 }
 
-function FeaturedGuild({ guild, isVi }: { guild: Guild; isVi: boolean }) {
+function FeaturedGuild({
+  guild,
+  isVi,
+  onView,
+}: {
+  guild: Guild;
+  isVi: boolean;
+  onView: () => void;
+}) {
   const { color } = guild;
   return (
     <div
@@ -478,6 +501,7 @@ function FeaturedGuild({ guild, isVi }: { guild: Guild; isVi: boolean }) {
           <button
             className="px-6 py-[10px] rounded-xl text-[13px] font-bold transition-all hover:opacity-90 active:scale-[0.98]"
             style={{ background: color, color: '#0f0b3c' }}
+            onClick={onView}
           >
             {isVi ? 'Xem chi tiết →' : 'View Guild →'}
           </button>
@@ -497,41 +521,82 @@ export function GuildsAll() {
   const [filterType, setFilterType] = useState<GuildType | 'All'>('All');
   const [search, setSearch] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<
-    'rank' | 'members' | 'winRate' | 'weeklyXP'
-  >('rank');
+  const [sortBy, setSortBy] = useState<GuildSortBy>('rank');
+  const [guilds, setGuilds] = useState<Guild[]>([]);
+  const [overview, setOverview] = useState<Awaited<
+    ReturnType<typeof getGuildOverview>
+  > | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [joiningSlug, setJoiningSlug] = useState<string | null>(null);
 
-  const filteredGuilds = useMemo(() => {
-    return GUILDS.filter((g) => {
-      const matchType = filterType === 'All' || g.type === filterType;
-      const matchSearch =
-        g.name.toLowerCase().includes(search.toLowerCase()) ||
-        g.type.toLowerCase().includes(search.toLowerCase()) ||
-        g.description.toLowerCase().includes(search.toLowerCase()) ||
-        g.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
-      return matchType && matchSearch;
-    }).sort((a, b) => {
-      if (sortBy === 'rank') return a.rank - b.rank;
-      if (sortBy === 'members') return b.members - a.members;
-      if (sortBy === 'winRate') return b.winRate - a.winRate;
-      if (sortBy === 'weeklyXP') return b.weeklyXP - a.weeklyXP;
-      return 0;
-    });
-  }, [filterType, search, sortBy]);
-
-  const featuredGuild = GUILDS.find((g) => g.featured)!;
-  const totalMembers = GUILDS.reduce((acc, g) => acc + g.members, 0);
-  const avgWinRate = Math.round(
-    GUILDS.reduce((acc, g) => acc + g.winRate, 0) / GUILDS.length
-  );
-  const totalQuests = GUILDS.reduce((acc, g) => acc + g.quests.length, 0);
-
-  const SORT_OPTIONS: { key: typeof sortBy; label: string }[] = [
+  const SORT_OPTIONS: { key: GuildSortBy; label: string }[] = [
     { key: 'rank', label: isVi ? 'Hạng' : 'Rank' },
     { key: 'members', label: isVi ? 'TV' : 'Members' },
     { key: 'winRate', label: isVi ? 'Thắng' : 'Win Rate' },
     { key: 'weeklyXP', label: isVi ? 'XP' : 'Weekly XP' },
   ];
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError(null);
+
+    Promise.all([
+      getGuildOverview(),
+      getGuilds({
+        type: filterType === 'All' ? undefined : filterType,
+        search,
+        sortBy,
+      }),
+    ])
+      .then(([overviewData, listData]) => {
+        if (!active) return;
+        setOverview(overviewData);
+        setGuilds(listData.items);
+      })
+      .catch((err: unknown) => {
+        if (!active) return;
+        setError(
+          err instanceof ApiError || err instanceof Error
+            ? err.message
+            : isVi
+              ? 'Không tải được guild.'
+              : 'Failed to load guilds.'
+        );
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [filterType, isVi, search, sortBy]);
+
+  const featuredGuild = overview?.featuredGuild ?? null;
+  const stats = overview?.stats;
+  const myGuild = overview?.myGuild ?? null;
+  const filteredGuilds = useMemo(() => guilds, [guilds]);
+
+  const handleJoin = async (guild: Guild) => {
+    if (!guild.canJoin) return;
+    try {
+      setJoiningSlug(guild.slug);
+      const detail = await joinGuild(guild.slug);
+      navigate(`/guilds/hall/${detail.slug}`);
+    } catch (err) {
+      setError(
+        err instanceof ApiError || err instanceof Error
+          ? err.message
+          : isVi
+            ? 'Không thể tham gia guild.'
+            : 'Unable to join guild.'
+      );
+    } finally {
+      setJoiningSlug(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)] selection:bg-[color:var(--cg-coral-a18)] select-none overflow-x-hidden">
@@ -572,11 +637,35 @@ export function GuildsAll() {
                   : 'Unite with fellow developers. Complete guild quests, share knowledge, and dominate the global leaderboards.'}
               </p>
             </div>
-            <button className="neon-btn-amber px-6 py-3 font-bold flex items-center gap-2 flex-shrink-0">
-              <span className="material-symbols-outlined text-[18px]">add</span>
-              {isVi ? 'Tạo Guild' : 'Create Guild'}
-            </button>
+            <div className="flex flex-wrap gap-3">
+              {myGuild && (
+                <button
+                  className="px-5 py-3 rounded-xl font-bold border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.05)] flex items-center gap-2"
+                  onClick={() => navigate(`/guilds/hall/${myGuild.slug}`)}
+                >
+                  <span className="material-symbols-outlined text-[18px]">
+                    shield
+                  </span>
+                  {isVi ? 'Guild của tôi' : 'My Guild'}
+                </button>
+              )}
+              <button
+                className="neon-btn-amber px-6 py-3 font-bold flex items-center gap-2 flex-shrink-0"
+                onClick={() => navigate('/guilds/create')}
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  add
+                </span>
+                {isVi ? 'Tạo Guild' : 'Create Guild'}
+              </button>
+            </div>
           </div>
+
+          {error && (
+            <div className="glass-card px-4 py-3 text-sm text-[#fda4af] border border-[rgba(244,114,182,0.24)]">
+              {error}
+            </div>
+          )}
 
           {/* Global Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -584,28 +673,28 @@ export function GuildsAll() {
               {
                 icon: 'hub',
                 label: isVi ? 'Tổng cộng' : 'Total',
-                value: `${GUILDS.length}`,
+                value: `${stats?.totalGuilds ?? 0}`,
                 sub: isVi ? 'bang hội' : 'guilds',
                 color: '#a78bfa',
               },
               {
                 icon: 'group',
                 label: isVi ? 'Tổng thành viên' : 'Total Members',
-                value: fmtMembers(totalMembers),
+                value: fmtMembers(stats?.totalMembers ?? 0),
                 sub: isVi ? 'lập trình viên' : 'developers',
                 color: '#60a5fa',
               },
               {
                 icon: 'trending_up',
                 label: isVi ? 'Win Rate TB' : 'Avg Win Rate',
-                value: `${avgWinRate}%`,
+                value: `${stats?.avgWinRate ?? 0}%`,
                 sub: isVi ? 'trung bình' : 'average',
                 color: '#4ade80',
               },
               {
                 icon: 'task_alt',
                 label: isVi ? 'Quest đang chạy' : 'Active Quests',
-                value: `${totalQuests}`,
+                value: `${stats?.totalQuests ?? 0}`,
                 sub: isVi ? 'đang chạy' : 'running',
                 color: '#fbbf24',
               },
@@ -643,7 +732,13 @@ export function GuildsAll() {
             ))}
           </div>
 
-          <FeaturedGuild guild={featuredGuild} isVi={isVi} />
+          {featuredGuild && (
+            <FeaturedGuild
+              guild={featuredGuild}
+              isVi={isVi}
+              onView={() => navigate(`/guilds/hall/${featuredGuild.slug}`)}
+            />
+          )}
 
           {/* Filters */}
           <div className="space-y-4">
@@ -740,7 +835,16 @@ export function GuildsAll() {
           </div>
 
           {/* Grid */}
-          {filteredGuilds.length === 0 ? (
+          {loading ? (
+            <div className="glass-card py-20 flex flex-col items-center gap-3 text-center">
+              <span className="material-symbols-outlined text-[48px] text-[color:var(--cg-text-muted)] opacity-40 animate-pulse">
+                progress_activity
+              </span>
+              <p className="text-[color:var(--cg-text-muted)] font-medium">
+                {isVi ? 'Đang tải guild...' : 'Loading guilds...'}
+              </p>
+            </div>
+          ) : filteredGuilds.length === 0 ? (
             <div className="glass-card py-20 flex flex-col items-center gap-3 text-center">
               <span className="material-symbols-outlined text-[48px] text-[color:var(--cg-text-muted)] opacity-40">
                 group_off
@@ -769,16 +873,19 @@ export function GuildsAll() {
                     setExpandedId(expandedId === guild.id ? null : guild.id)
                   }
                   isVi={isVi}
+                  onView={() => navigate(`/guilds/hall/${guild.slug}`)}
+                  onJoin={() => void handleJoin(guild)}
+                  joining={joiningSlug === guild.slug}
                 />
               ))}
             </div>
           )}
 
-          {filteredGuilds.length > 0 && (
+          {!loading && filteredGuilds.length > 0 && (
             <p className="text-[11px] text-[color:var(--cg-text-muted)] text-center">
               {isVi
-                ? `Hiển thị ${filteredGuilds.length} trong ${GUILDS.length} bang hội`
-                : `Showing ${filteredGuilds.length} of ${GUILDS.length} guilds`}
+                ? `Hiển thị ${filteredGuilds.length} guild theo bộ lọc hiện tại`
+                : `Showing ${filteredGuilds.length} guilds with the current filters`}
             </p>
           )}
         </main>

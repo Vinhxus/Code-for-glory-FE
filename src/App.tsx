@@ -23,6 +23,12 @@ import {
   GuildSecurity,
   GuildMobile,
 } from './route/GuildPages';
+import GuildDetailPage from './route/GuildDetailPage';
+import GuildCreatePage from './route/GuildCreatePage';
+import GuildQuestsPage from './route/GuildQuestsPage';
+import GuildMembersPage from './route/GuildMembersPage';
+import GuildActivityPage from './route/GuildActivityPage';
+import GuildSettingsPage from './route/GuildSettingsPage';
 import Terms from './route/Terms';
 import Privacy from './route/Privacy';
 import Support from './route/Support';
@@ -92,12 +98,18 @@ function App() {
         <Route path="/events" element={<Events />} />
         <Route path="/events/:id" element={<EventDetail />} />
         <Route path="/guilds" element={<GuildsAll />} />
+        <Route path="/guilds/create" element={<GuildCreatePage />} />
         <Route path="/guilds/backend" element={<GuildBackend />} />
         <Route path="/guilds/frontend" element={<GuildFrontend />} />
         <Route path="/guilds/data-science" element={<GuildDataScience />} />
         <Route path="/guilds/devops" element={<GuildDevOps />} />
         <Route path="/guilds/security" element={<GuildSecurity />} />
         <Route path="/guilds/mobile" element={<GuildMobile />} />
+        <Route path="/guilds/hall/:slug" element={<GuildDetailPage />} />
+        <Route path="/guilds/hall/:slug/quests" element={<GuildQuestsPage />} />
+        <Route path="/guilds/hall/:slug/members" element={<GuildMembersPage />} />
+        <Route path="/guilds/hall/:slug/activity" element={<GuildActivityPage />} />
+        <Route path="/guilds/hall/:slug/settings" element={<GuildSettingsPage />} />
         <Route path="/support" element={<Support />} />
         <Route path="/network" element={<Network />} />
         <Route path="/forum" element={<Forum />} />

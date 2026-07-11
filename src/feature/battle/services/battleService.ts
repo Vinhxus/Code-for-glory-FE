@@ -10,12 +10,108 @@ import type {
   CreateAnalysisPayload,
 } from '../types/battle.types';
 
+type ApiBattleField = 'frontend' | 'backend' | 'fullstack';
+type ApiBattleMode = 'speed' | 'performance';
+type ApiBattleStatus = 'waiting' | 'in_progress' | 'finished' | 'cancelled';
+
+type ApiBattle = {
+  _id: string;
+  mode: ApiBattleMode;
+  field: ApiBattleField;
+  status: ApiBattleStatus;
+  players: Array<{
+    userId: string;
+    username?: string;
+    avatar?: string;
+    score: number;
+    submissionCount?: number;
+  }>;
+  questions?: Array<{
+    questionId: string;
+    title: string;
+    content: string;
+    difficulty: string;
+  }>;
+  timeLimitSeconds?: number;
+  startTime?: string;
+  endTime?: string;
+  winnerId?: string | null;
+  isDraw?: boolean;
+};
+
+const FIELD_TO_API: Record<BattleField, ApiBattleField> = {
+  FE: 'frontend',
+  BE: 'backend',
+  CORE: 'fullstack',
+};
+
+const MODE_TO_API: Record<BattleMode, ApiBattleMode> = {
+  SPEED: 'speed',
+  PERFORMANCE: 'performance',
+};
+
+const FIELD_FROM_API: Record<ApiBattleField, BattleField> = {
+  frontend: 'FE',
+  backend: 'BE',
+  fullstack: 'CORE',
+};
+
+const MODE_FROM_API: Record<ApiBattleMode, BattleMode> = {
+  speed: 'SPEED',
+  performance: 'PERFORMANCE',
+};
+
+const STATUS_FROM_API: Record<ApiBattleStatus, Battle['status']> = {
+  waiting: 'WAITING',
+  in_progress: 'IN_PROGRESS',
+  finished: 'COMPLETED',
+  cancelled: 'ABANDONED',
+};
+
+const normalizeBattle = (battle: ApiBattle): Battle => ({
+  _id: battle._id,
+  mode: MODE_FROM_API[battle.mode],
+  field: FIELD_FROM_API[battle.field],
+  status: STATUS_FROM_API[battle.status],
+  players: battle.players.map((player) => ({
+    userId: player.userId,
+    username: player.username ?? 'Unknown',
+    avatar: player.avatar,
+    currentScore: player.score,
+    hasSubmitted: Boolean(player.submissionCount && player.submissionCount > 0),
+    submissionCount: player.submissionCount ?? 0,
+  })),
+  questions: (battle.questions ?? []).map((question) => ({
+    questionId: question.questionId,
+    title: question.title,
+    content: question.content,
+    difficulty: question.difficulty,
+  })),
+  timeLimit: battle.timeLimitSeconds ?? 0,
+  startTime: battle.startTime,
+  endTime: battle.endTime,
+  result:
+    battle.status === 'finished' || battle.status === 'cancelled'
+      ? {
+          winnerId: battle.winnerId ?? undefined,
+          isDraw: battle.isDraw ?? false,
+          finalScores: battle.players.map((player) => ({
+            userId: player.userId,
+            score: player.score,
+          })),
+        }
+      : undefined,
+});
+
 export const createBattle = async (
   field: BattleField,
   mode: BattleMode
 ): Promise<Battle> => {
-  const response = await axiosInstance.post('/battles/match', { field, mode });
-  return response.data;
+  const response = await axiosInstance.post('/battles/match', {
+    field: FIELD_TO_API[field],
+    mode: MODE_TO_API[mode],
+  });
+  return normalizeBattle(response.data as ApiBattle);
 };
 
 export const submitAnswer = async (
@@ -42,7 +138,7 @@ export const abandonBattle = async (battleId: string) => {
 };
 export const getBattleById = async (battleId: string): Promise<Battle> => {
   const response = await axiosInstance.get(`/battles/${battleId}`);
-  return response.data;
+  return normalizeBattle(response.data as ApiBattle);
 };
 export const getSubmissions = async (
   battleId: string

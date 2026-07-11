@@ -290,7 +290,7 @@ function MainNode({
   const getStyles = () => {
     // Pre-unlocked: muted green — auto-passed during assessment
     if (isPreUnlocked) {
-      return 'border-[#4ade80]/40 bg-gradient-to-br from-[#4ade80]/10 to-[#4ade80]/5 text-[#4ade80]/70 shadow-none cursor-default opacity-75';
+      return 'border-[#4ade80]/40 bg-gradient-to-br from-[#4ade80]/10 to-[#4ade80]/5 text-[#4ade80]/70 shadow-none cursor-pointer hover:border-[#4ade80]/80 hover:bg-[#4ade80]/15 opacity-75 transition-all duration-200';
     }
     switch (status) {
       case 'completed':
@@ -347,7 +347,7 @@ function MainNode({
 
   return (
     <div
-      onClick={isPreUnlocked ? undefined : onClick}
+      onClick={onClick}
       className={cx(
         'relative w-64 rounded-xl border-2 px-5 py-3.5 flex flex-col',
         'transition-all duration-250 select-none group',
@@ -622,16 +622,21 @@ function RoadmapViewer({
     });
   };
 
-  const handleNodeClick = (status: NodeStatus, step: MainStep) => {
+  const handleNodeClick = (
+    status: NodeStatus,
+    step: MainStep,
+    isPreUnlocked = false
+  ) => {
     if (status === 'locked') return;
-    if (status === 'current')
+    if (status === 'current' || isPreUnlocked) {
       navigate('/practice', {
         state: { nodeId: step.id, nodeTitle: step.title },
       });
-    if (status === 'completed' || status === 'skipped')
+    } else if (status === 'completed' || status === 'skipped') {
       navigate('/history', {
         state: { nodeId: step.id, nodeTitle: step.title },
       });
+    }
   };
 
   /**
@@ -657,6 +662,15 @@ function RoadmapViewer({
       const prog = apiProgress.find((p) => p.nodeId === step.id);
       if (prog?.status === 'completed') {
         return { status: 'completed', isPreUnlocked: false };
+      }
+      if (prog?.status === 'skipped') {
+        return { status: 'skipped', isPreUnlocked: false };
+      }
+      if (prog && ['current', 'open', 'in_progress'].includes(prog.status)) {
+        return { status: 'current', isPreUnlocked: false };
+      }
+      if (prog && ['locked', 'temp_locked'].includes(prog.status)) {
+        return { status: 'locked', isPreUnlocked: false };
       }
     }
 
@@ -735,7 +749,7 @@ function RoadmapViewer({
                   deadline={deadline}
                   isMilestoneGate={isMilestoneGate}
                   isPreUnlocked={isPreUnlocked}
-                  onNodeClick={() => handleNodeClick(status, step)}
+                  onNodeClick={() => handleNodeClick(status, step, isPreUnlocked)}
                 />
               </div>
             );

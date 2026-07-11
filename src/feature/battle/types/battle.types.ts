@@ -14,6 +14,7 @@ export interface BattlePlayer {
   avatar?: string;
   currentScore: number;
   hasSubmitted: boolean;
+  submissionCount?: number;
 }
 
 export interface BattleQuestion {

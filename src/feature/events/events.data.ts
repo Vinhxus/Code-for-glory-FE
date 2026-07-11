@@ -28,6 +28,7 @@ export const EVENTS: Event[] = [
       { icon: 'military_tech', name: '2nd Place', value: '30,000 XP + 1yr Pro', color: '#94a3b8' },
       { icon: 'emoji_events', name: '3rd Place', value: '20,000 XP + 6mo Pro', color: '#b45309' },
     ],
+    officialLink: 'https://qwencloud-hackathon.devpost.com/',
   },
   {
     id: 2,
@@ -47,6 +48,7 @@ export const EVENTS: Event[] = [
       { icon: 'workspace_premium', name: 'Attendance', value: 'Verified Badge', color: '#a78bfa' },
       { icon: 'star', name: 'Top Q&A', value: '5,000 XP Bonus', color: '#60a5fa' },
     ],
+    officialLink: 'https://bytebytego.com/courses/system-design-interview',
   },
   {
     id: 3,
@@ -66,6 +68,7 @@ export const EVENTS: Event[] = [
       { icon: 'workspace_premium', name: 'Weekly #1', value: '5,000 XP', color: '#fbbf24' },
       { icon: 'local_fire_department', name: 'Streak (4w)', value: '10,000 XP', color: '#f97316' },
     ],
+    officialLink: 'https://leetcode.com/contest/',
   },
   {
     id: 4,
@@ -86,5 +89,6 @@ export const EVENTS: Event[] = [
       { icon: 'military_tech', name: '2nd Place', value: '10,000 XP', color: '#94a3b8' },
       { icon: 'emoji_events', name: '3rd Place', value: '5,000 XP', color: '#b45309' },
     ],
+    officialLink: 'https://nsri-hackathon.org/',
   },
 ];

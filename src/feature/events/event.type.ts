@@ -24,4 +24,8 @@ export interface Event {
   duration: string;
   tags: string[];
   prizes: EventPrize[];
+  /** Link tới trang chính thức của contest bên ngoài (nếu có). Chỉ set cho
+   * các Competition có 1 sự kiện thật tương ứng — không bịa link cho
+   * Webinar/Challenge nội bộ của platform. */
+  officialLink?: string;
 }
