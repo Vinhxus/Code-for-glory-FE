@@ -49,6 +49,7 @@ export interface Battle {
 export interface SubmitAnswerPayload {
   questionId: string;
   answer: string;
+  language?: string;
 }
 
 export interface SubmitAnswerResponse {
@@ -66,11 +67,25 @@ export interface BattleSubmission {
   battleId: string;
   userId: string;
   questionId: string;
-  answer: string;
-  isCorrect: boolean;
-  points: number;
-  timeSpent: number;
-  submittedAt: string;
+  code: string;
+  language: string;
+  status:
+    | 'pending'
+    | 'accepted'
+    | 'wrong_answer'
+    | 'compilation_error'
+    | 'runtime_error'
+    | 'time_limit_exceeded'
+    | 'memory_limit_exceeded';
+  passedTestCount: number;
+  totalTestCount: number;
+  runtimeMs: number;
+  memoryKb: number;
+  pointsEarned: number;
+  elapsedSeconds: number;
+  isFinalAnswer: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CodeAnalysisResource {

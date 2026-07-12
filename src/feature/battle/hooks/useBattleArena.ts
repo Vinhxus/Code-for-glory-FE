@@ -150,6 +150,7 @@ export const useBattleArena = (battleId: string | undefined) => {
       const result = await submitAnswer(battleId, {
         questionId: currentQuestion.questionId,
         answer: code,
+        language,
       });
 
       if (!isMountedRef.current) return;
