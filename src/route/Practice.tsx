@@ -26,6 +26,9 @@ import {
   type PracticeLanguage,
 } from '../feature/practice/practiceSolutions';
 import { TheoryViewer } from './TheoryViewer';
+import { AiMentorBubble } from '../feature/ai-mentor/components/AiMentorBubble.tsx';
+import { AiMentorDrawer } from '../feature/ai-mentor/components/AiMentorDrawer.tsx';
+import { useAiMentorStore } from '../feature/ai-mentor/store/aiMentorStore.ts';
 
 const cx = (...classes: Array<string | false | null | undefined>) =>
   classes.filter(Boolean).join(' ');
@@ -2741,6 +2744,18 @@ function Practice() {
   const activeRunResult =
     lastRunResult?.fingerprint === currentFingerprint ? lastRunResult : null;
   const displayedCases = activeRunResult?.cases ?? [];
+  const resetAiMentor = useAiMentorStore((s) => s.reset);
+
+  const aiMentorContext = useMemo(
+    () => ({
+      ...(nodeId && /^[a-f\d]{24}$/i.test(nodeId) ? { nodeId } : {}),
+      ...(activePracticeId && /^[a-f\d]{24}$/i.test(activePracticeId)
+        ? { exerciseId: activePracticeId }
+        : {}),
+      contextSummary: `Exercise: ${currentPractice.title}. Topic: ${selectedCatalogItem?.topic ?? currentPractice.concept}. ${currentPractice.taskDesc}`,
+    }),
+    [activePracticeId, nodeId, currentPractice, selectedCatalogItem]
+  );
 
   useEffect(() => {
     // Chỉ reset code khi đổi bài (nodeTitle), không reset khi đổi ngôn ngữ.
@@ -2755,8 +2770,9 @@ function Practice() {
       setCooldownTime(0);
       setIsLocked(false);
       setConsoleTab('testcase');
+      resetAiMentor();
     }
-  }, [activePracticeId, language, getStarterCode]);
+  }, [activePracticeId, language, getStarterCode, resetAiMentor]);
 
   useEffect(() => {
     let isMounted = true;
@@ -3743,9 +3759,15 @@ function Practice() {
       </div>
     );
   }
-
   return (
     <div className="h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)] selection:bg-[color:var(--cg-coral-a18)] overflow-hidden flex flex-col">
+      {/* AI Mentor Floating Chat */}
+      <AiMentorBubble isVi={isVi} />
+      <AiMentorDrawer
+        context={aiMentorContext}
+        exerciseTitle={currentPractice.title}
+        isVi={isVi}
+      />
       {/* Toast notifications */}
       {toast && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[999] animate-bounce-in max-w-md w-full px-4">

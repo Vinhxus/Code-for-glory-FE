@@ -1,7 +1,9 @@
+// export type BattleField = 'FE' | 'BE';
 export type BattleField = 'FE' | 'BE' | 'CORE';
 export type BattleMode = 'SPEED' | 'PERFORMANCE';
 export type BattleStatus =
   | 'WAITING'
+  | 'MATCHED'
   | 'IN_PROGRESS'
   | 'COMPLETED'
   | 'ABANDONED';
@@ -10,9 +12,15 @@ export interface BattlePlayer {
   userId: string;
   username: string;
   avatar?: string;
-  currentScore: number;
-  hasSubmitted: boolean;
-  submissionCount?: number;
+  score: number;
+  ratingBefore: number;
+  ratingAfter?: number;
+  passedTestCount: number;
+  submissionCount: number;
+  result?: string;
+  totalPassedTests?: number;
+  totalTests?: number;
+  totalMemoryKb?: number;
 }
 
 export interface BattleQuestion {
@@ -30,20 +38,18 @@ export interface Battle {
   status: BattleStatus;
   players: BattlePlayer[];
   questions: BattleQuestion[];
-  timeLimit: number;
+  timeLimitSeconds: number;
   startTime?: string;
   expectedEndTime?: string;
   endTime?: string;
-  result?: {
-    winnerId?: string;
-    isDraw?: boolean;
-    finalScores: { userId: string; score: number }[];
-  };
+  winnerId?: string;
+  isDraw?: boolean;
 }
 
 export interface SubmitAnswerPayload {
   questionId: string;
   answer: string;
+  language?: string;
 }
 
 export interface SubmitAnswerResponse {
@@ -61,11 +67,25 @@ export interface BattleSubmission {
   battleId: string;
   userId: string;
   questionId: string;
-  answer: string;
-  isCorrect: boolean;
-  points: number;
-  timeSpent: number;
-  submittedAt: string;
+  code: string;
+  language: string;
+  status:
+    | 'pending'
+    | 'accepted'
+    | 'wrong_answer'
+    | 'compilation_error'
+    | 'runtime_error'
+    | 'time_limit_exceeded'
+    | 'memory_limit_exceeded';
+  passedTestCount: number;
+  totalTestCount: number;
+  runtimeMs: number;
+  memoryKb: number;
+  pointsEarned: number;
+  elapsedSeconds: number;
+  isFinalAnswer: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CodeAnalysisResource {
