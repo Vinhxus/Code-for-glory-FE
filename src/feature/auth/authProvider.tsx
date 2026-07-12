@@ -11,6 +11,8 @@ import {
   type AuthUser,
 } from './authService';
 
+import { disconnectNotificationsSocket } from '../../services/notificationsSocket';
+import { useNotificationsStore } from '../../store/notifications';
 interface AuthState {
   user: AuthUser | null;
   accessToken: string | null;
@@ -107,6 +109,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       // Đảm bảo xóa sạch localStorage dữ liệu user
       localStorage.removeItem('user');
+      disconnectNotificationsSocket();
+      useNotificationsStore.getState().reset();
 
       setState({
         user: null,

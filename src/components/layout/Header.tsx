@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import QuickSettings from '../QuickSettings';
+import NotificationBell from '../NotificationBell';
 import { useNavigate } from 'react-router-dom';
 import { useSettingsStore } from '../../store/settings';
 import { useSideNavStore } from '../SideNavMove';
@@ -20,21 +21,21 @@ export default function Header() {
   const text =
     language === 'vi'
       ? {
-          leaderboard: 'Bảng xếp hạng',
-          shop: 'Cửa hàng',
-          notifications: 'Thông báo',
-          profile: 'Hồ sơ',
-          languages: 'Ngôn ngữ',
-          darkMode: 'Chế độ tối',
-        }
+        leaderboard: 'Bảng xếp hạng',
+        shop: 'Cửa hàng',
+        notifications: 'Thông báo',
+        profile: 'Hồ sơ',
+        languages: 'Ngôn ngữ',
+        darkMode: 'Chế độ tối',
+      }
       : {
-          leaderboard: 'Leaderboard',
-          shop: 'Shop',
-          notifications: 'Notifications',
-          profile: 'Profile',
-          languages: 'Languages',
-          darkMode: 'DarkMode',
-        };
+        leaderboard: 'Leaderboard',
+        shop: 'Shop',
+        notifications: 'Notifications',
+        profile: 'Profile',
+        languages: 'Languages',
+        darkMode: 'DarkMode',
+      };
 
   const handleProfileClick = () => {
     setIsHeaderMenuOpen(false);
@@ -78,9 +79,7 @@ export default function Header() {
 
         <div className="header-actions">
           <QuickSettings />
-          <button className="header-icon-btn" aria-label={text.notifications}>
-            <span className="material-symbols-outlined">notifications</span>
-          </button>
+          <NotificationBell />
           <button
             className="header-profile-btn"
             onClick={() => navigate('/profile')}
@@ -134,7 +133,10 @@ export default function Header() {
             {/* 2. Notification */}
             <button
               className="mobile-clean-item"
-              onClick={() => setIsHeaderMenuOpen(false)}
+              onClick={() => {
+                setIsHeaderMenuOpen(false);
+                navigate('/notifications');
+              }}
             >
               <span>{text.notifications}</span>
               <span className="material-symbols-outlined">notifications</span>
