@@ -1,614 +1,493 @@
-body {
-  background: var(--cg-bg);
-  color: var(--cg-text);
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  min-height: 100vh;
-}
+/* ============================================================
+   Profile — dense, data-first layout inspired by LeetCode's
+   profile page, built entirely on the app's existing tokens
+   (--cg-bg, --cg-container, coral/amber/green accents, the
+   glass-card / neon-btn utilities). No new color system.
+   ============================================================ */
 
-/*layout*/
-.page {
-  max-width: 1200px;
+.profile-page {
+  max-width: 1180px;
   margin: 0 auto;
-  padding: 24px 20px;
+  padding: 32px 20px 80px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  position: relative;
+  gap: 20px;
 }
 
-.btn-back {
-  position: absolute;
-  left: -140px;
-  background: transparent;
-  color: var(--cg-text-muted);
-  border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition:
-    color 0.2s,
-    transform 0.2s;
-}
-
-.card {
-  background: var(--cg-container);
-  border: 1px solid var(--cg-border);
-  border-radius: 12px;
-  padding: 20px 24px;
-}
-
-.row {
-  display: grid;
-  gap: 14px;
-}
-
-.row-top {
-  grid-template-columns: 1fr 1.1fr;
-}
-
-.row-courses {
-  grid-template-columns: 1fr 1fr;
-}
-
-/*profile card*/
-.card-profile {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  position: relative;
-}
-
-/*avatar */
-.avatar-wrap {
-  position: relative;
-  flex-shrink: 0;
-  width: 76px;
-  height: 76px;
-}
-
-.avatar-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 3px solid var(--cg-coral);
-  animation: glow-ring 2s ease-in-out infinite;
-}
-
-@keyframes glow-ring {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.6;
-    transform: scale(1.06);
-  }
-}
-
-.avatar-inner {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: var(--cg-container);
-}
-
-.avatar-edit-btn {
-  position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--cg-green);
-  border: 2px solid var(--cg-bg);
-  color: #0f0b3c;
-  font-size: 0.6rem;
-  cursor: pointer;
+.profile-state {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition:
-    transform 0.2s,
-    background 0.2s;
-}
-
-.avatar-edit-btn:hover {
-  transform: scale(1.15);
-  background: var(--cg-green-hover);
-}
-
-/* Info */
-.profile-info {
-  flex: 1;
-}
-.username {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--cg-text);
-}
-
-.user-sub {
-  font-size: 0.72rem;
+  min-height: 60vh;
   color: var(--cg-text-muted);
-  letter-spacing: 0.08em;
-  margin: 3px 0 10px;
+  font-size: 15px;
+  gap: 12px;
 }
 
-.profile-stats {
-  display: flex;
-  gap: 24px;
-}
-.profile-stats > div {
-  display: flex;
+.profile-state.is-error {
   flex-direction: column;
-}
-
-.stat-val {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--cg-text);
-}
-
-.stat-label {
-  font-size: 0.65rem;
-  color: var(--cg-text-muted);
-  letter-spacing: 0.06em;
-}
-
-/* Edit button */
-.btn-edit {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: var(--cg-coral);
-  color: #0c0a2e;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 14px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  transition:
-    opacity 0.2s,
-    transform 0.2s;
-}
-
-.btn-edit:hover {
-  opacity: 0.85;
-  transform: translateY(-1px);
-}
-
-.card-rank {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
-.rank-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--cg-gold);
-  letter-spacing: 0.1em;
-  align-self: flex-start;
-  width: 100%;
   text-align: center;
 }
 
-.rank-cols {
-  display: flex;
-  gap: 48px;
-  justify-content: center;
-  width: 100%;
+.profile-top-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 20px;
+  align-items: start;
 }
 
-.rank-col {
+@media (max-width: 900px) {
+  .profile-top-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Identity card ---------- */
+
+.profile-identity {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-identity-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.profile-avatar {
+  width: 76px;
+  height: 76px;
+  border-radius: 18px;
+  object-fit: cover;
+  border: 2px solid rgba(255, 126, 95, 0.35);
+  background: rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+.profile-avatar-fallback {
+  width: 76px;
+  height: 76px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 800;
+  color: #ff7e5f;
+  background: rgba(255, 126, 95, 0.14);
+  border: 2px solid rgba(255, 126, 95, 0.35);
+  flex-shrink: 0;
+}
+
+.profile-identity-names {
+  min-width: 0;
+}
+
+.profile-username {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--cg-text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+.profile-level-chip {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 165, 0, 0.14);
+  border: 1px solid rgba(255, 165, 0, 0.4);
+  color: #ffa500;
+  white-space: nowrap;
+}
+
+.profile-joined {
+  margin-top: 2px;
+  font-size: 12.5px;
+  color: var(--cg-text-muted);
+}
+
+.profile-bio {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--cg-text);
+  opacity: 0.9;
+}
+
+.profile-bio.is-empty {
+  color: var(--cg-text-muted);
+  font-style: italic;
+  opacity: 1;
+}
+
+.profile-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--cg-text-muted);
+}
+
+.profile-social-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.profile-social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--cg-text);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-decoration: none;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.profile-social-link:hover {
+  border-color: rgba(255, 126, 95, 0.4);
+  background: rgba(255, 126, 95, 0.08);
+}
+
+.profile-follow-row {
+  display: flex;
+  gap: 18px;
+  font-size: 13px;
+  color: var(--cg-text-muted);
+}
+
+.profile-follow-row strong {
+  color: var(--cg-text);
+  font-weight: 800;
+}
+
+.profile-edit-btn {
+  margin-top: 4px;
+  width: 100%;
+  text-align: center;
+  text-decoration: none;
+  display: block;
+}
+
+/* ---------- Difficulty ring + stat grid ---------- */
+
+.profile-right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.profile-solved-card {
+  padding: 24px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 28px;
+  align-items: center;
+}
+
+@media (max-width: 560px) {
+  .profile-solved-card {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+}
+
+.profile-ring-wrap {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  flex-shrink: 0;
+}
+
+.profile-ring-wrap svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.profile-ring-center {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+}
+
+.profile-ring-total {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--cg-text);
+  line-height: 1.1;
+}
+
+.profile-ring-label {
+  font-size: 11.5px;
+  color: var(--cg-text-muted);
+  margin-top: 2px;
+}
+
+.profile-diff-breakdown {
+  display: flex;
+  flex-direction: column;
   gap: 10px;
 }
 
-.rank-label {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--cg-text-muted);
-  letter-spacing: 0.1em;
-}
-
-.rank-badge {
-  width: 100px;
-  height: 100px;
+.profile-diff-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 14px;
   border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
 }
 
-.rank-badge--empty {
-  background: var(--cg-container-a16);
-  border: 1px solid var(--cg-border);
+.profile-diff-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
 }
 
-/* ═══════════════════════════════════════
-   STATS BAR
-═══════════════════════════════════════ */
-.card-stats {
+.profile-diff-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.profile-diff-count {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--cg-text);
+}
+
+/* ---------- Quick stats strip ---------- */
+
+.profile-stats-strip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0;
-  padding: 0;
-  overflow: hidden;
+  gap: 14px;
+  padding: 18px 22px;
 }
 
-.stat-block {
+@media (max-width: 700px) {
+  .profile-stats-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.profile-stat {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 18px 12px;
-  border-right: 1px solid var(--border);
-  gap: 6px;
+  gap: 4px;
 }
 
-.stat-block:last-child {
-  border-right: none;
-}
-
-.stat-block-label {
-  font-size: 0.65rem;
-  color: var(--cg-text-muted);
-  letter-spacing: 0.08em;
+.profile-stat-label {
+  font-size: 11px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  color: var(--cg-text-muted);
 }
 
-.stat-block-val {
-  font-size: 1.6rem;
+.profile-stat-value {
+  font-size: 20px;
   font-weight: 800;
   color: var(--cg-text);
 }
 
-.stat-block-val--gold {
-  color: var(--cg-gold);
-  font-size: 1.1rem;
-  letter-spacing: 0.04em;
+/* ---------- Rankings ---------- */
+
+.profile-section {
+  padding: 22px;
 }
 
-/* ═══════════════════════════════════════
-   COURSE CARDS
-═══════════════════════════════════════ */
-.card-course {
+.profile-section-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--cg-text);
+  margin-bottom: 14px;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 8px;
-  padding-bottom: 0;
-  overflow: hidden;
 }
 
-.course-type {
-  font-size: 0.65rem;
-  color: var(--cg-text-muted);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.course-title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--cg-text);
-  line-height: 1.3;
-}
-
-.course-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 6px;
-  padding-bottom: 16px;
-}
-
-.course-progress-label {
-  font-size: 0.75rem;
-  color: var(--cg-text-muted);
-}
-
-.btn-continue {
-  background: var(--cg-green);
-  color: #0c0a2e;
-  border: none;
-  border-radius: 6px;
-  padding: 7px 16px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  transition:
-    opacity 0.2s,
-    transform 0.2s;
-}
-
-.btn-continue:hover {
-  opacity: 0.85;
-  transform: translateY(-1px);
-}
-
-.course-bar-track {
-  height: 4px;
-  background: var(--cg-container-a16);
-  margin: 0 -24px;
-}
-
-.course-bar-fill {
-  height: 100%;
-  background: var(--cg-green);
-  border-radius: 0 2px 2px 0;
-  transition: width 0.8s ease;
-}
-
-/* ═══════════════════════════════════════
-   SKILLS CARD
-═══════════════════════════════════════ */
-.card-skills {
+.profile-ranking-list {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 10px;
 }
 
-.section-title {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--cg-text);
-  letter-spacing: 0.04em;
-  border-bottom: 1px solid var(--cg-border);
-  padding-bottom: 12px;
-}
-
-.skills-grid {
+.profile-ranking-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
-}
-
-.skills-side {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.skills-side-title {
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--cg-coral);
-  letter-spacing: 0.12em;
-}
-
-.skill-item {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.skill-header {
-  display: flex;
-  justify-content: space-between;
+  grid-template-columns: 110px 1fr auto;
   align-items: center;
-}
-
-.skill-name {
-  font-size: 0.85rem;
-  color: var(--cg-text);
-}
-.skill-percent {
-  font-size: 0.8rem;
-  color: var(--cg-text-muted);
-}
-
-.skill-track {
-  height: 6px;
-  background: var(--cg-container-a16);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.skill-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--cg-coral), var(--cg-amber));
-  border-radius: 3px;
-  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.skill-tags {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-top: 2px;
-}
-
-.skill-tag {
-  background: rgba(108, 92, 231, 0.2);
-  border: 1px solid rgba(108, 92, 231, 0.4);
-  color: var(--cg-blue-accent);
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  padding: 2px 7px;
-  border-radius: 4px;
-}
-
-/* achievements */
-.card-achievements {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.achievements-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
   gap: 14px;
-}
-
-.achievement-card {
-  background: var(--cg-container-a16);
-  border: 1px solid var(--cg-border);
+  padding: 12px 14px;
   border-radius: 10px;
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
+  background: rgba(255, 255, 255, 0.03);
 }
 
-.achievement-icon {
-  font-size: 1.8rem;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--cg-coral-a18);
-  border-radius: 8px;
+@media (max-width: 640px) {
+  .profile-ranking-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
 }
 
-.achievement-title {
-  font-size: 0.85rem;
+.profile-ranking-field {
+  font-size: 13px;
   font-weight: 700;
+  text-transform: capitalize;
   color: var(--cg-text);
 }
 
-.achievement-sub {
-  font-size: 0.65rem;
+.profile-ranking-mid {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.profile-ranking-bar-track {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+
+.profile-ranking-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ff7e5f, #ffa500);
+}
+
+.profile-ranking-record {
+  font-size: 12px;
   color: var(--cg-text-muted);
-  letter-spacing: 0.06em;
-  margin-top: 3px;
+  white-space: nowrap;
 }
 
-/* ═══════════════════════════════════════
-   RESPONSIVE — TABLET (≤ 860px)
-═══════════════════════════════════════ */
-@media (max-width: 860px) {
-  .page {
-    padding: 56px 16px 24px;
-  }
-
-  /* back button no longer fits to the left of the page,
-     pin it inside the top of the page instead */
-  .btn-back {
-    position: absolute;
-    left: 16px;
-    top: 18px;
-  }
-
-  .card {
-    padding: 18px 18px;
-  }
-
-  .row-top {
-    grid-template-columns: 1fr;
-  }
-
-  .row-courses {
-    grid-template-columns: 1fr;
-  }
-
-  .skills-grid {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-
-  .achievements-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .card-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .stat-block {
-    border-right: none;
-    border-bottom: 1px solid var(--cg-border);
-  }
-
-  .stat-block:nth-last-child(-n + 2) {
-    border-bottom: none;
-  }
-
-  .rank-cols {
-    gap: 28px;
-  }
+.profile-ranking-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-self: end;
 }
 
-/* ═══════════════════════════════════════
-   RESPONSIVE — MOBILE (≤ 600px)
-═══════════════════════════════════════ */
-@media (max-width: 600px) {
-  .card-profile {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
-  }
-
-  .btn-edit {
-    position: static;
-    align-self: stretch;
-    text-align: center;
-    margin-top: 4px;
-    padding: 9px 14px;
-  }
-
-  .avatar-wrap {
-    width: 64px;
-    height: 64px;
-  }
-
-  .username {
-    font-size: 1.2rem;
-  }
-
-  .profile-stats {
-    gap: 18px;
-  }
-
-  .achievements-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .achievement-card {
-    padding: 12px;
-  }
-
-  .stat-block-val {
-    font-size: 1.25rem;
-  }
-
-  .course-bar-track {
-    margin: 0 -18px;
-  }
+.profile-ranking-rating {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--cg-text);
 }
 
-/* ═══════════════════════════════════════
-   RESPONSIVE — SMALL MOBILE (≤ 400px)
-═══════════════════════════════════════ */
-@media (max-width: 400px) {
-  .page {
-    padding: 52px 12px 20px;
-  }
+.profile-tier-chip {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
 
-  .card {
-    margin-top: 2rem;
-    padding: 14px 14px;
-  }
+/* ---------- Empty states ---------- */
 
-  .profile-stats {
-    gap: 14px;
-  }
+.profile-empty-note {
+  font-size: 13px;
+  color: var(--cg-text-muted);
+  text-align: center;
+  padding: 18px 0;
+}
 
-  .stat-block {
-    padding: 14px 8px;
-  }
+/* ---------- Chapter breakdown table ---------- */
 
-  .rank-cols {
-    gap: 18px;
-  }
+.profile-chapter-table {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 
-  .rank-badge {
-    width: 80px;
-    height: 80px;
-  }
+.profile-chapter-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 16px;
+  align-items: center;
+  padding: 11px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 13px;
+}
+
+.profile-chapter-row:last-child {
+  border-bottom: none;
+}
+
+.profile-chapter-name {
+  color: var(--cg-text);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-chapter-count {
+  font-weight: 700;
+  min-width: 34px;
+  text-align: right;
+}
+
+.profile-chapter-head {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 16px;
+  padding: 0 8px 8px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cg-text-muted);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 4px;
+}
+
+.profile-chapter-head span:not(:first-child) {
+  min-width: 34px;
+  text-align: right;
+}
+
+/* ---------- Badges ---------- */
+
+.profile-badge-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.profile-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  background: rgba(255, 165, 0, 0.12);
+  border: 1px solid rgba(255, 165, 0, 0.35);
+  color: #ffa500;
 }

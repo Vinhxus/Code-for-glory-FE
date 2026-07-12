@@ -1,229 +1,201 @@
-import { useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSettingsStore } from '../../store/settings';
+import {
+  getProfileSummary,
+  updateProfile,
+  type CareerField,
+  type SkillLevel,
+  type SocialLinks,
+} from '../../services/userApi';
 import './editProfile.css';
 
-/* ── Types ── */
-interface Skill {
-  id: number;
-  name: string;
-  percent: number;
-  tags: string[];
-  side: 'frontend' | 'backend';
-}
-
-interface ProfileData {
+/* ── Form state shape — mirrors UpdateProfilePayload but keeps
+   everything as controlled strings for simpler input binding. ── */
+interface FormState {
   username: string;
-  role: string;
+  avatarUrl: string;
   bio: string;
   location: string;
-  email: string;
+  fieldFocus: CareerField | '';
+  selfAssessedLevel: SkillLevel | '';
+  socialLinks: SocialLinks;
 }
 
-interface PrivacyToggles {
-  showProfile: boolean;
-  showCertificates: boolean;
-}
-
-/* ── Initial state (mirrors Profile data) ── */
-const INITIAL_PROFILE: ProfileData = {
-  username: 'User',
-  role: 'beginner',
+const EMPTY_FORM: FormState = {
+  username: '',
+  avatarUrl: '',
   bio: '',
   location: '',
-  email: '',
+  fieldFocus: '',
+  selfAssessedLevel: '',
+  socialLinks: {},
 };
 
-const INITIAL_PRIVACY: PrivacyToggles = {
-  showProfile: true,
-  showCertificates: true,
-};
+const MAX_BIO = 160;
 
-const INITIAL_SKILLS: Skill[] = [
-  {
-    id: 1,
-    side: 'frontend',
-    name: 'UI Architecture',
-    percent: 92,
-    tags: ['REACT', 'VITE.JS', 'FRAMER'],
-  },
-  {
-    id: 2,
-    side: 'frontend',
-    name: 'Performance Ops',
-    percent: 78,
-    tags: ['VITE', 'LIGHTHOUSE'],
-  },
-  {
-    id: 3,
-    side: 'backend',
-    name: 'API Alchemy',
-    percent: 84,
-    tags: ['NODE.JS', 'REST', 'SQL'],
-  },
-  {
-    id: 4,
-    side: 'backend',
-    name: 'System Resonance',
-    percent: 45,
-    tags: ['DOCKER', 'AWS'],
-  },
-];
-
-const ROLE_OPTIONS = [
-  'beginner',
+const SKILL_LEVEL_OPTIONS: SkillLevel[] = [
+  'novice',
   'apprentice',
   'journeyman',
-  'expert',
-  'archmage',
+  'master',
 ];
 
-/* ── Skill row component ── */
-function SkillEditRow({
-  skill,
-  onChange,
-}: {
-  skill: Skill;
-  onChange: (updated: Skill) => void;
-}) {
-  const [tagInput, setTagInput] = useState('');
+const FIELD_FOCUS_OPTIONS: CareerField[] = ['frontend', 'backend', 'fullstack'];
 
-  const handleTagKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if ((e.key === 'Enter' || e.key === ',') && tagInput.trim()) {
-      e.preventDefault();
-      const newTag = tagInput.trim().toUpperCase();
-      if (!skill.tags.includes(newTag)) {
-        onChange({ ...skill, tags: [...skill.tags, newTag] });
-      }
-      setTagInput('');
-    }
-  };
-
-  const removeTag = (tag: string) =>
-    onChange({ ...skill, tags: skill.tags.filter((t) => t !== tag) });
-
-  return (
-    <div className="skill-edit-item">
-      <div className="skill-edit-header">
-        <span className="skill-edit-type">
-          {skill.side === 'frontend' ? '⚡ FE' : '🔩 BE'}
-        </span>
-        <input
-          className="skill-edit-name"
-          value={skill.name}
-          onChange={(e) => onChange({ ...skill, name: e.target.value })}
-          placeholder="Skill name"
-        />
-        <span className="skill-edit-percent">{skill.percent}%</span>
-      </div>
-
-      {/* Progress slider with visual fill */}
-      <div style={{ position: 'relative' }}>
-        <div className="skill-range-track">
-          <div
-            className="skill-range-fill"
-            style={{ width: `${skill.percent}%` }}
-          />
-        </div>
-        <input
-          type="range"
-          className="skill-range"
-          min={0}
-          max={100}
-          value={skill.percent}
-          onChange={(e) =>
-            onChange({ ...skill, percent: Number(e.target.value) })
-          }
-          style={{
-            position: 'absolute',
-            inset: 0,
-            width: '100%',
-            opacity: 0,
-            height: '100%',
-            cursor: 'pointer',
-            zIndex: 1,
-          }}
-        />
-      </div>
-
-      {/* Tags */}
-      <div className="skill-edit-tags">
-        {skill.tags.map((tag) => (
-          <span key={tag} className="skill-tag-edit">
-            {tag}
-            <button className="skill-tag-remove" onClick={() => removeTag(tag)}>
-              ✕
-            </button>
-          </span>
-        ))}
-        <input
-          className="skill-tag-add-input"
-          value={tagInput}
-          onChange={(e) => setTagInput(e.target.value)}
-          onKeyDown={handleTagKey}
-          placeholder="+ Add tag"
-          maxLength={12}
-        />
-      </div>
-    </div>
-  );
-}
-
-/* ── Main component ── */
 export default function EditProfile() {
-  console.log('EditProfile rendered');
   const navigate = useNavigate();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const language = useSettingsStore((s) => s.language);
+  const isVi = language === 'vi';
 
-  const [profile, setProfile] = useState<ProfileData>(INITIAL_PROFILE);
-  const [skills, setSkills] = useState<Skill[]>(INITIAL_SKILLS);
-  const [privacy, setPrivacy] = useState<PrivacyToggles>(INITIAL_PRIVACY);
-  const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
+  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [privacy, setPrivacy] = useState({
+    showProfile: true,
+    showCertificates: true,
+  });
   const [showToast, setShowToast] = useState(false);
-  const [bioLen, setBioLen] = useState(0);
 
-  const MAX_BIO = 160;
+  useEffect(() => {
+    let cancelled = false;
+    getProfileSummary()
+      .then((data) => {
+        if (cancelled) return;
+        setForm({
+          username: data.username,
+          avatarUrl: data.avatarUrl ?? '',
+          bio: data.bio ?? '',
+          location: data.location ?? '',
+          fieldFocus: data.fieldFocus ?? '',
+          selfAssessedLevel: data.selfAssessedLevel ?? '',
+          socialLinks: data.socialLinks ?? {},
+        });
+        setEmail(data.email);
+        setPrivacy({
+          showProfile: data.showProfile,
+          showCertificates: data.showCertificates,
+        });
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setLoadError(
+            err instanceof Error
+              ? err.message
+              : isVi
+                ? 'Không tải được hồ sơ.'
+                : 'Failed to load profile.'
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  /* Handlers */
-  const handleField = useCallback(
-    (key: keyof ProfileData) =>
-      (
-        e: React.ChangeEvent<
-          HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-        >
-      ) => {
-        const val = e.target.value;
-        setProfile((prev) => ({ ...prev, [key]: val }));
-        if (key === 'bio') setBioLen(val.length);
-      },
+  const setField = useCallback(
+    <K extends keyof FormState>(key: K, value: FormState[K]) => {
+      setForm((prev) => ({ ...prev, [key]: value }));
+    },
     []
   );
 
-  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => setAvatarSrc(ev.target?.result as string);
-    reader.readAsDataURL(file);
+  const setSocialField = useCallback(
+    (key: keyof SocialLinks, value: string) => {
+      setForm((prev) => ({
+        ...prev,
+        socialLinks: { ...prev.socialLinks, [key]: value },
+      }));
+    },
+    []
+  );
+
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveError(null);
+    try {
+      // Chuỗi rỗng nghĩa là "chưa nhập" — không gửi lên để tránh set field
+      // thành '' một cách vô nghĩa (BE validate URL/username sẽ reject '').
+      await updateProfile({
+        username: form.username.trim() || undefined,
+        avatarUrl: form.avatarUrl.trim() || undefined,
+        bio: form.bio,
+        location: form.location.trim() || undefined,
+        fieldFocus: form.fieldFocus || undefined,
+        selfAssessedLevel: form.selfAssessedLevel || undefined,
+        socialLinks: {
+          github: form.socialLinks.github?.trim() || undefined,
+          linkedin: form.socialLinks.linkedin?.trim() || undefined,
+          twitter: form.socialLinks.twitter?.trim() || undefined,
+          website: form.socialLinks.website?.trim() || undefined,
+        },
+        showProfile: privacy.showProfile,
+        showCertificates: privacy.showCertificates,
+      });
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+        navigate('/profile');
+      }, 1400);
+    } catch (err) {
+      setSaveError(
+        err instanceof Error
+          ? err.message
+          : isVi
+            ? 'Lưu thất bại, thử lại sau.'
+            : 'Save failed, please try again.'
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleSkillChange = (updated: Skill) =>
-    setSkills((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
-
-  const handleSave = () => {
-    // In a real app: dispatch to store / call API
-    setShowToast(true);
-    setTimeout(() => {
-      setShowToast(false);
-      navigate('/profile');
-    }, 1800);
-  };
-
+  const bioLen = form.bio.length;
   const counterClass =
     bioLen > MAX_BIO
       ? 'field-counter field-counter--over'
       : bioLen > MAX_BIO - 20
         ? 'field-counter field-counter--warn'
         : 'field-counter';
+
+  if (loading) {
+    return (
+      <div className="edit-page">
+        <p
+          style={{
+            textAlign: 'center',
+            padding: '60px 0',
+            color: 'var(--cg-text-muted)',
+          }}
+        >
+          {isVi ? 'Đang tải…' : 'Loading…'}
+        </p>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="edit-page">
+        <p
+          style={{
+            textAlign: 'center',
+            padding: '60px 0',
+            color: 'var(--cg-coral)',
+          }}
+        >
+          {loadError}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="edit-page">
@@ -233,99 +205,145 @@ export default function EditProfile() {
           <button
             className="btn-back"
             onClick={() => navigate(-1)}
-            title="Go back"
+            title={isVi ? 'Quay lại' : 'Go back'}
           >
             ←
           </button>
-          <span className="edit-topbar-title">Edit Profile</span>
+          <span className="edit-topbar-title">
+            {isVi ? 'Chỉnh sửa hồ sơ' : 'Edit Profile'}
+          </span>
+        </div>
+        <div className="edit-topbar-actions">
+          <button className="btn-cancel" onClick={() => navigate(-1)}>
+            {isVi ? 'Huỷ' : 'Cancel'}
+          </button>
+          <button className="btn-save" onClick={handleSave} disabled={saving}>
+            {saving ? (isVi ? 'Đang lưu…' : 'Saving…') : isVi ? 'Lưu' : 'Save'}
+          </button>
         </div>
       </div>
 
+      {saveError && (
+        <div
+          className="edit-card"
+          style={{ borderColor: 'rgba(255,126,95,0.4)' }}
+        >
+          <p style={{ color: 'var(--cg-coral)', margin: 0 }}>{saveError}</p>
+        </div>
+      )}
+
+      {/* ─── Avatar ─── */}
       <div className="edit-card">
-        <p className="edit-section-title">Avatar</p>
+        <p className="edit-section-title">{isVi ? 'Ảnh đại diện' : 'Avatar'}</p>
         <div className="edit-avatar-section">
           <div className="edit-avatar-wrap">
             <div className="edit-avatar-ring" />
             <div
               className="edit-avatar-img"
               style={
-                avatarSrc
+                form.avatarUrl
                   ? {
-                      backgroundImage: `url(${avatarSrc})`,
+                      backgroundImage: `url(${form.avatarUrl})`,
                       backgroundSize: 'cover',
                     }
                   : {}
               }
             >
-              {!avatarSrc && '👤'}
-            </div>
-            <div
-              className="edit-avatar-overlay"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              📷
+              {!form.avatarUrl && '👤'}
             </div>
           </div>
-
           <div className="edit-avatar-info">
-            <p className="edit-avatar-label">Profile picture</p>
-            <p className="edit-avatar-hint">
-              PNG or JPG · max 2 MB · will be cropped to circle
+            <p className="edit-avatar-label">
+              {isVi ? 'URL ảnh đại diện' : 'Avatar image URL'}
             </p>
-            <div className="edit-avatar-btns">
-              <button
-                className="btn-upload"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                Upload image
-              </button>
-              {avatarSrc && (
-                <button
-                  className="btn-remove-avatar"
-                  onClick={() => setAvatarSrc(null)}
-                >
-                  Remove
-                </button>
-              )}
-            </div>
+            <p className="edit-avatar-hint">
+              {isVi
+                ? 'Chưa có dịch vụ lưu trữ ảnh — dán liên kết ảnh có sẵn (vd. từ GitHub, Imgur).'
+                : "No image hosting yet — paste a link to an image you've already uploaded elsewhere (e.g. GitHub, Imgur)."}
+            </p>
+            <input
+              className="field-input"
+              value={form.avatarUrl}
+              onChange={(e) => setField('avatarUrl', e.target.value)}
+              placeholder="https://…"
+              style={{ marginTop: 8 }}
+            />
           </div>
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            style={{ display: 'none' }}
-            onChange={handleAvatarUpload}
-          />
         </div>
       </div>
 
       {/* ─── Basic info ─── */}
       <div className="edit-card">
-        <p className="edit-section-title">Basic info</p>
+        <p className="edit-section-title">
+          {isVi ? 'Thông tin cơ bản' : 'Basic info'}
+        </p>
 
         <div className="edit-form-grid">
           <div className="field">
-            <label className="field-label">Username</label>
+            <label className="field-label">
+              {isVi ? 'Tên người dùng' : 'Username'}
+            </label>
             <input
               className="field-input"
-              value={profile.username}
-              onChange={handleField('username')}
-              placeholder="e.g. archmage_dev"
+              value={form.username}
+              onChange={(e) => setField('username', e.target.value)}
+              placeholder="e.g. tranminhkhoi_dev"
               maxLength={32}
             />
           </div>
 
           <div className="field">
-            <label className="field-label">Role / Title</label>
+            <label className="field-label">Email</label>
+            <input
+              className="field-input"
+              value={email}
+              disabled
+              style={{ opacity: 0.6, cursor: 'not-allowed' }}
+            />
+            <span className="field-hint">
+              {isVi
+                ? 'Không thể đổi email tại đây.'
+                : "Email can't be changed here."}
+            </span>
+          </div>
+        </div>
+
+        <div className="edit-form-grid">
+          <div className="field">
+            <label className="field-label">
+              {isVi ? 'Định hướng' : 'Field focus'}
+            </label>
             <select
               className="field-select"
-              value={profile.role}
-              onChange={handleField('role')}
+              value={form.fieldFocus}
+              onChange={(e) =>
+                setField('fieldFocus', e.target.value as CareerField)
+              }
             >
-              {ROLE_OPTIONS.map((r) => (
-                <option key={r} value={r}>
-                  {r.charAt(0).toUpperCase() + r.slice(1)}
+              <option value="">{isVi ? '— Chưa chọn —' : '— Not set —'}</option>
+              {FIELD_FOCUS_OPTIONS.map((f) => (
+                <option key={f} value={f}>
+                  {f.charAt(0).toUpperCase() + f.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="field">
+            <label className="field-label">
+              {isVi ? 'Trình độ' : 'Skill level'}
+            </label>
+            <select
+              className="field-select"
+              value={form.selfAssessedLevel}
+              onChange={(e) =>
+                setField('selfAssessedLevel', e.target.value as SkillLevel)
+              }
+            >
+              <option value="">{isVi ? '— Chưa chọn —' : '— Not set —'}</option>
+              {SKILL_LEVEL_OPTIONS.map((lvl) => (
+                <option key={lvl} value={lvl}>
+                  {lvl.charAt(0).toUpperCase() + lvl.slice(1)}
                 </option>
               ))}
             </select>
@@ -341,53 +359,127 @@ export default function EditProfile() {
           </label>
           <textarea
             className="field-textarea"
-            value={profile.bio}
-            onChange={handleField('bio')}
-            placeholder="A short intro — what you're building, learning, or obsessing over."
+            value={form.bio}
+            onChange={(e) => setField('bio', e.target.value)}
+            placeholder={
+              isVi
+                ? 'Vài dòng ngắn — bạn đang xây gì, học gì, mê gì.'
+                : "A short intro — what you're building, learning, or obsessing over."
+            }
             maxLength={MAX_BIO}
           />
         </div>
 
         <div className="edit-form-grid">
           <div className="field">
-            <label className="field-label">Location</label>
+            <label className="field-label">
+              {isVi ? 'Địa điểm' : 'Location'}
+            </label>
             <input
               className="field-input"
-              value={profile.location}
-              onChange={handleField('location')}
+              value={form.location}
+              onChange={(e) => setField('location', e.target.value)}
               placeholder="e.g. Ho Chi Minh City"
-            />
-          </div>
-          <div className="field">
-            <label className="field-label">Email</label>
-            <input
-              className="field-input"
-              value={profile.email}
-              onChange={handleField('email')}
-              placeholder="you@example.com"
-              type="email"
+              maxLength={80}
             />
           </div>
         </div>
       </div>
 
+      {/* ─── Social links ─── */}
       <div className="edit-card">
-        <p className="edit-section-title">Privacy</p>
+        <p className="edit-section-title">
+          {isVi ? 'Liên kết mạng xã hội' : 'Social links'}
+        </p>
+        <p className="field-hint" style={{ marginBottom: 4 }}>
+          {isVi
+            ? 'Lưu ý: để trống một ô sẽ giữ nguyên giá trị đã lưu trước đó, không xoá được qua form này.'
+            : 'Note: leaving a field blank keeps its previously saved value — clearing a link is not supported yet.'}
+        </p>
+
+        <div className="edit-form-grid">
+          <div className="field">
+            <label className="field-label">GitHub</label>
+            <div className="social-input-row">
+              <span className="social-input-prefix">github.com/</span>
+              <input
+                className="field-input"
+                value={form.socialLinks.github ?? ''}
+                onChange={(e) => setSocialField('github', e.target.value)}
+                placeholder="username"
+                maxLength={39}
+              />
+            </div>
+          </div>
+
+          <div className="field">
+            <label className="field-label">LinkedIn</label>
+            <div className="social-input-row">
+              <span className="social-input-prefix">linkedin.com/in/</span>
+              <input
+                className="field-input"
+                value={form.socialLinks.linkedin ?? ''}
+                onChange={(e) => setSocialField('linkedin', e.target.value)}
+                placeholder="username"
+                maxLength={39}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="edit-form-grid">
+          <div className="field">
+            <label className="field-label">X (Twitter)</label>
+            <div className="social-input-row">
+              <span className="social-input-prefix">x.com/</span>
+              <input
+                className="field-input"
+                value={form.socialLinks.twitter ?? ''}
+                onChange={(e) => setSocialField('twitter', e.target.value)}
+                placeholder="username"
+                maxLength={15}
+              />
+            </div>
+          </div>
+
+          <div className="field">
+            <label className="field-label">
+              {isVi ? 'Website cá nhân' : 'Personal website'}
+            </label>
+            <input
+              className="field-input"
+              value={form.socialLinks.website ?? ''}
+              onChange={(e) => setSocialField('website', e.target.value)}
+              placeholder="https://…"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* ─── Privacy ─── */}
+      <div className="edit-card">
+        <p className="edit-section-title">
+          {isVi ? 'Quyền riêng tư' : 'Privacy'}
+        </p>
         <div className="privacy-list">
-          {(
-            [
-              {
-                key: 'showProfile',
-                label: 'Show profile',
-                desc: 'Make your profile visible to other users',
-              },
-              {
-                key: 'showCertificates',
-                label: 'Show Certificates in Profile',
-                desc: 'Display earned certificates on your profile page',
-              },
-            ] as const
-          ).map(({ key, label, desc }) => (
+          {[
+            {
+              key: 'showProfile' as const,
+              label: isVi ? 'Hiển thị hồ sơ' : 'Show profile',
+              desc: isVi
+                ? 'Cho phép người khác xem hồ sơ của bạn'
+                : 'Make your profile visible to other users',
+            },
+            {
+              key: 'showCertificates' as const,
+              label: isVi
+                ? 'Hiển thị chứng chỉ'
+                : 'Show certificates in profile',
+              desc: isVi
+                ? 'Hiện các chứng chỉ đã đạt được trên trang hồ sơ'
+                : 'Display earned certificates on your profile page',
+            },
+          ].map(({ key, label, desc }) => (
             <div key={key} className="privacy-row">
               <div className="privacy-text">
                 <span className="privacy-label">{label}</span>
@@ -408,49 +500,51 @@ export default function EditProfile() {
         </div>
       </div>
 
-      {/* ─── Skills ─── */}
-      <div className="edit-card">
-        <p className="edit-section-title">
-          Skills — drag sliders to adjust · press Enter to add tags
-        </p>
-        <div className="skills-edit-list">
-          {skills.map((skill) => (
-            <SkillEditRow
-              key={skill.id}
-              skill={skill}
-              onChange={handleSkillChange}
-            />
-          ))}
-        </div>
-      </div>
-
       {/* ─── Danger zone ─── */}
       <div className="edit-card">
-        <p className="edit-section-title">Danger zone</p>
+        <p className="edit-section-title">
+          {isVi ? 'Vùng nguy hiểm' : 'Danger zone'}
+        </p>
         <div className="edit-danger-zone">
           <div className="danger-info">
-            <span className="danger-title">Delete account</span>
+            <span className="danger-title">
+              {isVi ? 'Xoá tài khoản' : 'Delete account'}
+            </span>
             <span className="danger-desc">
-              Permanently removes all your data. This cannot be undone.
+              {isVi
+                ? 'Tính năng này chưa được hỗ trợ ở backend.'
+                : 'This feature is not yet supported by the backend.'}
             </span>
           </div>
-          <button className="btn-danger">Delete account</button>
+          <button
+            className="btn-danger"
+            disabled
+            title={isVi ? 'Chưa khả dụng' : 'Not available yet'}
+          >
+            {isVi ? 'Xoá tài khoản' : 'Delete account'}
+          </button>
         </div>
       </div>
 
       {/* ─── Bottom save shortcut ─── */}
       <div className="edit-bottom-actions">
         <button className="btn-cancel" onClick={() => navigate(-1)}>
-          Cancel
+          {isVi ? 'Huỷ' : 'Cancel'}
         </button>
-        <button className="btn-save" onClick={handleSave}>
-          Save changes
+        <button className="btn-save" onClick={handleSave} disabled={saving}>
+          {saving
+            ? isVi
+              ? 'Đang lưu…'
+              : 'Saving…'
+            : isVi
+              ? 'Lưu thay đổi'
+              : 'Save changes'}
         </button>
       </div>
 
       {/* ─── Toast ─── */}
       <div className={`edit-toast${showToast ? ' show' : ''}`}>
-        ✓ Profile saved
+        ✓ {isVi ? 'Đã lưu hồ sơ' : 'Profile saved'}
       </div>
     </div>
   );

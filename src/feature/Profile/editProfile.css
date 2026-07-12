@@ -336,164 +336,6 @@ body {
   color: var(--cg-coral);
 }
 
-/* ─── Skills edit ─── */
-.skills-edit-list {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.skill-edit-item {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 16px;
-  background: var(--cg-container-a16);
-  border: 1px solid var(--cg-border);
-  border-radius: 12px;
-}
-
-.skill-edit-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.skill-edit-type {
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--cg-coral);
-  text-transform: uppercase;
-}
-
-.skill-edit-name {
-  flex: 1;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--cg-border);
-  color: var(--cg-text);
-  font-family: inherit;
-  font-size: 0.9rem;
-  font-weight: 600;
-  padding: 2px 0;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.skill-edit-name:focus {
-  border-bottom-color: var(--cg-coral);
-}
-
-.skill-edit-percent {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--cg-text);
-  min-width: 42px;
-  text-align: right;
-}
-
-/* ─── Range Slider Container & Hitbox Repair ─── */
-.skill-range-container {
-  position: relative;
-  height: 24px; /* Khung chạm ảo cao 24px */
-  display: flex;
-  align-items: center;
-}
-
-.skill-range-track {
-  position: relative;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 3px;
-  overflow: hidden;
-  width: 100%; /* Co dãn hết chiều rộng */
-}
-
-.skill-range-fill {
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  background: linear-gradient(90deg, var(--cg-coral), var(--cg-amber));
-  border-radius: 3px;
-  pointer-events: none;
-}
-
-.skill-range {
-  -webkit-appearance: none;
-  appearance: none;
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0; /* Input thật ẩn đi bao phủ toàn bộ vùng 24px */
-  cursor: pointer;
-  z-index: 2;
-  margin: 0;
-}
-
-/* ─── Tags ─── */
-.skill-edit-tags {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.skill-tag-edit {
-  background: rgba(255, 126, 95, 0.12);
-  border: 1px solid rgba(255, 126, 95, 0.3);
-  border-radius: 4px;
-  color: var(--cg-coral);
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  padding: 3px 8px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.skill-tag-remove {
-  background: none;
-  border: none;
-  color: var(--cg-text-muted);
-  cursor: pointer;
-  font-size: 0.7rem;
-  padding: 0;
-  line-height: 1;
-  transition: color 0.15s;
-}
-
-.skill-tag-remove:hover {
-  color: var(--cg-coral);
-}
-
-.skill-tag-add-input {
-  background: transparent;
-  border: 1px dashed var(--cg-border);
-  border-radius: 4px;
-  color: var(--cg-text-muted);
-  font-family: inherit;
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  padding: 3px 8px;
-  outline: none;
-  width: 72px;
-  transition: border-color 0.2s;
-}
-
-.skill-tag-add-input:focus {
-  border-color: var(--cg-coral);
-}
-
-.skill-tag-add-input::placeholder {
-  color: rgba(199, 201, 255, 0.3);
-}
-
 /* ─── Privacy toggles ─── */
 .privacy-list {
   display: flex;
@@ -736,13 +578,34 @@ body {
     height: 80px;
   }
 
-  .skill-edit-tags {
-    gap: 5px;
-  }
-
   .edit-toast {
     width: calc(100% - 32px);
     text-align: center;
     bottom: 16px;
   }
+}
+
+/* ─── Social links ─── */
+.social-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.social-input-prefix {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  color: var(--cg-text-muted);
+  white-space: nowrap;
+}
+
+/* ─── Danger zone: disabled state (no delete-account endpoint yet) ─── */
+.btn-danger[disabled] {
+  border-color: var(--cg-border);
+  color: var(--cg-text-muted);
+  cursor: not-allowed;
+}
+
+.btn-danger[disabled]:hover {
+  background: transparent;
 }
