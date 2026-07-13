@@ -35,6 +35,7 @@ export type I18nKey =
   | 'home.arena.cta'
   | 'home.top.title'
   | 'home.top.viewAll'
+  | 'home.top.empty'
   | 'home.footer.platform'
   | 'home.footer.community'
   | 'home.footer.terms'
@@ -139,6 +140,10 @@ export const translations: Record<I18nKey, { en: string; vi: string }> = {
   'home.arena.cta': { en: 'Join the Arena', vi: 'Vào đấu trường' },
   'home.top.title': { en: 'Top Users', vi: 'Top người chơi' },
   'home.top.viewAll': { en: 'VIEW ALL RANKINGS', vi: 'XEM TẤT CẢ XẾP HẠNG' },
+  'home.top.empty': {
+    en: 'No ranking data yet.',
+    vi: 'Chưa có dữ liệu xếp hạng.',
+  },
   'home.footer.platform': { en: 'Platform', vi: 'Nền tảng' },
   'home.footer.community': { en: 'Community', vi: 'Cộng đồng' },
   'home.footer.terms': { en: 'Terms', vi: 'Điều khoản' },

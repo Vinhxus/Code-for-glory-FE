@@ -1,9 +1,16 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SideNav from '../components/SideNav';
 import QuickSettings from '../components/QuickSettings';
 import { useT } from '../i18n/useT';
 import Header from '../components/layout/Header';
+import {
+  getMyStats,
+  getXpLeaderboard,
+  type CareerField,
+  type MyStats,
+  type XpLeaderboardEntry,
+} from '../services/userApi';
 
 const RANK_STYLES = [
   {
@@ -25,6 +32,23 @@ const RANK_STYLES = [
     medal: '🥉',
   },
 ];
+
+/** Tên "class" hiển thị kiểu game, suy ra từ fieldFocus của user — khớp phong cách WARRIOR/ARCHMAGE/ROGUE đã có sẵn trong UI. */
+const CLASS_LABEL: Record<CareerField, string> = {
+  frontend: 'ARCHMAGE CLASS',
+  backend: 'WARRIOR CLASS',
+  fullstack: 'ROGUE CLASS',
+};
+
+function classLabelFor(field?: CareerField): string {
+  return field ? CLASS_LABEL[field] : 'ADVENTURER CLASS';
+}
+
+/** Format XP gọn dạng "1.2k" cho card leaderboard nhỏ, giữ nguyên số nếu < 1000. */
+function formatXpShort(xp: number): string {
+  if (xp >= 1000) return `${(xp / 1000).toFixed(xp % 1000 === 0 ? 0 : 1)}k`;
+  return String(xp);
+}
 
 function Homepage() {
   const navigate = useNavigate();
@@ -57,14 +81,31 @@ function Homepage() {
     [t]
   );
 
-  const topUsers = useMemo(
-    () => [
-      { name: 'User Alpha', class: 'WARRIOR CLASS', xp: 123, rank: 1 },
-      { name: 'User Beta', class: 'ARCHMAGE CLASS', xp: 98, rank: 2 },
-      { name: 'User Gamma', class: 'ROGUE CLASS', xp: 87, rank: 3 },
-    ],
-    []
-  );
+  // XP của user hiện tại (mini XP bar) + top 3 toàn hệ thống (mini leaderboard).
+  // Cả hai đều lấy từ BE thật, không còn dữ liệu giả.
+  const [myStats, setMyStats] = useState<MyStats | null>(null);
+  const [topUsers, setTopUsers] = useState<XpLeaderboardEntry[]>([]);
+  const [xpLoading, setXpLoading] = useState(true);
+  const [xpError, setXpError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([getMyStats(), getXpLeaderboard(3)])
+      .then(([statsRes, leaderboardRes]) => {
+        if (cancelled) return;
+        setMyStats(statsRes);
+        setTopUsers(leaderboardRes);
+      })
+      .catch(() => {
+        if (!cancelled) setXpError(true);
+      })
+      .finally(() => {
+        if (!cancelled) setXpLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-[color:var(--cg-bg)] text-[color:var(--cg-text)] selection:bg-[color:var(--cg-coral-a18)] select-none overflow-x-hidden py-4">
@@ -134,21 +175,33 @@ function Homepage() {
                 </Link>
               </div>
 
-              {/* Mini XP bar */}
+              {/* Mini XP bar — dữ liệu thật từ GET /me/stats, không còn hardcode */}
               <div className="flex items-center gap-3 pt-1">
                 <span className="text-[11px] font-bold text-[color:var(--cg-text-muted)] tracking-widest">
-                  XP
+                  {myStats
+                    ? `Lv.${myStats.gamification.level} XP`
+                    : 'XP'}
                 </span>
                 <div className="flex-1 h-1.5 rounded-full overflow-hidden bg-[color:var(--cg-container-a30)] max-w-[180px]">
-                  <div
-                    className="xp-bar-fill delay-500"
-                    style={
-                      { '--progress-target': '60%' } as React.CSSProperties
-                    }
-                  />
+                  {xpLoading ? (
+                    <div className="h-full w-full animate-pulse bg-[color:var(--cg-container-a30)]" />
+                  ) : (
+                    <div
+                      className="xp-bar-fill delay-500"
+                      style={
+                        {
+                          '--progress-target': `${myStats?.xpProgress.progressPercent ?? 0}%`,
+                        } as React.CSSProperties
+                      }
+                    />
+                  )}
                 </div>
-                <span className="text-[11px] font-semibold text-[#ff7e5f]">
-                  240 / 400
+                <span className="text-[11px] font-semibold text-[#ff7e5f] tabular-nums">
+                  {xpLoading
+                    ? '…'
+                    : xpError || !myStats
+                      ? '—'
+                      : `${myStats.xpProgress.xpIntoLevel.toLocaleString()} / ${myStats.xpProgress.levelSpan.toLocaleString()}`}
                 </span>
               </div>
             </div>
@@ -315,9 +368,9 @@ function Homepage() {
                       style={
                         node.active
                           ? {
-                              borderColor: node.color,
-                              boxShadow: `0 0 30px ${node.color}40`,
-                            }
+                            borderColor: node.color,
+                            boxShadow: `0 0 30px ${node.color}40`,
+                          }
                           : { borderColor: 'var(--cg-border)' }
                       }
                     >
@@ -406,46 +459,66 @@ function Homepage() {
                 <span className="badge-amber">LIVE</span>
               </div>
               <div className="p-4 space-y-2 flex-1">
-                {topUsers.map((user, i) => {
-                  const rs = RANK_STYLES[i];
-                  return (
+                {xpLoading ? (
+                  Array.from({ length: 3 }).map((_, i) => (
                     <div
-                      key={user.rank}
-                      className="flex items-center gap-3 rounded-xl border px-4 py-3 transition-all hover:scale-[1.01]"
-                      style={{ background: rs.bg, borderColor: rs.border }}
+                      key={i}
+                      className="flex items-center gap-3 rounded-xl border border-[color:var(--cg-border)] px-4 py-3 animate-pulse"
                     >
-                      <div
-                        className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-extrabold flex-shrink-0"
-                        style={{
-                          background: rs.bg,
-                          border: `1px solid ${rs.border}`,
-                          color: rs.ring,
-                        }}
-                      >
-                        {rs.medal}
+                      <div className="h-8 w-8 rounded-lg bg-[color:var(--cg-container-a30)] flex-shrink-0" />
+                      <div className="flex-1 space-y-1.5">
+                        <div className="h-2.5 w-2/3 rounded bg-[color:var(--cg-container-a30)]" />
+                        <div className="h-2 w-1/3 rounded bg-[color:var(--cg-container-a30)]" />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs font-bold text-[color:var(--cg-text)] truncate">
-                          {user.name}
-                        </div>
-                        <div className="text-[10px] text-[color:var(--cg-text-muted)] font-medium tracking-wide">
-                          {user.class}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div
-                          className="text-xs font-extrabold"
-                          style={{ color: rs.ring }}
-                        >
-                          {user.xp}k
-                        </div>
-                        <div className="text-[9px] text-[color:var(--cg-text-muted)] font-bold">
-                          XP
-                        </div>
-                      </div>
+                      <div className="h-3 w-8 rounded bg-[color:var(--cg-container-a30)]" />
                     </div>
-                  );
-                })}
+                  ))
+                ) : topUsers.length === 0 ? (
+                  <p className="py-6 text-center text-xs text-[color:var(--cg-text-muted)]">
+                    {t('home.top.empty')}
+                  </p>
+                ) : (
+                  topUsers.map((user, i) => {
+                    const rs = RANK_STYLES[i] ?? RANK_STYLES[RANK_STYLES.length - 1];
+                    return (
+                      <div
+                        key={user._id}
+                        className="flex items-center gap-3 rounded-xl border px-4 py-3 transition-all hover:scale-[1.01]"
+                        style={{ background: rs.bg, borderColor: rs.border }}
+                      >
+                        <div
+                          className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-extrabold flex-shrink-0"
+                          style={{
+                            background: rs.bg,
+                            border: `1px solid ${rs.border}`,
+                            color: rs.ring,
+                          }}
+                        >
+                          {rs.medal}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-bold text-[color:var(--cg-text)] truncate">
+                            {user.username}
+                          </div>
+                          <div className="text-[10px] text-[color:var(--cg-text-muted)] font-medium tracking-wide">
+                            {classLabelFor(user.fieldFocus)}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div
+                            className="text-xs font-extrabold"
+                            style={{ color: rs.ring }}
+                          >
+                            {formatXpShort(user.gamification.xp)}
+                          </div>
+                          <div className="text-[9px] text-[color:var(--cg-text-muted)] font-bold">
+                            XP
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
               <div className="p-4 pt-0">
                 <button

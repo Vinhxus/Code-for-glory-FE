@@ -32,6 +32,37 @@ export interface UserRankingSummary {
   peakRating: number;
 }
 
+/** Tiến độ XP trong level hiện tại — khớp GamificationService.getXpProgress() ở BE. */
+export interface XpProgress {
+  level: number;
+  xp: number;
+  currentLevelFloor: number;
+  nextLevelFloor: number;
+  xpIntoLevel: number;
+  xpToNextLevel: number;
+  levelSpan: number;
+  progressPercent: number;
+}
+
+/** Response gọn của GET /me/stats — dùng cho mini XP bar và mọi nơi chỉ cần XP/level/streak, không cần full profile. */
+export interface MyStats {
+  gamification: UserGamification;
+  xpProgress: XpProgress;
+  rankings: UserRankingSummary[];
+}
+
+/** Một dòng trong bảng xếp hạng theo tổng XP toàn thời gian (GET /users/leaderboard/xp). */
+export interface XpLeaderboardEntry {
+  _id: string;
+  username: string;
+  avatarUrl?: string;
+  fieldFocus?: CareerField;
+  gamification: {
+    xp: number;
+    level: number;
+  };
+}
+
 export interface DifficultyBreakdown {
   easy: number;
   medium: number;
@@ -92,4 +123,18 @@ export async function updateProfile(
   payload: UpdateProfilePayload
 ): Promise<ProfileSummary> {
   return api.patch<ProfileSummary>('/me', payload);
+}
+
+/** XP, level, streak, badges, coins + xpProgress — gọn hơn getProfileSummary(), dùng cho mini XP bar. */
+export async function getMyStats(): Promise<MyStats> {
+  return api.get<MyStats>('/me/stats');
+}
+
+/** Top N user theo tổng XP toàn thời gian, toàn hệ thống (mặc định 3) — dùng cho mini leaderboard trang chủ. */
+export async function getXpLeaderboard(
+  limit = 3
+): Promise<XpLeaderboardEntry[]> {
+  return api.get<XpLeaderboardEntry[]>(
+    `/users/leaderboard/xp?limit=${limit}`
+  );
 }
