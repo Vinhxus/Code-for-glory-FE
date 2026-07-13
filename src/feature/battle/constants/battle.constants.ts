@@ -14,7 +14,6 @@ interface ResultConfigItem {
   subtitle: string;
   accentClass: string;
   statLabels: { left: string; right: string };
-  statValues: { left: string; right: string };
   primaryLabel: string;
   primaryIcon: string;
 }
@@ -25,8 +24,7 @@ export const RESULT_CONFIG: Record<ResultType, ResultConfigItem> = {
     label: 'VICTORY',
     subtitle: 'Algorithm Optimized Successfully.',
     accentClass: 'text-[#4ade80]',
-    statLabels: { left: 'Runtime', right: 'Memory' },
-    statValues: { left: '1.2s', right: '14MB' },
+    statLabels: { left: 'Test Cases Passed', right: 'Memory Used' },
     primaryLabel: 'Next Challenge',
     primaryIcon: 'play_arrow',
   },
@@ -35,8 +33,7 @@ export const RESULT_CONFIG: Record<ResultType, ResultConfigItem> = {
     label: 'DEFEAT',
     subtitle: 'Time Limit Exceeded. Better luck next time.',
     accentClass: 'text-[#ff7e5f]',
-    statLabels: { left: 'Test Cases Passed', right: 'Memory' },
-    statValues: { left: '4 / 10', right: '14MB' },
+    statLabels: { left: 'Test Cases Passed', right: 'Memory Used' },
     primaryLabel: 'Retry',
     primaryIcon: 'refresh',
   },
@@ -45,8 +42,7 @@ export const RESULT_CONFIG: Record<ResultType, ResultConfigItem> = {
     label: 'Draw',
     subtitle: 'Time Expired. Better luck next time.',
     accentClass: 'text-[#ff7e5f]',
-    statLabels: { left: 'Test Cases Passed', right: 'Memory' },
-    statValues: { left: '4 / 10', right: '14MB' },
+    statLabels: { left: 'Test Cases Passed', right: 'Memory Used' },
     primaryLabel: 'Retry',
     primaryIcon: 'refresh',
   },

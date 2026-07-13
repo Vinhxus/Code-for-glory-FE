@@ -54,7 +54,7 @@ export const useBattleArena = (battleId: string | undefined) => {
 
         // Chỉ set tạm timeLimit, timer-tick từ server sẽ cập nhật chính xác ngay sau đó
         if (data.status === 'IN_PROGRESS') {
-          setTimeLeft(data.timeLimit);
+          setTimeLeft(data.timeLimitSeconds);
         }
       } catch {
         setError('Failed to load battle. Please try again.');
@@ -75,7 +75,7 @@ export const useBattleArena = (battleId: string | undefined) => {
 
     const handleBattleStarted = (updatedBattle: Battle) => {
       setBattle(updatedBattle);
-      setTimeLeft(updatedBattle.timeLimit);
+      setTimeLeft(updatedBattle.timeLimitSeconds);
     };
 
     const handleOpponentCorrect = (payload: OpponentCorrectPayload) => {
@@ -150,6 +150,7 @@ export const useBattleArena = (battleId: string | undefined) => {
       const result = await submitAnswer(battleId, {
         questionId: currentQuestion.questionId,
         answer: code,
+        language,
       });
 
       if (!isMountedRef.current) return;

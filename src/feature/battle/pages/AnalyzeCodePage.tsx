@@ -50,11 +50,10 @@ const AnalyzeCodePage = () => {
       const myRealId = user?.id ?? '';
 
       const mySolved = submissions
-        .filter((s) => s.userId === myRealId && s.isCorrect)
+        .filter((s) => s.userId === myRealId && s.status === 'accepted')
         .sort(
           (a, b) =>
-            new Date(b.submittedAt).getTime() -
-            new Date(a.submittedAt).getTime()
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
 
       const latest = mySolved[0];
@@ -62,14 +61,10 @@ const AnalyzeCodePage = () => {
         throw new Error('NO_CORRECT_SUBMISSION');
       }
 
-      const language =
-        localStorage.getItem(`battleLang:${id}:${latest.questionId}`) ??
-        'javascript';
-
       return createAnalysis({
         battleId: id,
-        code: latest.answer,
-        language,
+        code: latest.code,
+        language: latest.language,
       });
     },
     [user]
@@ -255,7 +250,7 @@ const AnalyzeCodePage = () => {
                 <div className="space-y-4 text-sm leading-relaxed">
                   {analysis.strengths.length > 0 && (
                     <div>
-                      <p className="mb-1 font-semibold text-[color:var(--cg-green-a14,#4ade80)]">
+                      <p className="mb-1 font-semibold text-[#4ade80]">
                         Strengths
                       </p>
                       <ul className="space-y-1 text-[color:var(--cg-text-muted)]">

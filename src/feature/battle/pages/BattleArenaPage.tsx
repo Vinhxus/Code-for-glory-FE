@@ -1,5 +1,7 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { abandonBattle } from '../services/battleService';
+import { BATTLE_ROUTES } from '../constants/battle.constants';
 import Editor from '@monaco-editor/react';
 import SideNav from '../../../components/SideNav';
 import Header from '../../../components/layout/Header';
@@ -38,6 +40,23 @@ const BattleArenaPage = () => {
 
   const [language, setLanguage] = useState('javascript');
   const [editorTheme, setEditorTheme] = useState<'vs-dark' | 'vs'>('vs-dark');
+  const [showSurrenderModal, setShowSurrenderModal] = useState(false);
+  const [isSurrendering, setIsSurrendering] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSurrender = async () => {
+    if (!battleId || isSurrendering) return;
+    setIsSurrendering(true);
+    try {
+      await abandonBattle(battleId);
+      navigate(`${BATTLE_ROUTES.RESULT}/${battleId}`);
+    } catch (err) {
+      console.error('Surrender failed:', err);
+      setIsSurrendering(false);
+      setShowSurrenderModal(false);
+    }
+  };
+
   const currentQuestion = battle?.questions[currentQuestionIndex];
 
   return (
@@ -95,7 +114,7 @@ const BattleArenaPage = () => {
               <div className="flex flex-col items-start">
                 <span className="text-xs text-(--cg-text-muted)">You</span>
                 <span className="font-['Lexend'] text-lg font-bold text-[#ff7e5f]">
-                  {me?.currentScore ?? 0} pts
+                  {me?.score ?? 0} pts
                 </span>
               </div>
 
@@ -119,7 +138,7 @@ const BattleArenaPage = () => {
                   {opponent?.username ?? 'Waiting...'}
                 </span>
                 <span className="font-['Lexend'] text-lg font-bold text-(--cg-text)">
-                  {opponent?.currentScore ?? 0} pts
+                  {opponent?.score ?? 0} pts
                 </span>
               </div>
             </div>
@@ -141,7 +160,7 @@ const BattleArenaPage = () => {
                     <h2 className="font-['Lexend'] text-xl font-semibold">
                       {currentQuestion.title}
                     </h2>
-                    <p className="mt-3 text-sm leading-relaxed text-(--cg-text-muted)">
+                    <p className="mt-3 text-sm leading-relaxed text-(--cg-text-muted) whitespace-pre-wrap">
                       {currentQuestion.content}
                     </p>
                   </>
@@ -217,11 +236,51 @@ const BattleArenaPage = () => {
                 >
                   {isSubmitting ? 'Submitting...' : 'Submit Answer'}
                 </button>
+
+                {/* Surrender button */}
+                <button
+                  onClick={() => setShowSurrenderModal(true)}
+                  className="w-full py-2 rounded-xl border border-red-500/20 text-sm text-red-300 hover:bg-red-500/10 hover:border-red-500/40 transition-colors font-['Lexend']"
+                >
+                  Surrender
+                </button>
               </div>
             </div>
           </main>
         )}
       </div>
+
+      {/* Surrender Confirm Modal */}
+      {showSurrenderModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-sm rounded-2xl border border-(--cg-border) bg-(--cg-container-a16) p-6 text-center">
+            <h3 className="font-['Lexend'] text-lg font-semibold text-(--cg-text)">
+              Surrender this battle?
+            </h3>
+            <p className="mt-2 text-sm text-(--cg-text-muted)">
+              Your opponent will be declared the winner. This action cannot be
+              undone.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setShowSurrenderModal(false)}
+                disabled={isSurrendering}
+                className="flex-1 rounded-xl border border-(--cg-border) py-2.5 text-sm font-medium text-(--cg-text-muted) hover:text-(--cg-text) transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSurrender}
+                disabled={isSurrendering}
+                className="flex-1 rounded-xl bg-red-500/20 border border-red-500/30 py-2.5 text-sm font-medium text-red-400 hover:bg-red-500/30 transition-colors disabled:opacity-50"
+              >
+                {isSurrendering ? 'Surrendering...' : 'Confirm Surrender'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {submitResult && !submitResult.isCorrect && (
         <SubmitFailedModal
           message={submitResult.message}
