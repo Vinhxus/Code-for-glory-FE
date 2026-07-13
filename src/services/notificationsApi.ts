@@ -12,7 +12,9 @@ export type NotificationType =
     | 'achievement'
     | 'recall_due'
     | 'suspicious_login'
-    | 'system';
+    | 'system'
+    | 'practice_solved'
+    | 'shop_purchase';
 
 export interface AppNotification {
     _id: string;

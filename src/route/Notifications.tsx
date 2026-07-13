@@ -21,6 +21,8 @@ const TYPE_ICON: Record<NotificationType, string> = {
     recall_due: 'history_edu',
     suspicious_login: 'gpp_maybe',
     system: 'campaign',
+    practice_solved: 'task_alt',
+    shop_purchase: 'shopping_bag',
 };
 
 const TYPE_COLOR: Record<NotificationType, string> = {
@@ -34,16 +36,20 @@ const TYPE_COLOR: Record<NotificationType, string> = {
     recall_due: '#60a5fa',
     suspicious_login: '#f87171',
     system: 'var(--cg-text-muted)',
+    practice_solved: 'var(--cg-green)',
+    shop_purchase: 'var(--cg-amber)',
 };
 
 const FILTERS: { id: NotificationType | 'all'; label: string; labelVi: string }[] = [
     { id: 'all', label: 'All', labelVi: 'Tất cả' },
     { id: 'battle_result', label: 'Battles', labelVi: 'Trận đấu' },
     { id: 'lesson_unlock', label: 'Lessons', labelVi: 'Bài học' },
+    { id: 'practice_solved', label: 'Practice', labelVi: 'Luyện tập' },
     { id: 'streak_reminder', label: 'Streak', labelVi: 'Streak' },
     { id: 'penalty_applied', label: 'Penalties', labelVi: 'Khóa bài' },
     { id: 'achievement', label: 'Achievements', labelVi: 'Huy hiệu' },
     { id: 'recall_due', label: 'Recall', labelVi: 'Ôn tập' },
+    { id: 'shop_purchase', label: 'Shop', labelVi: 'Cửa hàng' },
     { id: 'suspicious_login', label: 'Security', labelVi: 'Bảo mật' },
 ];
 
@@ -188,8 +194,8 @@ export default function Notifications() {
                                 type="button"
                                 onClick={() => setActiveFilter(f.id)}
                                 className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${activeFilter === f.id
-                                        ? 'border-[color:var(--cg-amber)] bg-[color:var(--cg-amber-a14)] text-[color:var(--cg-amber)]'
-                                        : 'border-[color:var(--cg-border)] text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a16)]'
+                                    ? 'border-[color:var(--cg-amber)] bg-[color:var(--cg-amber-a14)] text-[color:var(--cg-amber)]'
+                                    : 'border-[color:var(--cg-border)] text-[color:var(--cg-text-muted)] hover:bg-[color:var(--cg-container-a16)]'
                                     }`}
                             >
                                 {isVi ? f.labelVi : f.label}

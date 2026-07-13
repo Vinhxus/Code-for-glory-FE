@@ -18,6 +18,8 @@ const TYPE_ICON: Record<NotificationType, string> = {
     recall_due: 'history_edu',
     suspicious_login: 'gpp_maybe',
     system: 'campaign',
+    practice_solved: 'task_alt',
+    shop_purchase: 'shopping_bag',
 };
 
 const TYPE_COLOR: Record<NotificationType, string> = {
@@ -31,6 +33,8 @@ const TYPE_COLOR: Record<NotificationType, string> = {
     recall_due: '#60a5fa',
     suspicious_login: '#f87171',
     system: 'var(--cg-text-muted)',
+    practice_solved: 'var(--cg-green)',
+    shop_purchase: 'var(--cg-amber)',
 };
 
 function formatRelativeTime(iso: string, isVi: boolean): string {
