@@ -1855,3 +1855,29 @@ export function pickSolutionCode(
     ''
   );
 }
+
+/**
+ * Trả về ngôn ngữ THỰC SỰ tương ứng với code mà `pickSolutionCode` chọn.
+ *
+ * Bug gốc: `pickSolutionCode` có thể fallback sang một ngôn ngữ khác với
+ * `language` được truyền vào (ví dụ editor đang ở `javascript` nhưng bài chỉ
+ * có solution `typescript`). Nếu UI chỉ lấy `code` mà không cập nhật lại
+ * `language` theo đúng fallback này, editor sẽ hiển thị code của ngôn ngữ A
+ * trong khi state `language` (và do đó field `language` gửi lên backend khi
+ * submit) vẫn là ngôn ngữ B — khiến backend chạy/chấm sai code, dù code mẫu
+ * hoàn toàn đúng. Hàm này PHẢI dùng cùng thứ tự fallback với `pickSolutionCode`
+ * để hai hàm luôn đồng bộ.
+ */
+export function pickSolutionLanguage(
+  content: PracticeSolutionContent,
+  language: PracticeLanguage
+): PracticeLanguage {
+  if (content.code[language] !== undefined) return language;
+  if (content.code[content.primaryLanguage] !== undefined)
+    return content.primaryLanguage;
+  if (content.code.typescript !== undefined) return 'typescript';
+  if (content.code.javascript !== undefined) return 'javascript';
+  if (content.code.html !== undefined) return 'html';
+  if (content.code.css !== undefined) return 'css';
+  return language;
+}

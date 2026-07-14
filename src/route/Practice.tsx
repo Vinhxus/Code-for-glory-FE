@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
+﻿import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import {
@@ -23,6 +23,7 @@ import { useSettingsStore } from '../store/settings';
 import {
   PRACTICE_SOLUTIONS,
   pickSolutionCode,
+  pickSolutionLanguage,
   type PracticeLanguage,
 } from '../feature/practice/practiceSolutions';
 import { TheoryViewer } from './TheoryViewer';
@@ -113,6 +114,12 @@ type PracticeSolutionCard = {
   upvotes: string;
   views: string;
   code: string;
+  /**
+   * Ngôn ngữ thực sự tương ứng với `code` ở trên (có thể khác với `language`
+   * đang chọn trong editor, vì `pickSolutionCode` có thể fallback sang ngôn
+   * ngữ khác nếu bài không có solution cho ngôn ngữ hiện tại).
+   */
+  language: PracticeLanguage;
   explanation: string;
 };
 
@@ -2607,6 +2614,13 @@ function Practice() {
       : isVi
         ? '// TODO: Solution will be added later.'
         : '// TODO: Solution will be added later.';
+    // QUAN TRỌNG: phải dùng CÙNG content/language với dòng pickSolutionCode ở
+    // trên để không bao giờ lệch nhau — nếu content không tồn tại, code là
+    // placeholder text nên coi như không có ngôn ngữ cụ thể, giữ nguyên
+    // `language` hiện tại để không kích hoạt việc đổi ngôn ngữ ở nơi gọi.
+    const solutionLanguage = content
+      ? pickSolutionLanguage(content, language)
+      : language;
 
     return [
       {
@@ -2619,6 +2633,7 @@ function Practice() {
         upvotes: selectedCatalogItem.solvedCount,
         views: selectedCatalogItem.acceptanceRate,
         code,
+        language: solutionLanguage,
         explanation,
       },
     ];
@@ -2893,7 +2908,7 @@ function Practice() {
   };
 
   const handleApplySolutionCode = useCallback(
-    (solutionCode: string) => {
+    (solutionCode: string, solutionLanguage?: PracticeLanguage) => {
       const starter = getStarterCode(language);
       const normalizedCurrent = code.trim();
       const normalizedStarter = starter.trim();
@@ -2913,6 +2928,19 @@ function Practice() {
       }
 
       setCode(solutionCode);
+
+      // FIX: nếu solution mẫu thuộc ngôn ngữ khác với `language` đang chọn
+      // trong editor (ví dụ editor ở 'javascript' nhưng bài chỉ có solution
+      // 'typescript'), phải đổi luôn `language` theo đúng ngôn ngữ của code
+      // vừa dán vào. Trước đây chỉ `setCode` mà không `setLanguage`, khiến
+      // editor hiển thị code của ngôn ngữ A trong khi field `language` gửi
+      // lên backend khi Run/Submit vẫn là ngôn ngữ B — backend chạy/chấm
+      // nhầm ngôn ngữ nên báo sai đáp án dù code mẫu đúng.
+      if (solutionLanguage && solutionLanguage !== language) {
+        setLanguage(solutionLanguage);
+        safeWritePracticeLanguage(solutionLanguage);
+      }
+
       showToast(
         isVi
           ? 'Đã đưa code mẫu vào editor.'
@@ -4253,7 +4281,10 @@ function Practice() {
                           <button
                             type="button"
                             onClick={() =>
-                              handleApplySolutionCode(practiceSolutions[0].code)
+                              handleApplySolutionCode(
+                                practiceSolutions[0].code,
+                                practiceSolutions[0].language
+                              )
                             }
                             className="rounded-lg border border-[#FF7E5F]/40 px-3 py-1.5 text-xs font-bold text-[#FFB199] hover:border-[#FF7E5F] hover:text-[#FF7E5F] transition-colors"
                           >
@@ -4346,7 +4377,10 @@ function Practice() {
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        handleApplySolutionCode(sol.code);
+                                        handleApplySolutionCode(
+                                          sol.code,
+                                          sol.language
+                                        );
                                       }}
                                       className="text-[10px] font-bold px-2 py-1 rounded-md bg-[#FF7E5F] text-[#0F0B3C] hover:brightness-105 transition-colors"
                                     >
