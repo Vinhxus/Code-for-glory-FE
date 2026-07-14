@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSettingsStore } from '../../store/settings';
 import ActivityHeatmap from '../../route/ActivityHeatmap';
 import {
@@ -178,6 +178,7 @@ function SocialIcon({
 }
 
 export default function Profile() {
+  const navigate = useNavigate();
   const language = useSettingsStore((s) => s.language);
   const isVi = language === 'vi';
 
@@ -261,6 +262,18 @@ export default function Profile() {
 
   return (
     <div className="profile-page">
+      {/* Back */}
+      <div className="mb-6 flex justify-start">
+        <Link
+          to="/"
+          className="inline-flex w-fit items-center gap-2 rounded-full border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-5 py-2.5 text-sm font-bold transition hover:bg-[color:var(--cg-container-a22)] hover:border-[#ff7e5f]/40 group animate-fade-in-up"
+        >
+          <span className="material-symbols-outlined text-[18px] text-[#ff7e5f] transition-transform group-hover:-translate-x-1">
+            arrow_back
+          </span>
+          {isVi ? 'Quay lại' : 'Back'}
+        </Link>
+      </div>
       <div className="profile-top-grid">
         {/* ---------- Left: identity ---------- */}
         <div className="profile-identity glass-card">

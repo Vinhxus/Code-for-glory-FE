@@ -231,6 +231,18 @@ export default function Leaderboard() {
         <Header />
         <main className="mx-auto max-w-5xl px-6 py-12 pt-22 space-y-10">
 
+          <div className="flex justify-start">
+            <button
+              onClick={() => navigate('/')}
+              className="inline-flex w-fit items-center gap-2 rounded-full border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-5 py-2.5 text-sm font-bold transition hover:bg-[color:var(--cg-container-a22)] hover:border-[#ff7e5f]/40 group animate-fade-in-up"
+            >
+              <span className="material-symbols-outlined text-[18px] text-[#ff7e5f] transition-transform group-hover:-translate-x-1">
+                arrow_back
+              </span>
+              {isVi ? 'Quay lại' : 'Back'}
+            </button>
+          </div>
+
           {/* Hero */}
           <section className="space-y-4 animate-fade-in-up">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#fbbf24]/25 bg-[#fbbf24]/10 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#fbbf24]">

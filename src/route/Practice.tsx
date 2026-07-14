@@ -1,4 +1,4 @@
-﻿import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
+import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import {
@@ -2677,6 +2677,18 @@ function Practice() {
     coinToastTimeoutRef.current = setTimeout(() => setCoinToast(null), 4000);
   }, []);
 
+  // XP reward notification — cùng pattern với coinToast ở trên, tách riêng
+  // state để 2 toast có thể hiện đồng thời (giải bài Accepted lần đầu luôn
+  // trả về cả coinsEarned lẫn xpEarned cùng lúc từ BE).
+  const [xpToast, setXpToast] = useState<number | null>(null);
+  const xpToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showXpToast = useCallback((amount: number) => {
+    if (xpToastTimeoutRef.current) clearTimeout(xpToastTimeoutRef.current);
+    setXpToast(amount);
+    xpToastTimeoutRef.current = setTimeout(() => setXpToast(null), 4000);
+  }, []);
+
   const showToast = useCallback(
     (message: string, type: 'success' | 'error' | 'info' = 'info') => {
       if (toastTimeoutRef.current) {
@@ -3094,9 +3106,12 @@ function Practice() {
       setCooldownTime(0);
       setIsLocked(false);
 
-      // Show coin reward notification if earned
+      // Show coin + XP reward notification if earned
       if (response.coinsEarned > 0) {
         showCoinToast(response.coinsEarned);
+      }
+      if (response.xpEarned > 0) {
+        showXpToast(response.xpEarned);
       }
 
       // Show success toast immediately — accepted regardless of progress sync
@@ -3859,6 +3874,42 @@ function Practice() {
             @keyframes coinFloat3 { 0%{opacity:1;transform:translate(-50%,0) scale(1)} 100%{opacity:0;transform:translate(calc(-50% + 20px),-85px) scale(0.4)} }
             @keyframes coinFloat4 { 0%{opacity:1;transform:translate(-50%,0) scale(1)} 100%{opacity:0;transform:translate(calc(-50% - 65px),-65px) scale(0.4)} }
             @keyframes coinFloat5 { 0%{opacity:1;transform:translate(-50%,0) scale(1)} 100%{opacity:0;transform:translate(calc(-50% + 65px),-70px) scale(0.4)} }
+          `}</style>
+        </div>
+      )}
+
+      {/* XP reward popup — offset top-52 (thay vì top-24 như coin toast) để
+          2 popup không đè lên nhau khi cả coinsEarned và xpEarned cùng > 0,
+          vốn luôn xảy ra đồng thời ở lần Accepted đầu tiên. */}
+      {xpToast !== null && (
+        <div
+          className="fixed top-52 right-6 z-[1000] pointer-events-none select-none"
+          style={{ animation: 'xpPopIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards' }}
+        >
+          <div className="relative flex flex-col items-center">
+            <div className="flex items-center gap-3 rounded-2xl border border-[#818cf8]/40 bg-gradient-to-br from-[#312e81]/80 to-[#0d0620]/90 px-5 py-4 shadow-[0_0_40px_rgba(129,140,248,0.35),0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl" style={{ minWidth: 210 }}>
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#818cf8]/20 border border-[#818cf8]/40 text-2xl shadow-[0_0_20px_rgba(129,140,248,0.4)]">
+                ⭐
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-semibold tracking-[0.15em] uppercase" style={{ color: 'rgba(199,210,254,0.65)' }}>
+                  {isVi ? 'Kinh nghiệm' : 'Experience Earned'}
+                </span>
+                <span className="text-[26px] font-extrabold leading-tight" style={{ color: '#c7d2fe', textShadow: '0 0 20px rgba(129,140,248,0.8)' }}>
+                  +{xpToast} XP
+                </span>
+                <span className="text-[10px] font-medium" style={{ color: 'rgba(199,210,254,0.5)' }}>
+                  {isVi ? 'XP đã được thêm vào tài khoản' : 'XP added to your account'}
+                </span>
+              </div>
+            </div>
+          </div>
+          <style>{`
+            @keyframes xpPopIn {
+              0%   { opacity:0; transform: scale(0.4) translateY(30px); }
+              60%  { opacity:1; transform: scale(1.1) translateY(-6px);  }
+              100% { opacity:1; transform: scale(1)   translateY(0);      }
+            }
           `}</style>
         </div>
       )}

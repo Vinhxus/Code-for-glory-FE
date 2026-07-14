@@ -95,6 +95,7 @@ export async function submitPracticeCode(payload: PracticeEvaluationPayload) {
     submission: SubmissionRecord;
     submissions: SubmissionRecord[];
     coinsEarned: number;
+    xpEarned: number;
   }>('/exercises/submit', {
     method: 'POST',
     body: JSON.stringify(payload),
