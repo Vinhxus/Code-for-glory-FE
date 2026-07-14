@@ -1,6 +1,7 @@
 import { io, Socket } from 'socket.io-client';
 
-const SOCKET_URL = 'http://localhost:3000/battles';
+const SOCKET_URL =
+  (import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000') + '/battles';
 
 let socket: Socket | null = null;
 
