@@ -20,27 +20,26 @@ interface DraftCardProps {
 // ─── Sub-Components ──────────────────────────────────────────────────────────
 const QuestCard: FC<QuestCardProps> = ({ quest }) => {
   return (
-    <div className="quest-card glass-card card-hover">
-      <div className="quest-card__main">
-        <div className="quest-card__icon-box">{quest.icon}</div>
-        <div className="quest-card__details">
-          <h3 className="quest-card__title">{quest.title}</h3>
-          <p className="quest-card__step-label">Current: {quest.stepLabel}</p>
-          <p className="quest-card__step-counter">
-            Step {quest.currentStep} of {quest.totalSteps}
-          </p>
-        </div>
-      </div>
+    <div className="quest-card">
+      <div className="quest-card__icon">{quest.icon}</div>
 
-      <div className="quest-card__progress-section">
+      <div className="quest-card__content">
+        <div className="quest-card__header">
+          <h3 className="quest-card__title">{quest.title}</h3>
+          <span className="quest-card__percent">{quest.progress}%</span>
+        </div>
+        <p className="quest-card__step">
+          Step {quest.currentStep} of {quest.totalSteps} · {quest.stepLabel}
+        </p>
+
         <div className="quest-progress-bar">
           <div
             className="quest-progress-bar__fill"
             style={{ width: `${quest.progress}%` }}
           />
         </div>
-        <div className="quest-card__footer">
-          <span className="quest-card__percentage">{quest.progress}%</span>
+
+        <div className="quest-card__actions">
           <HButton variant="recall" className="btn-continue">
             CONTINUE QUEST
           </HButton>
@@ -61,22 +60,20 @@ const DraftCard: FC<DraftCardProps> = ({ draft, onDelete }) => {
   };
 
   return (
-    <div
-      className={`draft-card glass-card card-hover ${isDeleting ? 'draft-card--fade-out' : ''}`}
-    >
+    <div className={`draft-card ${isDeleting ? 'draft-card--fade-out' : ''}`}>
       <div className="draft-card__header">
         <h3 className="draft-card__title">{draft.title}</h3>
-        <span
-          className={`intensity-badge intensity-${draft.intensity.toLowerCase()}`}
-        >
-          {draft.intensity} INTENSITY
-        </span>
+        <span className="draft-card__time">Modified {draft.timeAgo}</span>
       </div>
       <p className="draft-card__desc">{draft.description}</p>
       <div className="draft-card__footer">
-        <span className="draft-card__time">Modified {draft.timeAgo}</span>
+        <span
+          className={`intensity-badge badge--${draft.intensity.toLowerCase()}`}
+        >
+          {draft.intensity} INTENSITY
+        </span>
         <div className="draft-card__actions">
-          <button className="btn-resume">RESUME BATTLE</button>
+          <HButton className="btn-resume">RESUME BATTLE</HButton>
           <button
             className="btn-delete"
             onClick={handleDelete}
@@ -137,7 +134,7 @@ export const Unfinished: FC = () => {
   };
 
   return (
-    <div className="incomplete-root animate-fade-in-up">
+    <div className="incomplete-root">
       <header className="incomplete-header">
         <h1 className="incomplete-title">Incomplete Sagas</h1>
         <p className="incomplete-subtitle">

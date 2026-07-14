@@ -107,6 +107,8 @@
 .quest-card__content {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .quest-card__header {
@@ -160,7 +162,7 @@
   justify-content: flex-end;
 }
 
-/* .btn-continue {
+.btn-continue {
   padding: 6px 14px;
   border-radius: 8px;
   border: 1px solid var(--cg-coral);
@@ -170,15 +172,16 @@
   font-weight: 700;
   cursor: pointer;
   letter-spacing: 0.5px;
+  flex-shrink: 0;
   transition:
     background 0.2s,
     color 0.2s;
-} */
+}
 
-/* .btn-continue:hover {
+.btn-continue:hover {
   background: var(--cg-coral);
   color: #fff;
-} */
+}
 
 .drafts-section__header {
   display: flex;
@@ -212,6 +215,14 @@
 .draft-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.draft-card--fade-out {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.98);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
 .draft-card__header {
