@@ -30,6 +30,10 @@ export type ProgressDto = {
   roadmapId: string;
   status: string;
   score?: number;
+  attemptCount?: number;
+  submitCount?: number;
+  startedAt?: string;
+  completedAt?: string;
 };
 
 import { request } from './apiClient';

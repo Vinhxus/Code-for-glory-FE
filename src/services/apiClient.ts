@@ -6,6 +6,7 @@ export const API_BASE_URL =
   'http://localhost:3000/api';
 
 export const TOKEN_KEY = 'access_token';
+const GUEST_USER_KEY = 'cg_guest_user_id_v1';
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
@@ -19,9 +20,45 @@ export function clearToken(): void {
   localStorage.removeItem(TOKEN_KEY);
 }
 
+function toHex(bytes: Uint8Array): string {
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+/**
+ * Guest mode (no login):
+ * - Generate a stable pseudo Mongo ObjectId (24 hex chars) and store in localStorage.
+ * - Backend will use this id as "userId" for learning-path progress so progress isn't shared
+ *   across all anonymous users (demo user).
+ */
+export function getOrCreateGuestUserId(): string {
+  try {
+    const existing = localStorage.getItem(GUEST_USER_KEY);
+    if (existing && /^[0-9a-f]{24}$/i.test(existing)) return existing;
+
+    const bytes = new Uint8Array(12);
+    crypto.getRandomValues(bytes);
+    const id = toHex(bytes); // 24 hex chars
+    localStorage.setItem(GUEST_USER_KEY, id);
+    return id;
+  } catch {
+    // Fallback: still return something deterministic per-tab session
+    const id = '000000000000000000000001';
+    return id;
+  }
+}
+
 function authHeader(): Record<string, string> {
   const token = getToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+function guestHeader(): Record<string, string> {
+  // Only attach guest id when user is not logged in
+  const token = getToken();
+  if (token) return {};
+  return { 'x-guest-user-id': getOrCreateGuestUserId() };
 }
 
 export class ApiError extends Error {
@@ -61,7 +98,7 @@ export async function request<T>(
 
   const finalHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...(auth === false ? {} : authHeader()),
+    ...(auth === false ? {} : { ...authHeader(), ...guestHeader() }),
     ...((headers as Record<string, string>) || {}),
   };
 

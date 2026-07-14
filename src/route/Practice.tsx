@@ -2176,6 +2176,9 @@ function getInitialCodeForPractice(
   // NOTE: Đây là “starter code” theo ngôn ngữ. App hiện chưa có engine chạy code,
   // nên mục tiêu ở đây là đổi template và highlight phù hợp khi đổi dropdown.
   switch (practiceKey) {
+    case 'How the Internet Works & HTTP': {
+      return getInitialCodeForPractice('Web & Internet Basics', lang);
+    }
     case 'Web & Internet Basics': {
       const variants: Partial<Record<PracticeLanguage, string>> = {
         javascript:
@@ -2239,12 +2242,23 @@ function getInitialCodeForPractice(
 }
 
 const PRACTICE_DATA: Record<string, PracticeItem> = {
+  'How the Internet Works & HTTP': {
+    title: 'How the Internet Works & HTTP',
+    description:
+      'Understand how the internet works, what HTTP is, and the request-response cycle.',
+    concept: 'HTTP Fundamentals',
+    conceptDesc: 'How requests, responses, status codes, and headers work in HTTP.',
+    taskDesc:
+      'Refactor the mock server response to return a 200 OK status instead of 404.',
+    initialCode:
+      "function handleRequest(req) {\n  return { status: 404, body: 'Not Found' };\n}",
+  },
   'Web & Internet Basics': {
     title: 'Web & Internet Basics',
     description:
       'Understand how the internet works, what HTTP is, and the request-response cycle.',
-    concept: 'HTTP Protocol',
-    conceptDesc: 'The foundation of data communication for the World Wide Web.',
+    concept: 'HTTP Fundamentals',
+    conceptDesc: 'How requests, responses, status codes, and headers work in HTTP.',
     taskDesc:
       'Refactor the mock server response to return a 200 OK status instead of 404.',
     initialCode:
@@ -2254,8 +2268,8 @@ const PRACTICE_DATA: Record<string, PracticeItem> = {
     title: 'Basic HTML Structure',
     description:
       'Learn the core tags that make up every HTML document: html, head, and body.',
-    concept: 'Semantic HTML',
-    conceptDesc: 'Use tags that convey meaning about the content they enclose.',
+    concept: 'HTML & Semantics',
+    conceptDesc: 'Use semantic tags and a clear document outline so structure is readable by humans and machines.',
     taskDesc: 'Wrap the text in a valid HTML5 boilerplate.',
     initialCode: 'Hello World',
   },
@@ -2263,9 +2277,9 @@ const PRACTICE_DATA: Record<string, PracticeItem> = {
     title: 'Async / Await Patterns',
     description:
       'Async functions improve the syntax of Promises, letting you write asynchronous code that reads synchronously.\n\nYou may assume that each input would have exactly one solution, and you may not use the same element twice.',
-    concept: 'Promise.all()',
+    concept: 'JavaScript Fundamentals',
     conceptDesc:
-      'Use Promise.all() when you want to initiate multiple async operations and wait for all of them.',
+      'Async/await, Promises, and error handling are core JavaScript primitives used across both frontend and backend.',
     taskDesc:
       'Refactor the legacy callback function on the right to use async/await. Handle potential rejection with a try/catch block.',
     initialCode:
@@ -2375,15 +2389,25 @@ function Practice() {
   const isVi = appLanguage === 'vi';
   const location = useLocation();
   const navigate = useNavigate();
-  const { nodeId, nodeTitle } = location.state || {};
+  const { nodeId, nodeTitle, problemId } = (location.state as
+    | { nodeId?: string; nodeTitle?: string; problemId?: string }
+    | null) || { };
+  const isLearningPathPractice = Boolean(nodeId && nodeTitle);
 
-  const isHubView = !nodeTitle;
+  const isHubView = !nodeTitle && !problemId;
   const selectedCatalogItem = useMemo(
-    () => PRACTICE_CATALOG.find((item) => item.title === nodeTitle),
-    [nodeTitle]
+    () =>
+      problemId
+        ? PRACTICE_CATALOG.find((item) => item.id === problemId)
+        : PRACTICE_CATALOG.find((item) => item.title === nodeTitle),
+    [nodeTitle, problemId]
   );
   const practiceKey =
-    nodeTitle && PRACTICE_DATA[nodeTitle] ? nodeTitle : 'default';
+    selectedCatalogItem?.title && PRACTICE_DATA[selectedCatalogItem.title]
+      ? selectedCatalogItem.title
+      : nodeTitle && PRACTICE_DATA[nodeTitle]
+        ? nodeTitle
+        : 'default';
   const basePractice = PRACTICE_DATA[practiceKey] || PRACTICE_DATA['default'];
   const chapterLabel = useMemo(() => {
     if (selectedCatalogItem) {
@@ -2393,177 +2417,177 @@ function Practice() {
   }, [nodeTitle, selectedCatalogItem]);
   const ui = isVi
     ? {
-      practiceHub: 'TRUNG TÂM PRACTICE',
-      clearFilters: 'Xoá bộ lọc',
-      startPracticing: 'Bắt đầu luyện tập',
-      curatedPractice: 'BÀI TẬP CHỌN LỌC',
-      tracks: 'FRONTEND + BACKEND',
-      hubTitle: 'Duyệt bài theo chủ đề trước khi vào workspace code.',
-      hubSubtitle:
-        'Trang practice giờ hoạt động như một problem hub đúng nghĩa với danh sách chọn lọc, topic chip và bộ lọc rõ ràng hơn.',
-      openFirst: 'Mở thử thách đầu tiên',
-      frontendTopics: 'Chủ đề Frontend',
-      backendTopics: 'Chủ đề Backend',
-      totalProblems: 'TỔNG SỐ BÀI',
-      totalSubtitle: 'Danh mục bài tập gọn gàng trước khi vào editor.',
-      trackSplit: 'TỶ LỆ THEO TRACK',
-      topicDirectory: 'DANH MỤC CHỦ ĐỀ',
-      discoverByTopic: 'Khám phá thử thách theo chủ đề',
-      topicSubtitle:
-        'Các topic pill được tối ưu để quét nhanh giống trải nghiệm trên các nền tảng luyện thuật toán.',
-      visibleProblems: 'bài đang hiển thị',
-      allTopics: 'Tất cả chủ đề',
-      frontendPath: 'LỘ TRÌNH FRONTEND',
-      frontendPathTitle: 'Chủ đề UI engineering',
-      backendPath: 'LỘ TRÌNH BACKEND',
-      backendPathTitle: 'Chủ đề service và dữ liệu',
-      problems: 'bài',
-      problemList: 'DANH SÁCH BÀI',
-      browseOpen: 'Duyệt, lọc rồi mở workspace',
-      searchChallenges: 'Tìm challenge, chủ đề hoặc tag...',
-      all: 'Tất cả',
-      easy: 'Dễ',
-      medium: 'Trung bình',
-      hard: 'Khó',
-      problem: 'Bài toán',
-      track: 'Track',
-      difficulty: 'Độ khó',
-      acceptance: 'Tỷ lệ',
-      action: 'Hành động',
-      noMatching: 'Không có bài phù hợp',
-      tryAnother: 'Hãy thử chủ đề khác hoặc xoá bộ lọc hiện tại.',
-      allProblems: 'Tất cả bài',
-      description: 'Mô tả',
-      solutions: 'Lời giải',
-      theory: 'Lý Thuyết',
-      accepted: 'Đã nhận',
-      rate: 'Tỷ lệ',
-      task: 'Yêu cầu',
-      topics: 'Chủ đề',
-      companies: 'Công ty',
-      askedBy: 'Thường được hỏi bởi:',
-      hint1: 'Gợi ý 1',
-      hint2: 'Gợi ý 2',
-      hint2Body:
-        'Một cách brute force là duyệt mọi cặp số có thể, nhưng sẽ quá chậm. Hãy thử nghĩ theo hướng hash map.',
-      similarQuestions: 'Câu hỏi tương tự',
-      discussion: 'Thảo luận (2K)',
-      discussionBody: 'Khu vực thảo luận cộng đồng sẽ nằm ở đây.',
-      searchSolutions: 'Tìm lời giải...',
-      share: 'Chia sẻ',
-      code: 'Code',
-      locked: 'ĐÃ KHOÁ',
-      attempt: 'LƯỢT',
-      testcase: 'Test case',
-      testResult: 'Kết quả test',
-      submissions: 'Bài nộp',
-      runFirst: 'Bạn cần chạy code trước',
-      runToSee: 'Chạy code để xem kết quả test',
-      status: 'Trạng thái',
-      language: 'Ngôn ngữ',
-      runtime: 'Thời gian chạy',
-      memory: 'Bộ nhớ',
-      notes: 'Ghi chú',
-      run: 'Chạy',
-      wait: 'ĐỢI',
-      submitting: 'ĐANG NỘP...',
-      submit: 'Nộp bài',
-      chapterProgress: 'Tiến độ theo chủ đề',
-      chapterProgressSubtitle:
-        'Số bài đã giải theo từng mức độ, giống bảng tiến độ trên LeetCode.',
-      solvedBadge: 'Đã giải',
-      loadingProgress: 'Đang tải tiến độ...',
-      reward: 'Thưởng',
-      coinsUnit: 'coins',
-      firstSolveReward: 'Thưởng lần solve đầu tiên',
-    }
+        practiceHub: 'TRUNG TÂM PRACTICE',
+        clearFilters: 'Xoá bộ lọc',
+        startPracticing: 'Bắt đầu luyện tập',
+        curatedPractice: 'BÀI TẬP CHỌN LỌC',
+        tracks: 'FRONTEND + BACKEND',
+        hubTitle: 'Duyệt bài theo chủ đề trước khi vào workspace code.',
+        hubSubtitle:
+          'Trang practice giờ hoạt động như một problem hub đúng nghĩa với danh sách chọn lọc, topic chip và bộ lọc rõ ràng hơn.',
+        openFirst: 'Mở thử thách đầu tiên',
+        frontendTopics: 'Chủ đề Frontend',
+        backendTopics: 'Chủ đề Backend',
+        totalProblems: 'TỔNG SỐ BÀI',
+        totalSubtitle: 'Danh mục bài tập gọn gàng trước khi vào editor.',
+        trackSplit: 'TỶ LỆ THEO TRACK',
+        topicDirectory: 'DANH MỤC CHỦ ĐỀ',
+        discoverByTopic: 'Khám phá thử thách theo chủ đề',
+        topicSubtitle:
+          'Các topic pill được tối ưu để quét nhanh giống trải nghiệm trên các nền tảng luyện thuật toán.',
+        visibleProblems: 'bài đang hiển thị',
+        allTopics: 'Tất cả chủ đề',
+        frontendPath: 'LỘ TRÌNH FRONTEND',
+        frontendPathTitle: 'Chủ đề UI engineering',
+        backendPath: 'LỘ TRÌNH BACKEND',
+        backendPathTitle: 'Chủ đề service và dữ liệu',
+        problems: 'bài',
+        problemList: 'DANH SÁCH BÀI',
+        browseOpen: 'Duyệt, lọc rồi mở workspace',
+        searchChallenges: 'Tìm challenge, chủ đề hoặc tag...',
+        all: 'Tất cả',
+        easy: 'Dễ',
+        medium: 'Trung bình',
+        hard: 'Khó',
+        problem: 'Bài toán',
+        track: 'Track',
+        difficulty: 'Độ khó',
+        acceptance: 'Tỷ lệ',
+        action: 'Hành động',
+        noMatching: 'Không có bài phù hợp',
+        tryAnother: 'Hãy thử chủ đề khác hoặc xoá bộ lọc hiện tại.',
+        allProblems: 'Tất cả bài',
+        description: 'Mô tả',
+        solutions: 'Lời giải',
+        theory: 'Lý Thuyết',
+        accepted: 'Đã nhận',
+        rate: 'Tỷ lệ',
+        task: 'Yêu cầu',
+        topics: 'Chủ đề',
+        companies: 'Công ty',
+        askedBy: 'Thường được hỏi bởi:',
+        hint1: 'Gợi ý 1',
+        hint2: 'Gợi ý 2',
+        hint2Body:
+          'Một cách brute force là duyệt mọi cặp số có thể, nhưng sẽ quá chậm. Hãy thử nghĩ theo hướng hash map.',
+        similarQuestions: 'Câu hỏi tương tự',
+        discussion: 'Thảo luận (2K)',
+        discussionBody: 'Khu vực thảo luận cộng đồng sẽ nằm ở đây.',
+        searchSolutions: 'Tìm lời giải...',
+        share: 'Chia sẻ',
+        code: 'Code',
+        locked: 'ĐÃ KHOÁ',
+        attempt: 'LƯỢT',
+        testcase: 'Test case',
+        testResult: 'Kết quả test',
+        submissions: 'Bài nộp',
+        runFirst: 'Bạn cần chạy code trước',
+        runToSee: 'Chạy code để xem kết quả test',
+        status: 'Trạng thái',
+        language: 'Ngôn ngữ',
+        runtime: 'Thời gian chạy',
+        memory: 'Bộ nhớ',
+        notes: 'Ghi chú',
+        run: 'Chạy',
+        wait: 'ĐỢI',
+        submitting: 'ĐANG NỘP...',
+        submit: 'Nộp bài',
+        chapterProgress: 'Tiến độ theo chủ đề',
+        chapterProgressSubtitle:
+          'Số bài đã giải theo từng mức độ, giống bảng tiến độ trên LeetCode.',
+        solvedBadge: 'Đã giải',
+        loadingProgress: 'Đang tải tiến độ...',
+        reward: 'Thưởng',
+        coinsUnit: 'coins',
+        firstSolveReward: 'Thưởng lần solve đầu tiên',
+      }
     : {
-      practiceHub: 'PRACTICE HUB',
-      clearFilters: 'Clear filters',
-      startPracticing: 'Start practicing',
-      curatedPractice: 'CURATED PRACTICE',
-      tracks: 'FRONTEND + BACKEND',
-      hubTitle:
-        'Browse problems by topic before entering the code workspace.',
-      hubSubtitle:
-        'The practice page behaves like a proper problem hub with curated lists, topic chips, and clearer filtering.',
-      openFirst: 'Open first challenge',
-      frontendTopics: 'Frontend topics',
-      backendTopics: 'Backend topics',
-      totalProblems: 'TOTAL PROBLEMS',
-      totalSubtitle:
-        'Polished practice catalog instead of jumping straight into the editor.',
-      trackSplit: 'TRACK SPLIT',
-      topicDirectory: 'TOPIC DIRECTORY',
-      discoverByTopic: 'Discover challenges by topic',
-      topicSubtitle:
-        'Topic pills are intentionally dense and scannable so users can browse the catalog like algorithm platforms.',
-      visibleProblems: 'visible problems',
-      allTopics: 'All Topics',
-      frontendPath: 'FRONTEND PATH',
-      frontendPathTitle: 'UI engineering topics',
-      backendPath: 'BACKEND PATH',
-      backendPathTitle: 'Service and data topics',
-      problems: 'problems',
-      problemList: 'PROBLEM LIST',
-      browseOpen: 'Browse, filter, then open a workspace',
-      searchChallenges: 'Search challenges, topics, or tags...',
-      all: 'All',
-      easy: 'Easy',
-      medium: 'Medium',
-      hard: 'Hard',
-      problem: 'Problem',
-      track: 'Track',
-      difficulty: 'Difficulty',
-      acceptance: 'Acceptance',
-      action: 'Action',
-      noMatching: 'No matching problems',
-      tryAnother: 'Try another topic or clear the current filters.',
-      allProblems: 'All problems',
-      description: 'Description',
-      solutions: 'Solutions',
-      theory: 'Theory',
-      accepted: 'Accepted',
-      rate: 'Rate',
-      task: 'The Task',
-      topics: 'Topics',
-      companies: 'Companies',
-      askedBy: 'Frequently asked by:',
-      hint1: 'Hint 1',
-      hint2: 'Hint 2',
-      hint2Body:
-        "A really brute force way would be to search for all possible pairs of numbers but that would be too slow. Again, it's best to try and think of a hash map.",
-      similarQuestions: 'Similar Questions',
-      discussion: 'Discussion (2K)',
-      discussionBody: 'Community discussion goes here.',
-      searchSolutions: 'Search solutions...',
-      share: 'Share',
-      code: 'Code',
-      locked: 'LOCKED',
-      attempt: 'ATTEMPT',
-      testcase: 'Testcase',
-      testResult: 'Test Result',
-      submissions: 'Submissions',
-      runFirst: 'You must run your code first',
-      runToSee: 'Run code to see test results',
-      status: 'Status',
-      language: 'Language',
-      runtime: 'Runtime',
-      memory: 'Memory',
-      notes: 'Notes',
-      run: 'Run',
-      wait: 'WAIT',
-      submitting: 'SUBMITTING...',
-      submit: 'Submit',
-      chapterProgress: 'Progress by topic',
-      chapterProgressSubtitle:
-        'Problems solved per difficulty, similar to the LeetCode progress panel.',
-      solvedBadge: 'Solved',
-      loadingProgress: 'Loading progress...',
-      reward: 'Reward',
-      coinsUnit: 'coins',
-      firstSolveReward: 'First-solve reward',
-    };
+        practiceHub: 'PRACTICE HUB',
+        clearFilters: 'Clear filters',
+        startPracticing: 'Start practicing',
+        curatedPractice: 'CURATED PRACTICE',
+        tracks: 'FRONTEND + BACKEND',
+        hubTitle:
+          'Browse problems by topic before entering the code workspace.',
+        hubSubtitle:
+          'The practice page behaves like a proper problem hub with curated lists, topic chips, and clearer filtering.',
+        openFirst: 'Open first challenge',
+        frontendTopics: 'Frontend topics',
+        backendTopics: 'Backend topics',
+        totalProblems: 'TOTAL PROBLEMS',
+        totalSubtitle:
+          'Polished practice catalog instead of jumping straight into the editor.',
+        trackSplit: 'TRACK SPLIT',
+        topicDirectory: 'TOPIC DIRECTORY',
+        discoverByTopic: 'Discover challenges by topic',
+        topicSubtitle:
+          'Topic pills are intentionally dense and scannable so users can browse the catalog like algorithm platforms.',
+        visibleProblems: 'visible problems',
+        allTopics: 'All Topics',
+        frontendPath: 'FRONTEND PATH',
+        frontendPathTitle: 'UI engineering topics',
+        backendPath: 'BACKEND PATH',
+        backendPathTitle: 'Service and data topics',
+        problems: 'problems',
+        problemList: 'PROBLEM LIST',
+        browseOpen: 'Browse, filter, then open a workspace',
+        searchChallenges: 'Search challenges, topics, or tags...',
+        all: 'All',
+        easy: 'Easy',
+        medium: 'Medium',
+        hard: 'Hard',
+        problem: 'Problem',
+        track: 'Track',
+        difficulty: 'Difficulty',
+        acceptance: 'Acceptance',
+        action: 'Action',
+        noMatching: 'No matching problems',
+        tryAnother: 'Try another topic or clear the current filters.',
+        allProblems: 'All problems',
+        description: 'Description',
+        solutions: 'Solutions',
+        theory: 'Theory',
+        accepted: 'Accepted',
+        rate: 'Rate',
+        task: 'The Task',
+        topics: 'Topics',
+        companies: 'Companies',
+        askedBy: 'Frequently asked by:',
+        hint1: 'Hint 1',
+        hint2: 'Hint 2',
+        hint2Body:
+          "A really brute force way would be to search for all possible pairs of numbers but that would be too slow. Again, it's best to try and think of a hash map.",
+        similarQuestions: 'Similar Questions',
+        discussion: 'Discussion (2K)',
+        discussionBody: 'Community discussion goes here.',
+        searchSolutions: 'Search solutions...',
+        share: 'Share',
+        code: 'Code',
+        locked: 'LOCKED',
+        attempt: 'ATTEMPT',
+        testcase: 'Testcase',
+        testResult: 'Test Result',
+        submissions: 'Submissions',
+        runFirst: 'You must run your code first',
+        runToSee: 'Run code to see test results',
+        status: 'Status',
+        language: 'Language',
+        runtime: 'Runtime',
+        memory: 'Memory',
+        notes: 'Notes',
+        run: 'Run',
+        wait: 'WAIT',
+        submitting: 'SUBMITTING...',
+        submit: 'Submit',
+        chapterProgress: 'Progress by topic',
+        chapterProgressSubtitle:
+          'Problems solved per difficulty, similar to the LeetCode progress panel.',
+        solvedBadge: 'Solved',
+        loadingProgress: 'Loading progress...',
+        reward: 'Reward',
+        coinsUnit: 'coins',
+        firstSolveReward: 'First-solve reward',
+      };
 
   // UI States
   const [leftTab, setLeftTab] = useState<
@@ -2599,9 +2623,10 @@ function Practice() {
   const [solutionSearchQuery, setSolutionSearchQuery] = useState('');
   const solutionScopeId = selectedCatalogItem?.id ?? practiceKey;
   const practiceSolutions = useMemo<PracticeSolutionCard[]>(() => {
-    if (!selectedCatalogItem) return [];
+    if (isHubView) return [];
 
-    const content = PRACTICE_SOLUTIONS[selectedCatalogItem.id];
+    const solutionKey = solutionScopeId;
+    const content = PRACTICE_SOLUTIONS[solutionKey];
     const explanation = content
       ? isVi
         ? content.explanation.vi
@@ -2624,20 +2649,20 @@ function Practice() {
 
     return [
       {
-        id: `${selectedCatalogItem.id}-official`,
+        id: `${solutionKey}-official`,
         title: isVi
-          ? `Lời giải chuẩn · ${selectedCatalogItem.title}`
-          : `Official solution · ${selectedCatalogItem.title}`,
+          ? `Lời giải chuẩn · ${selectedCatalogItem?.title ?? currentPractice.title}`
+          : `Official solution · ${selectedCatalogItem?.title ?? currentPractice.title}`,
         author: 'TRAE',
-        tags: selectedCatalogItem.tags,
-        upvotes: selectedCatalogItem.solvedCount,
-        views: selectedCatalogItem.acceptanceRate,
+        tags: selectedCatalogItem?.tags ?? [currentPractice.concept].filter(Boolean),
+        upvotes: selectedCatalogItem?.solvedCount ?? '—',
+        views: selectedCatalogItem?.acceptanceRate ?? '—',
         code,
         language: solutionLanguage,
         explanation,
       },
     ];
-  }, [isVi, language, selectedCatalogItem]);
+  }, [currentPractice, isHubView, isVi, language, selectedCatalogItem, solutionScopeId]);
   const filteredPracticeSolutions = useMemo(() => {
     const query = solutionSearchQuery.trim();
     if (!query) return practiceSolutions;
@@ -2684,7 +2709,9 @@ function Practice() {
 
   // Coin reward notification
   const [coinToast, setCoinToast] = useState<number | null>(null);
-  const coinToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const coinToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   const showCoinToast = useCallback((amount: number) => {
     if (coinToastTimeoutRef.current) clearTimeout(coinToastTimeoutRef.current);
@@ -2697,6 +2724,9 @@ function Practice() {
   // trả về cả coinsEarned lẫn xpEarned cùng lúc từ BE).
   const [xpToast, setXpToast] = useState<number | null>(null);
   const xpToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoNavigateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   const showXpToast = useCallback((amount: number) => {
     if (xpToastTimeoutRef.current) clearTimeout(xpToastTimeoutRef.current);
@@ -2721,10 +2751,15 @@ function Practice() {
     async (text: string) => {
       try {
         await navigator.clipboard.writeText(text);
-        showToast(isVi ? 'Đã copy vào clipboard.' : 'Copied to clipboard.', 'success');
+        showToast(
+          isVi ? 'Đã copy vào clipboard.' : 'Copied to clipboard.',
+          'success'
+        );
       } catch {
         showToast(
-          isVi ? 'Không thể copy (trình duyệt chặn).' : 'Copy failed (blocked).',
+          isVi
+            ? 'Không thể copy (trình duyệt chặn).'
+            : 'Copy failed (blocked).',
           'error'
         );
       }
@@ -2744,6 +2779,15 @@ function Practice() {
       window.removeEventListener('resize', checkSize);
       if (toastTimeoutRef.current) {
         clearTimeout(toastTimeoutRef.current);
+      }
+      if (coinToastTimeoutRef.current) {
+        clearTimeout(coinToastTimeoutRef.current);
+      }
+      if (xpToastTimeoutRef.current) {
+        clearTimeout(xpToastTimeoutRef.current);
+      }
+      if (autoNavigateTimeoutRef.current) {
+        clearTimeout(autoNavigateTimeoutRef.current);
       }
     };
   }, []);
@@ -2953,12 +2997,24 @@ function Practice() {
 
   const handleOpenPractice = (item: PracticeCatalogItem) => {
     navigate('/practice', {
-      state: { nodeId: item.id, nodeTitle: item.title },
+      state: { problemId: item.id },
     });
   };
 
   const handleBackToHub = () => {
     navigate('/practice');
+  };
+
+  const handleBackToLearningPath = () => {
+    navigate('/learning-path');
+  };
+
+  const handleBackNavigation = () => {
+    if (isLearningPathPractice) {
+      handleBackToLearningPath();
+      return;
+    }
+    handleBackToHub();
   };
 
   const toggleAccordion = (key: string) => {
@@ -3030,9 +3086,9 @@ function Practice() {
         selectedTopic === 'All Topics' ? true : item.topic === selectedTopic;
       const matchesSearch = keyword
         ? [item.title, item.summary, item.topic, item.track, ...item.tags]
-          .join(' ')
-          .toLowerCase()
-          .includes(keyword)
+            .join(' ')
+            .toLowerCase()
+            .includes(keyword)
         : true;
       return matchesTrack && matchesDifficulty && matchesTopic && matchesSearch;
     });
@@ -3183,6 +3239,15 @@ function Practice() {
           // Non-critical: practice submission already recorded; just log quietly
           console.warn('Could not sync learning-path progress:', progressError);
         }
+
+        if (isLearningPathPractice) {
+          if (autoNavigateTimeoutRef.current) {
+            clearTimeout(autoNavigateTimeoutRef.current);
+          }
+          autoNavigateTimeoutRef.current = setTimeout(() => {
+            navigate('/learning-path', { replace: true });
+          }, 1200);
+        }
       }
     } catch (error) {
       console.error('Lỗi submit:', error);
@@ -3192,10 +3257,7 @@ function Practice() {
           : isVi
             ? 'Có lỗi xảy ra khi nộp bài. Vui lòng thử lại!'
             : 'Something went wrong while submitting. Please try again.';
-      showToast(
-        errorMessage,
-        'error'
-      );
+      showToast(errorMessage, 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -3792,10 +3854,16 @@ function Practice() {
 
           <div className="mt-6 flex flex-wrap gap-3 justify-center">
             <button
-              onClick={() => handleBackToHub()}
+              onClick={handleBackNavigation}
               className="rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-4 py-2 text-xs font-semibold text-[color:var(--cg-text)] hover:bg-[color:var(--cg-container-a22)] transition cursor-pointer"
             >
-              {isVi ? 'Quay lại Hub' : 'Go back to Hub'}
+              {isLearningPathPractice
+                ? isVi
+                  ? 'Quay lại lộ trình'
+                  : 'Back to learning path'
+                : isVi
+                  ? 'Quay lại Hub'
+                  : 'Go back to Hub'}
             </button>
           </div>
         </div>
@@ -3859,7 +3927,10 @@ function Practice() {
       {coinToast !== null && (
         <div
           className="fixed top-24 right-6 z-[1000] pointer-events-none select-none"
-          style={{ animation: 'coinPopIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards' }}
+          style={{
+            animation:
+              'coinPopIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards',
+          }}
         >
           <div className="relative flex flex-col items-center">
             {/* Floating coin particles */}
@@ -3867,25 +3938,47 @@ function Practice() {
               <span
                 key={i}
                 className="absolute text-xl"
-                style={{ animation: `coinFloat${i} 1.4s ease-out forwards`, top: 0, left: '50%', transform: 'translateX(-50%)' }}
+                style={{
+                  animation: `coinFloat${i} 1.4s ease-out forwards`,
+                  top: 0,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                }}
               >
                 🪙
               </span>
             ))}
             {/* Main reward card */}
-            <div className="flex items-center gap-3 rounded-2xl border border-[#fbbf24]/40 bg-gradient-to-br from-[#78350f]/80 to-[#0d0706]/90 px-5 py-4 shadow-[0_0_40px_rgba(251,191,36,0.35),0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl" style={{ minWidth: 210 }}>
+            <div
+              className="flex items-center gap-3 rounded-2xl border border-[#fbbf24]/40 bg-gradient-to-br from-[#78350f]/80 to-[#0d0706]/90 px-5 py-4 shadow-[0_0_40px_rgba(251,191,36,0.35),0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl"
+              style={{ minWidth: 210 }}
+            >
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#fbbf24]/20 border border-[#fbbf24]/40 text-2xl shadow-[0_0_20px_rgba(251,191,36,0.4)]">
                 🏆
               </div>
               <div className="flex flex-col">
-                <span className="text-[10px] font-semibold tracking-[0.15em] uppercase" style={{ color: 'rgba(252,211,77,0.65)' }}>
+                <span
+                  className="text-[10px] font-semibold tracking-[0.15em] uppercase"
+                  style={{ color: 'rgba(252,211,77,0.65)' }}
+                >
                   {isVi ? 'Phần thưởng' : 'Reward Earned'}
                 </span>
-                <span className="text-[26px] font-extrabold leading-tight" style={{ color: '#fcd34d', textShadow: '0 0 20px rgba(251,191,36,0.8)' }}>
+                <span
+                  className="text-[26px] font-extrabold leading-tight"
+                  style={{
+                    color: '#fcd34d',
+                    textShadow: '0 0 20px rgba(251,191,36,0.8)',
+                  }}
+                >
                   +{coinToast} 🪙
                 </span>
-                <span className="text-[10px] font-medium" style={{ color: 'rgba(252,211,77,0.5)' }}>
-                  {isVi ? 'coins đã được thêm vào tài khoản' : 'coins added to your account'}
+                <span
+                  className="text-[10px] font-medium"
+                  style={{ color: 'rgba(252,211,77,0.5)' }}
+                >
+                  {isVi
+                    ? 'coins đã được thêm vào tài khoản'
+                    : 'coins added to your account'}
                 </span>
               </div>
             </div>
@@ -3912,22 +4005,42 @@ function Practice() {
       {xpToast !== null && (
         <div
           className="fixed top-52 right-6 z-[1000] pointer-events-none select-none"
-          style={{ animation: 'xpPopIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards' }}
+          style={{
+            animation:
+              'xpPopIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards',
+          }}
         >
           <div className="relative flex flex-col items-center">
-            <div className="flex items-center gap-3 rounded-2xl border border-[#818cf8]/40 bg-gradient-to-br from-[#312e81]/80 to-[#0d0620]/90 px-5 py-4 shadow-[0_0_40px_rgba(129,140,248,0.35),0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl" style={{ minWidth: 210 }}>
+            <div
+              className="flex items-center gap-3 rounded-2xl border border-[#818cf8]/40 bg-gradient-to-br from-[#312e81]/80 to-[#0d0620]/90 px-5 py-4 shadow-[0_0_40px_rgba(129,140,248,0.35),0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl"
+              style={{ minWidth: 210 }}
+            >
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#818cf8]/20 border border-[#818cf8]/40 text-2xl shadow-[0_0_20px_rgba(129,140,248,0.4)]">
                 ⭐
               </div>
               <div className="flex flex-col">
-                <span className="text-[10px] font-semibold tracking-[0.15em] uppercase" style={{ color: 'rgba(199,210,254,0.65)' }}>
+                <span
+                  className="text-[10px] font-semibold tracking-[0.15em] uppercase"
+                  style={{ color: 'rgba(199,210,254,0.65)' }}
+                >
                   {isVi ? 'Kinh nghiệm' : 'Experience Earned'}
                 </span>
-                <span className="text-[26px] font-extrabold leading-tight" style={{ color: '#c7d2fe', textShadow: '0 0 20px rgba(129,140,248,0.8)' }}>
+                <span
+                  className="text-[26px] font-extrabold leading-tight"
+                  style={{
+                    color: '#c7d2fe',
+                    textShadow: '0 0 20px rgba(129,140,248,0.8)',
+                  }}
+                >
                   +{xpToast} XP
                 </span>
-                <span className="text-[10px] font-medium" style={{ color: 'rgba(199,210,254,0.5)' }}>
-                  {isVi ? 'XP đã được thêm vào tài khoản' : 'XP added to your account'}
+                <span
+                  className="text-[10px] font-medium"
+                  style={{ color: 'rgba(199,210,254,0.5)' }}
+                >
+                  {isVi
+                    ? 'XP đã được thêm vào tài khoản'
+                    : 'XP added to your account'}
                 </span>
               </div>
             </div>
@@ -3961,13 +4074,17 @@ function Practice() {
           <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
-              onClick={handleBackToHub}
+              onClick={handleBackNavigation}
               className="inline-flex items-center gap-1.5 rounded-xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] px-3 py-2 text-xs font-semibold text-[color:var(--cg-text-muted)] transition hover:bg-[color:var(--cg-container-a22)] hover:text-[color:var(--cg-text)]"
             >
               <span className="material-symbols-outlined text-[16px]">
                 arrow_back
               </span>
-              {ui.allProblems}
+              {isLearningPathPractice
+                ? isVi
+                  ? 'Lộ trình học'
+                  : 'Learning Path'
+                : ui.allProblems}
             </button>
 
             <Link to="/" className="flex items-center gap-3 group">
@@ -4119,7 +4236,10 @@ function Practice() {
                       )}
                       {selectedCatalogItem?.difficulty && (
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold text-[#fcd34d] bg-[#fbbf24]/10 border border-[#fbbf24]/25">
-                          +{getCoinRewardByDifficulty(selectedCatalogItem.difficulty)}{' '}
+                          +
+                          {getCoinRewardByDifficulty(
+                            selectedCatalogItem.difficulty
+                          )}{' '}
                           {ui.coinsUnit}
                         </span>
                       )}
@@ -4136,7 +4256,9 @@ function Practice() {
                         </div>
                         <div className="mt-2 text-sm font-semibold text-[color:var(--cg-text)]">
                           {selectedCatalogItem.difficulty} = +
-                          {getCoinRewardByDifficulty(selectedCatalogItem.difficulty)}{' '}
+                          {getCoinRewardByDifficulty(
+                            selectedCatalogItem.difficulty
+                          )}{' '}
                           {ui.coinsUnit}
                         </div>
                       </div>
@@ -4247,7 +4369,9 @@ function Practice() {
                           type="text"
                           placeholder={ui.searchSolutions}
                           value={solutionSearchQuery}
-                          onChange={(e) => setSolutionSearchQuery(e.target.value)}
+                          onChange={(e) =>
+                            setSolutionSearchQuery(e.target.value)
+                          }
                           className="bg-transparent border-none outline-none text-xs w-full text-[color:var(--cg-text)]"
                         />
                       </div>
@@ -4634,10 +4758,14 @@ function Practice() {
                       </span>{' '}
                       {ui.submissions}
                       {submissionHistory.length > 0 && (
-                        <span className={cx(
-                          'ml-1 rounded-full px-1.5 py-0.5 text-[9px] font-extrabold leading-none',
-                          consoleTab === 'submissions' ? 'bg-[#fbbf24]/25 text-[#fbbf24]' : 'bg-white/10 text-slate-400'
-                        )}>
+                        <span
+                          className={cx(
+                            'ml-1 rounded-full px-1.5 py-0.5 text-[9px] font-extrabold leading-none',
+                            consoleTab === 'submissions'
+                              ? 'bg-[#fbbf24]/25 text-[#fbbf24]'
+                              : 'bg-white/10 text-slate-400'
+                          )}
+                        >
                           {submissionHistory.length}
                         </span>
                       )}

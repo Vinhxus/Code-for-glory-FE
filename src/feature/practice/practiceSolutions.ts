@@ -1838,6 +1838,105 @@ export function useDraftAutosave() {
       ].join('\n'),
     },
   },
+
+  // Legacy Learning Path nodes (không nằm trong PRACTICE_CATALOG)
+  'Web & Internet Basics': {
+    primaryLanguage: 'javascript',
+    code: {
+      javascript: [
+        'function handleRequest(req) {',
+        "  const request = req ?? { method: 'GET', path: '/' };",
+        "  const path = request.path ?? '/';",
+        '',
+        '  return {',
+        '    status: 200,',
+        "    body: { ok: true, method: request.method ?? 'GET', path },",
+        "    headers: { 'content-type': 'application/json' },",
+        '  };',
+        '}',
+      ].join('\n'),
+      typescript: [
+        "type HttpRequest = { method?: string; path?: string; body?: unknown };",
+        "type HttpResponse = { status: number; body: unknown; headers: Record<string, string> };",
+        '',
+        'export function handleRequest(req?: HttpRequest): HttpResponse {',
+        "  const request = req ?? { method: 'GET', path: '/' };",
+        '  return {',
+        '    status: 200,',
+        '    body: { ok: true, method: request.method ?? "GET", path: request.path ?? "/" },',
+        '    headers: { "content-type": "application/json" },',
+        '  };',
+        '}',
+      ].join('\n'),
+      python: [
+        'def handleRequest(req):',
+        "    request = req or {'method': 'GET', 'path': '/'}",
+        "    path = request.get('path', '/')",
+        '    return {',
+        "        'status': 200,",
+        "        'body': {'ok': True, 'method': request.get('method', 'GET'), 'path': path},",
+        "        'headers': {'content-type': 'application/json'},",
+        '    }',
+      ].join('\n'),
+    },
+    explanation: {
+      vi: [
+        'Giữ contract response ổn định: luôn trả về object gồm `status`, `body`, `headers`.',
+        'Có guard cho input `undefined`/`null` để không bị throw khi request trống.',
+        'Explicit `content-type: application/json` để client parse nhất quán.',
+      ].join('\n'),
+      en: [
+        'Keep a stable response contract: always return `{ status, body, headers }`.',
+        'Guard against `undefined`/`null` input so empty requests do not crash.',
+        'Return an explicit `content-type: application/json` so clients can parse consistently.',
+      ].join('\n'),
+    },
+  },
+
+  default: {
+    primaryLanguage: 'typescript',
+    code: {
+      typescript: [
+        'type User = Record<string, unknown>;',
+        '',
+        'async function loadUserAsync(id: string): Promise<User> {',
+        '  try {',
+        '    // Demo async flow (no external I/O, safe for sandbox test runners)',
+        '    const user = await Promise.resolve({ id });',
+        '    return user as unknown as User;',
+        '  } catch (e) {',
+        '    // Keep the error surface predictable for callers',
+        '    throw e;',
+        '  }',
+        '}',
+      ].join('\n'),
+      javascript: [
+        '/**',
+        ' * @param {string} id',
+        ' * @return {Promise<Object>}',
+        ' */',
+        'async function loadUserAsync(id) {',
+        '  try {',
+        '    // Demo async flow (no external I/O, safe for sandbox test runners)',
+        '    return await Promise.resolve({ id });',
+        '  } catch (e) {',
+        '    throw e;',
+        '  }',
+        '}',
+      ].join('\n'),
+    },
+    explanation: {
+      vi: [
+        'Đây là lời giải mẫu cho bài “legacy/default”: refactor flow async theo `async/await` + `try/catch`.',
+        'Điểm quan trọng là xử lý HTTP errors (`!res.ok`) thay vì assume mọi response đều thành công.',
+      ].join('\n'),
+      en: [
+        'This is a fallback solution for the legacy/default exercise: refactor the async flow using `async/await` + `try/catch`.',
+        'Key point: handle HTTP errors (`!res.ok`) instead of assuming every response succeeds.',
+      ].join('\n'),
+    },
+  },
+
   ...PRACTICE_BACKEND_SOLUTIONS,
 };
 

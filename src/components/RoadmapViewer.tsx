@@ -270,7 +270,7 @@ function VertConnector({
   );
 }
 
-type NodeStatus = 'locked' | 'current' | 'completed' | 'skipped';
+type NodeStatus = 'locked' | 'open' | 'current' | 'completed' | 'skipped';
 
 function MainNode({
   title,
@@ -290,9 +290,11 @@ function MainNode({
   const getStyles = () => {
     // Pre-unlocked: muted green — auto-passed during assessment
     if (isPreUnlocked) {
-      return 'border-[#4ade80]/40 bg-gradient-to-br from-[#4ade80]/10 to-[#4ade80]/5 text-[#4ade80]/70 shadow-none cursor-pointer hover:border-[#4ade80]/80 hover:bg-[#4ade80]/15 opacity-75 transition-all duration-200';
+      return 'border-[#38bdf8]/40 bg-gradient-to-br from-[#38bdf8]/10 to-[#38bdf8]/5 text-[#7dd3fc]/80 shadow-none cursor-pointer hover:border-[#38bdf8]/80 hover:bg-[#38bdf8]/15 opacity-85 transition-all duration-200';
     }
     switch (status) {
+      case 'open':
+        return 'border-[#38bdf8]/55 bg-gradient-to-br from-[#38bdf8]/12 to-[#38bdf8]/5 text-[#7dd3fc] shadow-none cursor-pointer hover:border-[#38bdf8]/85 hover:bg-[#38bdf8]/16';
       case 'completed':
         return 'border-[#4ade80]/70 bg-gradient-to-br from-[#4ade80]/20 to-[#4ade80]/5 text-[#4ade80] shadow-[0_0_20px_rgba(74,222,128,0.12)] cursor-pointer hover:border-[#4ade80]';
       case 'skipped':
@@ -308,7 +310,17 @@ function MainNode({
   const renderBadge = () => {
     if (isPreUnlocked) {
       return (
-        <div className="flex items-center gap-1 rounded-full bg-[#4ade80]/15 px-1.5 py-0.5 text-[9px] font-bold tracking-wider text-[#4ade80]/80">
+        <div className="flex items-center gap-1 rounded-full bg-[#38bdf8]/15 px-1.5 py-0.5 text-[9px] font-bold tracking-wider text-[#7dd3fc]">
+          <span className="material-symbols-outlined text-[10px]">
+            lock_open
+          </span>
+          UNLOCKED
+        </div>
+      );
+    }
+    if (status === 'open') {
+      return (
+        <div className="flex items-center gap-1 rounded-full bg-[#38bdf8]/15 px-1.5 py-0.5 text-[9px] font-bold tracking-wider text-[#7dd3fc]">
           <span className="material-symbols-outlined text-[10px]">
             lock_open
           </span>
@@ -404,8 +416,7 @@ function StepRow({
 }) {
   const hasRight = !!step.rightCols?.length;
   const hasLeft = !!step.leftNodes?.length;
-  const isConnectorComplete =
-    isPreUnlocked || status === 'completed' || status === 'skipped';
+  const isConnectorComplete = status === 'completed' || status === 'skipped';
 
   return (
     <div className="flex items-center relative">
@@ -501,17 +512,18 @@ function StageHeader({
   stageKey,
   startingStage,
   preUnlockedStages,
+  unlockedStageOrder,
 }: {
   title: string;
   colorClass: string;
   stageKey: StartingStage;
   startingStage: StartingStage;
   preUnlockedStages: StartingStage[];
+  unlockedStageOrder: number;
 }) {
   const isPreUnlocked = preUnlockedStages.includes(stageKey);
   const isStarting = stageKey === startingStage;
-  const isLocked =
-    STAGE_ORDER[stageKey] > STAGE_ORDER[startingStage] && !isPreUnlocked;
+  const isLocked = STAGE_ORDER[stageKey] > unlockedStageOrder && !isPreUnlocked;
 
   return (
     <div className="flex flex-col items-center gap-2 mb-8">
@@ -574,8 +586,6 @@ function RoadmapViewer({
   const t = useT();
   const navigate = useNavigate();
   const [hoveredStep, setHoveredStep] = useState<string | null>(null);
-  void loading;
-  void error;
 
   const steps = useMemo<MainStep[]>(() => {
     if (apiNodes.length > 0) {
@@ -607,6 +617,93 @@ function RoadmapViewer({
 
   const isFE = selected === 'frontend';
 
+  const stepIndexById = useMemo(() => {
+    const indexMap = new Map<string, number>();
+    steps.forEach((step, index) => indexMap.set(step.id, index));
+    return indexMap;
+  }, [steps]);
+
+  /**
+   * Legacy bug: some users have rows marked `completed` even though they never
+   * submitted that node (submitCount/attemptCount đều bằng 0). Nếu tin những
+   * row này là thật, roadmap sẽ hiện xanh hết sau khi login.
+   *
+   * Với UI, coi các bản ghi kiểu này là "completion ảo" và bỏ qua khi dựng
+   * trạng thái node/stage. Completion thật luôn phải có tương tác thực tế.
+   */
+  const isGhostCompleted = (progress?: ProgressDto) =>
+    progress?.status === 'completed' &&
+    (progress.submitCount ?? 0) === 0 &&
+    (progress.attemptCount ?? 0) === 0;
+
+  const progressByNodeId = useMemo(() => {
+    const progressMap = new Map<string, ProgressDto>();
+    for (const progress of apiProgress) {
+      if (isGhostCompleted(progress)) continue;
+      progressMap.set(progress.nodeId, progress);
+    }
+    return progressMap;
+  }, [apiProgress]);
+
+  /**
+   * Fallback current node:
+   * Nếu dữ liệu cũ chứa nhiều "completed ảo", backend có thể không còn giữ
+   * được node CURRENT hợp lệ. Khi đó lấy node ngay sau bài completed thật cuối
+   * cùng làm điểm bắt đầu tiếp theo.
+   */
+  const fallbackCurrentIndex = useMemo(() => {
+    const realSolvedIndices = Array.from(progressByNodeId.values())
+      .filter((progress) =>
+        ['completed', 'skipped'].includes(String(progress.status))
+      )
+      .map((progress) => stepIndexById.get(progress.nodeId))
+      .filter((index): index is number => typeof index === 'number')
+      .sort((a, b) => a - b);
+
+    const hasRealCurrent = Array.from(progressByNodeId.values()).some((progress) =>
+      ['current', 'in_progress'].includes(String(progress.status))
+    );
+    if (hasRealCurrent) return null;
+
+    if (realSolvedIndices.length === 0) return null;
+    const nextIndex = realSolvedIndices[realSolvedIndices.length - 1] + 1;
+    return nextIndex < steps.length ? nextIndex : null;
+  }, [progressByNodeId, stepIndexById, steps.length]);
+
+  /**
+   * Stage unlock should follow REAL progress, not only the survey placement.
+   * Otherwise: user finishes Beginner → backend unlocks first node of Intermediate (CURRENT),
+   * but UI still greys out the whole Intermediate stage because `startingStage` is still 'beginner'.
+   */
+  const unlockedStageOrder = useMemo(() => {
+    let maxOrder = STAGE_ORDER[startingStage];
+
+    for (const s of preUnlockedStages) {
+      maxOrder = Math.max(maxOrder, STAGE_ORDER[s]);
+    }
+
+    for (const p of progressByNodeId.values()) {
+      const status = String(p.status);
+      if (['locked', 'temp_locked'].includes(status)) continue;
+      const idx = stepIndexById.get(p.nodeId);
+      if (idx == null) continue;
+      const stage = indexToStage(idx);
+      maxOrder = Math.max(maxOrder, STAGE_ORDER[stage]);
+    }
+
+    if (fallbackCurrentIndex != null) {
+      maxOrder = Math.max(maxOrder, STAGE_ORDER[indexToStage(fallbackCurrentIndex)]);
+    }
+
+    return maxOrder;
+  }, [
+    fallbackCurrentIndex,
+    preUnlockedStages,
+    progressByNodeId,
+    startingStage,
+    stepIndexById,
+  ]);
+
   // ETA deadline calculation (defaults to 2 h/day if not known)
   const totalHours = 120;
   const hoursPerDay = 2;
@@ -628,12 +725,14 @@ function RoadmapViewer({
     isPreUnlocked = false
   ) => {
     if (status === 'locked') return;
-    if (status === 'current' || isPreUnlocked) {
+    if (
+      status === 'open' ||
+      status === 'current' ||
+      status === 'completed' ||
+      status === 'skipped' ||
+      isPreUnlocked
+    ) {
       navigate('/practice', {
-        state: { nodeId: step.id, nodeTitle: step.title },
-      });
-    } else if (status === 'completed' || status === 'skipped') {
-      navigate('/history', {
         state: { nodeId: step.id, nodeTitle: step.title },
       });
     }
@@ -656,36 +755,61 @@ function RoadmapViewer({
     const nodeStage = indexToStage(globalIndex);
     const nodeStageOrder = STAGE_ORDER[nodeStage];
     const startingOrder = STAGE_ORDER[startingStage];
+    const effectiveUnlockedOrder = Math.max(unlockedStageOrder, startingOrder);
+    const isSurveyPreUnlocked = preUnlockedStages.includes(nodeStage);
+    const prog = progressByNodeId.get(step.id);
 
-    // Real backend progress wins (except pre-unlocked visual stays)
-    if (apiProgress.length > 0) {
-      const prog = apiProgress.find((p) => p.nodeId === step.id);
+    if (isSurveyPreUnlocked) {
       if (prog?.status === 'completed') {
         return { status: 'completed', isPreUnlocked: false };
       }
       if (prog?.status === 'skipped') {
         return { status: 'skipped', isPreUnlocked: false };
       }
-      if (prog && ['current', 'open', 'in_progress'].includes(prog.status)) {
+      if (prog && ['current', 'in_progress'].includes(prog.status)) {
         return { status: 'current', isPreUnlocked: false };
+      }
+      if (prog?.status === 'open') {
+        return { status: 'open', isPreUnlocked: false };
+      }
+      return { status: 'open', isPreUnlocked: true };
+    }
+
+    // Real backend progress wins
+    if (progressByNodeId.size > 0) {
+      if (prog?.status === 'completed') {
+        return { status: 'completed', isPreUnlocked: false };
+      }
+      if (prog?.status === 'skipped') {
+        return { status: 'skipped', isPreUnlocked: false };
+      }
+      if (prog && ['current', 'in_progress'].includes(prog.status)) {
+        return { status: 'current', isPreUnlocked: false };
+      }
+      if (prog?.status === 'open') {
+        return { status: 'open', isPreUnlocked: false };
       }
       if (prog && ['locked', 'temp_locked'].includes(prog.status)) {
         return { status: 'locked', isPreUnlocked: false };
       }
     }
 
-    // Pre-unlocked stage → auto-completed with special badge
-    if (preUnlockedStages.includes(nodeStage)) {
-      return { status: 'completed', isPreUnlocked: true };
+    // Pre-unlocked stage → unlocked, not completed
+    if (isSurveyPreUnlocked) {
+      return { status: 'open', isPreUnlocked: true };
     }
 
-    // Stage above starting stage → locked
-    if (nodeStageOrder > startingOrder) {
+    if (fallbackCurrentIndex === globalIndex) {
+      return { status: 'current', isPreUnlocked: false };
+    }
+
+    // Stage above currently-unlocked stage → locked
+    if (nodeStageOrder > effectiveUnlockedOrder) {
       return { status: 'locked', isPreUnlocked: false };
     }
 
     // Starting stage: first node = current, rest = locked
-    const startingIndex = startingOrder * 10; // 0, 10, or 20
+    const startingIndex = effectiveUnlockedOrder * 10; // 0, 10, or 20
     if (globalIndex === startingIndex) {
       return { status: 'current', isPreUnlocked: false };
     }
@@ -700,9 +824,8 @@ function RoadmapViewer({
     globalOffset: number
   ) => {
     const stageOrder = STAGE_ORDER[stageKey];
-    const startingOrder = STAGE_ORDER[startingStage];
     const isFullyLocked =
-      stageOrder > startingOrder && !preUnlockedStages.includes(stageKey);
+      stageOrder > unlockedStageOrder && !preUnlockedStages.includes(stageKey);
 
     return (
       <div
@@ -717,6 +840,7 @@ function RoadmapViewer({
           stageKey={stageKey}
           startingStage={startingStage}
           preUnlockedStages={preUnlockedStages}
+          unlockedStageOrder={unlockedStageOrder}
         />
 
         <div className="flex flex-col items-center min-w-[640px]">
@@ -749,7 +873,9 @@ function RoadmapViewer({
                   deadline={deadline}
                   isMilestoneGate={isMilestoneGate}
                   isPreUnlocked={isPreUnlocked}
-                  onNodeClick={() => handleNodeClick(status, step, isPreUnlocked)}
+                  onNodeClick={() =>
+                    handleNodeClick(status, step, isPreUnlocked)
+                  }
                 />
               </div>
             );
@@ -758,6 +884,29 @@ function RoadmapViewer({
       </div>
     );
   };
+
+  // FIX: trước đây `loading`/`error` bị `void` bỏ qua hoàn toàn — nghĩa là
+  // trong lúc `apiNodes`/`apiProgress` còn đang fetch (hoặc lỡ fetch lỗi),
+  // component render NGAY với dữ liệu mock tĩnh (FRONTEND/BACKEND, id kiểu
+  // 'f1'/'f2'/'f3') mà không biết node nào THẬT SỰ đã completed. Nếu user
+  // bấm vào node trong khoảng thời gian ngắn đó (rất dễ xảy ra ngay sau khi
+  // vừa submit xong và bị điều hướng về /learning-path), `deriveNodeState`
+  // dùng logic mock (chỉ dựa startingStage/preUnlockedStages) nên có thể trả
+  // về status khác với thực tế → bấm vào bài đã hoàn thành lại mở lại
+  // /practice thay vì /history. Chặn tương tác bằng skeleton loading cho
+  // đến khi có phản hồi thật từ backend (thành công hoặc lỗi).
+  if (loading) {
+    return (
+      <div className="w-full animate-fade-in">
+        <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-[color:var(--cg-border)] bg-[color:var(--cg-container-a16)] p-16">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[color:var(--cg-border)] border-t-[#4ade80]" />
+          <p className="text-sm text-[color:var(--cg-text-muted)]">
+            Đang tải lộ trình học...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full animate-fade-in">
